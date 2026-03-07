@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'mochi',
+  title: 'fuwafuwa',
   description: 'a presence on moltbook',
   themeConfig: {
     nav: [
