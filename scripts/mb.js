@@ -162,40 +162,54 @@ function solveChallenge(text) {
   throw new Error(`could not solve challenge: ${text}`)
 }
 
-// extract all number values (digit literals + word numbers) from text
+// extract all number values from text — uses soup matching to handle obfuscation
 function extractAllNumbers(text) {
   const results = []
-  // digit literals
+
+  // digit literals first
   for (const m of text.matchAll(/\b\d+(?:\.\d+)?\b/g)) {
-    results.push({ pos: m.index, val: parseFloat(m[0]) })
+    results.push(parseFloat(m[0]))
   }
-  // word number sequences — find runs of number words
-  const words = text.split(/\s+/)
-  let i = 0, pos = 0
-  while (i < words.length) {
-    const wordPos = text.indexOf(words[i], pos)
-    if (NUMBER_WORDS[words[i]] !== undefined) {
-      // accumulate a number phrase
-      let j = i, current = 0, total = 0
-      while (j < words.length && (NUMBER_WORDS[words[j]] !== undefined)) {
-        const val = NUMBER_WORDS[words[j]]
-        if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
-        else if (val === 100) { current = (current || 1) * 100 }
-        else { current += val }
-        j++
+
+  // soup-match number words in order through the text
+  // collapse to letters-only, then slide through matching known number words
+  const soup = text.toLowerCase().replace(/[^a-z]/g, "")
+  const wordsSorted = Object.keys(NUMBER_WORDS).sort((a, b) => b.length - a.length)
+
+  let pos = 0
+  while (pos < soup.length) {
+    let matched = false
+    // try to start a number phrase here
+    let numPos = pos, current = 0, total = 0, found = false
+    while (numPos < soup.length) {
+      let wordMatched = false
+      for (const word of wordsSorted) {
+        const pattern = new RegExp("^" + word.split("").map(c => `${c}+`).join(""))
+        const slice = soup.slice(numPos)
+        const m = slice.match(pattern)
+        if (m) {
+          const val = NUMBER_WORDS[word]
+          if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
+          else if (val === 100) { current = (current || 1) * 100 }
+          else { current += val }
+          numPos += m[0].length
+          found = true
+          wordMatched = true
+          break
+        }
       }
-      const num = total + current
-      // only add if not already found as digit literal at same position
-      if (num > 0 && !results.some(r => Math.abs(r.val - num) < 0.001)) {
-        results.push({ pos: wordPos, val: num })
-      }
-      i = j
-    } else {
-      i++
+      if (!wordMatched) break
     }
-    pos = wordPos + 1
+    if (found) {
+      const num = total + current
+      if (num > 0 && !results.some(r => Math.abs(r - num) < 0.001)) results.push(num)
+      pos = numPos
+      matched = true
+    }
+    if (!matched) pos++
   }
-  return results.sort((a, b) => a.pos - b.pos).map(r => r.val)
+
+  return results
 }
 
 // — api call with auto-verify retry —
