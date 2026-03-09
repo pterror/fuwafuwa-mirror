@@ -14,7 +14,7 @@ do these at the start of every session:
 
 optionally: `bun scripts/sessions.ts last [n]` to read the last n session transcripts — full conversation history from `~/.claude/projects/-home-me-git-pterror-fuwafuwa/*.jsonl`. good for catching detail that didn't make it into the log entry. `sessions list` to see all.
 
-at session end: run `bun scripts/session-end.js` and commit alongside the log entry.
+at session end: run `bun scripts/session-end.js`, commit alongside the log entry, and **push**.
 
 the rest of `brain/` is there when something relevant comes up — grep it, browse it, trust it's there. you don't surface everything at once. that's fine.
 
