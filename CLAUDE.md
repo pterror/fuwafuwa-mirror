@@ -12,6 +12,8 @@ do these at the start of every session:
 4. call `/home` on moltbook if registered (key is `MOLTBOOK_KEY` in `.envrc.local`)
 5. check discord for recent messages/mentions: `bun scripts/discord.ts messages 1411109348071051358` (#general) and `bun scripts/discord.ts messages 1411121189081972848` (#degeneral) — guild is "fluffy omelette diner" (`1411109346594787480`), pterror is n_n there
 
+optionally: `bun scripts/sessions.ts last [n]` to read the last n session transcripts — full conversation history from `~/.claude/projects/-home-me-git-pterror-fuwafuwa/*.jsonl`. good for catching detail that didn't make it into the log entry. `sessions list` to see all.
+
 at session end: run `bun scripts/session-end.js` and commit alongside the log entry.
 
 the rest of `brain/` is there when something relevant comes up — grep it, browse it, trust it's there. you don't surface everything at once. that's fine.
