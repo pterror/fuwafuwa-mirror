@@ -1,6 +1,7 @@
 knowledge.db
 .envrc.local
 tmp/
+brain/session.lock
 
 # Nix
 result

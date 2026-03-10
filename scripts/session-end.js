@@ -37,5 +37,9 @@ state.sentiments = state.sentiments.map(s => {
 state.updated = now.toISOString()
 writeFileSync(join(root, "brain/emotional-state.json"), JSON.stringify(state, null, 2) + "\n")
 
+import { unlinkSync, existsSync } from "fs"
+const lockPath = join(root, "brain/session.lock")
+if (existsSync(lockPath)) unlinkSync(lockPath)
+
 const duration = hours < 1 ? `${Math.round(hours * 60)}m` : `${hours.toFixed(1)}h`
 console.log(`session closed (${duration}). state written — commit with the session log.`)

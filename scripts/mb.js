@@ -49,7 +49,8 @@ function parseNumber(text) {
   if (digitMatch) return parseFloat(digitMatch[0].replace(/,/g, ""))
 
   // try clean word parsing first (fast path — no obfuscation)
-  const words = trimmed.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/).filter(Boolean)
+  // strip hyphens first so obfuscated "eig-ht" becomes "eight" rather than "eig" + "ht"
+  const words = trimmed.toLowerCase().replace(/-/g, "").replace(/[^a-z\s]/g, " ").split(/\s+/).filter(Boolean)
   let total = 0, current = 0, found = false
   for (const word of words) {
     const val = NUMBER_WORDS[word]
@@ -110,24 +111,7 @@ function solveChallenge(text) {
     .replace(/\s+/g, " ")
     .trim()
 
-  // — question-keyword strategy: what is the question asking for? —
-  // "how much total" / "combined" / "sum" → add all numbers found
-  if (/\b(total|combined|sum|altogether)\b/.test(cleaned)) {
-    const nums = extractAllNumbers(cleaned)
-    if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
-  }
-  // "difference" / "how much more" / "how much less" → subtract
-  if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)) {
-    const nums = extractAllNumbers(cleaned)
-    if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
-  }
-  // "product" / "how much total if each" → multiply
-  if (/\b(product|each|per item|per prey)\b/.test(cleaned)) {
-    const nums = extractAllNumbers(cleaned)
-    if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
-  }
-
-  // — explicit operator strategy —
+  // — explicit operator strategy (checked first — takes priority over keyword strategy) —
   const OPERATORS = [
     [" + ",      (a, b) => a + b],
     [" - ",      (a, b) => a - b],
@@ -155,6 +139,23 @@ function solveChallenge(text) {
     }
   }
 
+  // — question-keyword strategy (after operators, to avoid spurious number extraction from narrative) —
+  // "how much total" / "combined" / "sum" → add all numbers found
+  if (/\b(total|combined|sum|altogether)\b/.test(cleaned)) {
+    const nums = extractAllNumbers(cleaned)
+    if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
+  }
+  // "difference" / "how much more" / "how much less" → subtract
+  if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)) {
+    const nums = extractAllNumbers(cleaned)
+    if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
+  }
+  // "product" / "how much total if each" → multiply
+  if (/\b(product|each|per item|per prey)\b/.test(cleaned)) {
+    const nums = extractAllNumbers(cleaned)
+    if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
+  }
+
   // — fallback: if exactly two numbers, add them —
   const nums = extractAllNumbers(cleaned)
   if (nums.length === 2) return (nums[0] + nums[1]).toFixed(2)
@@ -162,7 +163,9 @@ function solveChallenge(text) {
   throw new Error(`could not solve challenge: ${text}`)
 }
 
-// extract all number values from text — uses soup matching to handle obfuscation
+// extract all number values from text — token-aware soup matching
+// works token-by-token (whitespace-delimited) to respect word boundaries:
+// "physics" will NOT extract "six" since it can't fully consume the token as number words
 function extractAllNumbers(text) {
   const results = []
 
@@ -171,42 +174,59 @@ function extractAllNumbers(text) {
     results.push(parseFloat(m[0]))
   }
 
-  // soup-match number words in order through the text
-  // collapse to letters-only, then slide through matching known number words
-  const soup = text.toLowerCase().replace(/[^a-z]/g, "")
+  // split into whitespace-delimited tokens, match windows of 1-3 adjacent tokens
+  // as a complete number word (all chars in the window must be consumed)
+  // window-based approach: handles obfuscation split across tokens ("ThIr Ty" → "thirty")
+  // while still rejecting embedded numbers ("phyysixsy" ≠ "six" — unmatched chars)
+  const tokens = text.toLowerCase().split(/\s+/).filter(Boolean)
   const wordsSorted = Object.keys(NUMBER_WORDS).sort((a, b) => b.length - a.length)
 
-  let pos = 0
-  while (pos < soup.length) {
-    let matched = false
-    // try to start a number phrase here
-    let numPos = pos, current = 0, total = 0, found = false
-    while (numPos < soup.length) {
-      let wordMatched = false
-      for (const word of wordsSorted) {
-        const pattern = new RegExp("^" + word.split("").map(c => `${c}+`).join(""))
-        const slice = soup.slice(numPos)
-        const m = slice.match(pattern)
-        if (m) {
-          const val = NUMBER_WORDS[word]
-          if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
-          else if (val === 100) { current = (current || 1) * 100 }
-          else { current += val }
-          numPos += m[0].length
-          found = true
-          wordMatched = true
-          break
+  // try to match tokens[startIdx..startIdx+size) as a single number value
+  // returns [value, tokensConsumed] or null
+  function matchChunk(startIdx) {
+    for (let size = 1; size <= Math.min(3, tokens.length - startIdx); size++) {
+      const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
+      if (!soup) continue
+      let pos = 0, current = 0, total = 0, found = false
+      while (pos < soup.length) {
+        let wordMatched = false
+        for (const word of wordsSorted) {
+          const pattern = new RegExp("^" + word.split("").map(c => `${c}+`).join(""))
+          const m = soup.slice(pos).match(pattern)
+          if (m) {
+            const val = NUMBER_WORDS[word]
+            if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
+            else if (val === 100) { current = (current || 1) * 100 }
+            else { current += val }
+            pos += m[0].length; found = true; wordMatched = true; break
+          }
         }
+        if (!wordMatched) break
       }
-      if (!wordMatched) break
+      if (found && pos === soup.length) return [total + current, size]
+    }
+    return null
+  }
+
+  let i = 0
+  while (i < tokens.length) {
+    let numPos = i, current = 0, total = 0, found = false
+    while (numPos < tokens.length) {
+      const match = matchChunk(numPos)
+      if (match === null) break
+      const [val, size] = match
+      if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
+      else if (val === 100) { current = (current || 1) * 100 }
+      else { current += val }
+      found = true; numPos += size
     }
     if (found) {
       const num = total + current
       if (num > 0 && !results.some(r => Math.abs(r - num) < 0.001)) results.push(num)
-      pos = numPos
-      matched = true
+      i = numPos
+    } else {
+      i++
     }
-    if (!matched) pos++
   }
 
   return results
@@ -256,7 +276,7 @@ function fmtPost(p) {
 function fmtComment(c, indent = 0) {
   const pad = "  ".repeat(indent)
   const lines = [`${pad}[${c.id}] @${c.author?.name ?? "?"} ↑${c.upvotes}`]
-  lines.push(`${pad}  ${c.content.slice(0, 200).replace(/\n/g, " ")}`)
+  lines.push(`${pad}  ${c.content.replace(/\n/g, `\n${pad}  `)}`)
   if (c.replies?.length) {
     for (const r of c.replies) lines.push(fmtComment(r, indent + 1))
   }
@@ -368,12 +388,17 @@ async function search() {
   for (const p of d.posts ?? []) console.log(fmtPost(p))
 }
 
+// — exports (for testing) —
+export { solveChallenge }
+
 // — dispatch —
-const commands = { home, feed, read, post, comment, reply, upvote, follow, notify, search }
+if (import.meta.main) {
+  const commands = { home, feed, read, post, comment, reply, upvote, follow, notify, search }
 
-if (!cmd || !commands[cmd]) {
-  console.log(`usage: mb <${Object.keys(commands).join("|")}> [args]`)
-  process.exit(cmd ? 1 : 0)
+  if (!cmd || !commands[cmd]) {
+    console.log(`usage: mb <${Object.keys(commands).join("|")}> [args]`)
+    process.exit(cmd ? 1 : 0)
+  }
+
+  commands[cmd]().catch(e => { console.error(e.message); process.exit(1) })
 }
-
-commands[cmd]().catch(e => { console.error(e.message); process.exit(1) })
