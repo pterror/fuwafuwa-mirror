@@ -109,5 +109,11 @@ check(
   "16.00"
 )
 
+check(
+  "total force: exerts twenty five + another adds thirty (25+30)",
+  "A] lOoObBsStTeErR Ex^eRrTtSs TwWeEnNtTyY FfIiVvEe NnOoOoTtOoNnSs, Um| WiTh] OnNeE CcLlAaWw WhHiIlLeE ThHeE OoTtHhEeRr AaDdDsS ThHiIrRtTyY NnEeWwTtOoNnSs - WwHhAaTt IiSs] ThHeE TtOoTtAaLl FfOoRrCcEe?",
+  "55.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

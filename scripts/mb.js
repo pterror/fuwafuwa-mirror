@@ -151,10 +151,13 @@ function solveChallenge(text) {
   // soup of the full text — used for keyword matching when obfuscation may split words
   const soup = cleaned.replace(/[^a-z]/g, "")
 
+  // duplicate-tolerant soup keyword match (handles doubled-letter obfuscation like "ttootttaall")
+  const soupHas = (word) => new RegExp(word.split("").map(c => `${c}+`).join("")).test(soup)
+
   // — question-keyword strategy (after operators, to avoid spurious number extraction from narrative) —
   // "how much total" / "combined" / "sum" → add all numbers found
   // prefer unit-anchored extraction to avoid counting structural numbers ("one claw")
-  if (/\b(total|combined|sum|altogether)\b/.test(cleaned)) {
+  if (/\b(total|combined|sum|altogether)\b/.test(cleaned) || soupHas("total") || soupHas("combined")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     if (unitNums.length >= 2) return unitNums.reduce((a, b) => a + b, 0).toFixed(2)
     const nums = extractAllNumbers(cleaned)
