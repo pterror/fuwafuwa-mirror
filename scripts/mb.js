@@ -145,8 +145,8 @@ function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
   }
-  // "difference" / "how much more" / "how much less" → subtract
-  if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)) {
+  // "difference" / "how much more" / "how much less" / "net" / "slows by" → subtract
+  if (/\b(difference|how much more|how much less|how much remain|left over|remaining|net|slows?|reduces?|decreases?)\b/.test(cleaned)) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
   }
@@ -232,6 +232,8 @@ function extractAllNumbers(text) {
   return results
 }
 
+const FETCH_TIMEOUT_MS = 30_000
+
 // — api call with auto-verify retry —
 async function api(method, path, body) {
   const opts = {
@@ -240,6 +242,7 @@ async function api(method, path, body) {
       "Authorization": `Bearer ${KEY}`,
       "Content-Type": "application/json",
     },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   }
   if (body) opts.body = JSON.stringify(body)
 
@@ -256,6 +259,7 @@ async function api(method, path, body) {
       method: "POST",
       headers: { "Authorization": `Bearer ${KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ verification_code: v.verification_code, answer }),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     }).then(r => r.json())
 
     if (!verified.success) throw new Error(`verification failed: ${JSON.stringify(verified)}`)
