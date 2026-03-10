@@ -115,5 +115,17 @@ check(
   "55.00"
 )
 
+check(
+  "strikes twice: 35 × 2 = 70",
+  "ThE] lOo.oBbSsSttEeRr] ClA-w^ F.oR cE] Is ThIrTy FiVe~ NeUwToOnS] AnD/ iT StRrIiKeSs TwIcE, WhAt] Is ToTaL FoRcE?",
+  "70.00"
+)
+
+check(
+  "y-for-i substitution: 'FyV e' → twenty-five (25+15)",
+  "A] lOoOoB-sT]eR ClAw] ExErT s TwEnTy FyV e NooToNs~, Um AnOtHeR] ClAw ExErT s FiFtEeN NooToNs/ - HoW MuCh ToTaL FoR^cE?",
+  "40.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

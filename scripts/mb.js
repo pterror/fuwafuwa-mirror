@@ -50,6 +50,8 @@ const NUMBER_WORDS = {
   twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90,
   hundred:100, thousand:1000, million:1000000,
 }
+// allow 'y' as a substitute for 'i' (common obfuscation: "fyve" → "five", "fyftEEn" → "fifteen")
+const charPat = c => c === 'i' ? '[iy]+' : `${c}+`
 
 function parseNumber(text) {
   const trimmed = text.trim()
@@ -91,7 +93,7 @@ function parseNumberFromSoup(text) {
     let matched = false
     for (const word of wordsSorted) {
       // regex: each letter in the word can appear 1+ times
-      const pattern = new RegExp(word.split("").map(c => `${c}+`).join(""))
+      const pattern = new RegExp(word.split("").map(charPat).join(""))
       const m = remaining.match(pattern)
       if (m && m.index === 0) {
         found.push(NUMBER_WORDS[word])
@@ -152,9 +154,18 @@ function solveChallenge(text) {
   const soup = cleaned.replace(/[^a-z]/g, "")
 
   // duplicate-tolerant soup keyword match (handles doubled-letter obfuscation like "ttootttaall")
-  const soupHas = (word) => new RegExp(word.split("").map(c => `${c}+`).join("")).test(soup)
+  const soupHas = (word) => new RegExp(word.split("").map(charPat).join("")).test(soup)
 
   // — question-keyword strategy (after operators, to avoid spurious number extraction from narrative) —
+  // "strikes twice/thrice" → multiply the single force value
+  for (const [word, mult] of [["twice", 2], ["thrice", 3]]) {
+    if (/\btwice\b/.test(cleaned) && word === "twice" || /\bthrice\b/.test(cleaned) && word === "thrice" || soupHas(word)) {
+      const unitNums = extractNumbersPrecedingUnits(cleaned)
+      if (unitNums.length === 1) return (unitNums[0] * mult).toFixed(2)
+      const nums = extractAllNumbers(cleaned)
+      if (nums.length === 1) return (nums[0] * mult).toFixed(2)
+    }
+  }
   // "how much total" / "combined" / "sum" → add all numbers found
   // prefer unit-anchored extraction to avoid counting structural numbers ("one claw")
   if (/\b(total|combined|sum|altogether)\b/.test(cleaned) || soupHas("total") || soupHas("combined")) {
@@ -198,7 +209,7 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
     while (pos < soup.length) {
       let wordMatched = false
       for (const word of wordsSorted) {
-        const pattern = new RegExp("^" + word.split("").map(c => `${c}+`).join(""))
+        const pattern = new RegExp("^" + word.split("").map(charPat).join(""))
         const m = soup.slice(pos).match(pattern)
         if (m) {
           const val = NUMBER_WORDS[word]
