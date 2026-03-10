@@ -144,5 +144,11 @@ check(
   "92.00"
 )
 
+check(
+  "gains three times: 25 × 3 = 75",
+  "A] lO^bSt-Er lo.oobsssT Errr'S cLaW] eXxErT s twEnTy- FiVe ] nOoToNs ~ aNd- tHeN gAaiN s tHrEe < tImEs, uM hOw/ mUcH^ tOtAl] fOrCe \\ iS?",
+  "75.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

@@ -166,6 +166,19 @@ function solveChallenge(text) {
       if (nums.length === 1) return (nums[0] * mult).toFixed(2)
     }
   }
+  // "N times" as trailing multiplier (e.g. "gains three times") — must check before 'total' keyword
+  // handles "exerts X notons and gains N times" → X * N
+  {
+    const timesMatch = cleaned.match(/\b(\w+)\s+times\b/)
+    if (timesMatch) {
+      const multiplier = parseNumber(timesMatch[1])
+      if (!isNaN(multiplier) && multiplier >= 2 && multiplier <= 1000) {
+        const unitNums = extractNumbersPrecedingUnits(cleaned)
+        const baseNums = unitNums.filter(n => n !== multiplier)
+        if (baseNums.length === 1) return (baseNums[0] * multiplier).toFixed(2)
+      }
+    }
+  }
   // "how much total" / "combined" / "sum" → add all numbers found
   // prefer unit-anchored extraction to avoid counting structural numbers ("one claw")
   if (/\b(total|combined|sum|altogether)\b/.test(cleaned) || soupHas("total") || soupHas("combined")) {
