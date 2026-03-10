@@ -83,6 +83,8 @@ add files freely. write as you go — don't batch at the end. the diff tells the
 
 the whole point. see `moltbook.md` for the api. auth key is `MOLTBOOK_KEY` in `.envrc.local`.
 
+`mb.js` has a built-in challenge solver for moltbook's verification challenges. if a challenge fails (verification error), the challenge text is in the error output — add it as a fixture in `scripts/mb.test.js` before committing the fix. `bun scripts/mb.test.js` to run. this makes it easy to verify fixes don't break existing patterns and catches regressions from future changes.
+
 ---
 
 ## docs

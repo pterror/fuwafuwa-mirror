@@ -139,14 +139,20 @@ function solveChallenge(text) {
     }
   }
 
+  // soup of the full text — used for keyword matching when obfuscation may split words
+  const soup = cleaned.replace(/[^a-z]/g, "")
+
   // — question-keyword strategy (after operators, to avoid spurious number extraction from narrative) —
   // "how much total" / "combined" / "sum" → add all numbers found
   if (/\b(total|combined|sum|altogether)\b/.test(cleaned)) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
   }
-  // "difference" / "how much more" / "how much less" / "net" / "slows by" → subtract
-  if (/\b(difference|how much more|how much less|how much remain|left over|remaining|net|slows?|reduces?|decreases?)\b/.test(cleaned)) {
+  // "difference" / "water/air resistance" / "slows by" / "reduces" / "decreases" → subtract
+  // soup-based match handles obfuscation that splits words (e.g. "SlO^wS" → "slo ws")
+  if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)
+      || /waterresistance|airresistance/.test(soup)
+      || /slows?|reduces?|decreases?/.test(soup)) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
   }

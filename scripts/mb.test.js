@@ -60,5 +60,42 @@ check(
   "45.00"
 )
 
+// real challenge texts from session logs (2026-03-10)
+check(
+  "net force: claw force minus water resistance",
+  "Lo.bStEr] S^wImS Um| AnD ExErTs ClAw] FoRcE Of TwEnTy FoUr~ NeWToNs, BuT WaTeR ReSiStAnCe Is SiX] NeWToNs - WhAt Is NeT FoRcE?",
+  "18.00"
+)
+check(
+  "slows by: new speed after deceleration",
+  "A] Lo.BsT.eR S^wImS[ aT tWeNtY tWo/ cEnT iMeTeRs PeR sE/cOnD ~ AnD SlO^wS ]bY SeV eN {,} WhAt Is ThE NeW SpEeD?",
+  "15.00"
+)
+check(
+  "total force: two claws same direction (23+15)",
+  "A] Lo.BbSsT-tEr S^wI mMs UmM, ClAw ExErTs TwEnTy ThReE NeW^tOnS, AnOtHeR ClAw ExErTs FiFtEeN NeW|tOnS, WhAtS ToTaL FoRcE?",
+  "38.00"
+)
+check(
+  "total force: how much total (32+20)",
+  "A] LoB-StEr^ ClAw FoR|Ce Is ThIrTy TwO NeWtOnS ~ AnD AnOtHeR] ClAw FoR^Ce Is TwEnTy NeWtOnS, HoW MuCh ToTaL FoRcE?",
+  "52.00"
+)
+check(
+  "new speed: adds seven (23+7)",
+  "A] LoO b-StErS S^wImS [aT tW/eN tY ThReE mE^tErS PeR SeCoNd ~AnD AnTeNnA ToUcH AdDs SeVeN, WhAt Is ThE NeW SpEeD?",
+  "30.00"
+)
+check(
+  "total force: two claws heavy obfuscation (35+7)",
+  "A] lOoObSsT-tEr S^cLaWw ExErRtSs thIr RtYy fIiV-e NoOoToOnNs~ AnD| aNnOtThHeEr ClLaAwW ExErRtSs SeVeEnN NoOoToOnNs, WhHaT Is ToTaLl FoOrRcEe<? um",
+  "42.00"
+)
+check(
+  "total force: one claw plus another adds (34+6)",
+  "A] LoOobBsTtEr ] ClLaAwW^ FoOrRcEe- OfF ] ThHiIrRtTyY { FoOuUrR ] NeEwWtToOnNs ~ aNdD ] ThHeE ] OtThHeErR ] ClLaAwW / AdDdSs ] SiIxX ] NeEwWtToOnNs, ] WhHaAtT ] IiSs ] ToOtTaAlL } FoOrRcEe < ?",
+  "40.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
