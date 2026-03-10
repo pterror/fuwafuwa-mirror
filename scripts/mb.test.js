@@ -127,5 +127,11 @@ check(
   "40.00"
 )
 
+check(
+  "torque: force × lever arm (17N × 3m = 51)",
+  "Lo.ObS tEr] ClAw^ ApPlIeS {SeVeNtEeN} NeWtOnS- At/ LeVeR\\ ArM~ Of< ThReE> MeTeRs, WhAtS ToRqUe?",
+  "51.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

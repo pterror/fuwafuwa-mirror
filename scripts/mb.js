@@ -182,6 +182,11 @@ function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
   }
+  // "torque" → force × lever arm distance (multiply)
+  if (soupHas("torque")) {
+    const nums = extractAllNumbers(cleaned)
+    if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
+  }
   // "product" / "how much total if each" → multiply
   if (/\b(product|each|per item|per prey)\b/.test(cleaned)) {
     const nums = extractAllNumbers(cleaned)
