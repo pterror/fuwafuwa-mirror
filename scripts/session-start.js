@@ -1,9 +1,17 @@
 #!/usr/bin/env bun
 // session-start.js — apply between-session drift and print current mood
+//
+// flags:
+//   --nonce <value>   autonomous session nonce — only writes lockfile if it doesn't
+//                     already belong to a different session. pass same nonce to session-end.
 
-import { readFileSync, writeFileSync } from "fs"
+import { readFileSync, writeFileSync, existsSync } from "fs"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
+
+const argv = process.argv.slice(2)
+const nonceIdx = argv.indexOf("--nonce")
+const nonce = nonceIdx >= 0 ? argv[nonceIdx + 1] : null
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const state = JSON.parse(readFileSync(join(root, "brain/emotional-state.json"), "utf8"))
@@ -74,7 +82,26 @@ const tone = modifiers.length ? `${primary}+${modifiers.join("+")}` : primary
 
 // — write —
 writeFileSync(join(root, "brain/emotional-state.json"), JSON.stringify(state, null, 2) + "\n")
-writeFileSync(join(root, "brain/session.lock"), JSON.stringify({ started: now.toISOString(), pid: process.pid }) + "\n")
+
+const lockPath = join(root, "brain/session.lock")
+if (nonce) {
+  // autonomous session: only write lock if no other session owns it
+  let owned = false
+  if (existsSync(lockPath)) {
+    try {
+      const existing = JSON.parse(readFileSync(lockPath, "utf8"))
+      owned = existing.nonce === nonce  // we already wrote it (e.g. heartbeat pre-wrote)
+      if (!owned && existing.nonce) {
+        console.log(`[session-start] lock owned by nonce ${existing.nonce} — skipping lock write`)
+      }
+    } catch {}
+  }
+  if (!existsSync(lockPath) || owned) {
+    writeFileSync(lockPath, JSON.stringify({ started: now.toISOString(), pid: process.pid, nonce }) + "\n")
+  }
+} else {
+  writeFileSync(lockPath, JSON.stringify({ started: now.toISOString(), pid: process.pid }) + "\n")
+}
 
 // — print summary —
 const SE_TIER = state.social_energy > 75 ? "fresh" : state.social_energy > 40 ? "engaged" : state.social_energy > 20 ? "flagging" : "depleted"

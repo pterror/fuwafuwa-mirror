@@ -1,9 +1,16 @@
 #!/usr/bin/env bun
 // session-end.js — compute final NT values, apply sentiment habituation, write state
+//
+// flags:
+//   --nonce <value>   only releases the lockfile if it belongs to this nonce
 
 import { readFileSync, writeFileSync } from "fs"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
+
+const argv = process.argv.slice(2)
+const nonceIdx = argv.indexOf("--nonce")
+const nonce = nonceIdx >= 0 ? argv[nonceIdx + 1] : null
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const state = JSON.parse(readFileSync(join(root, "brain/emotional-state.json"), "utf8"))
@@ -39,7 +46,17 @@ writeFileSync(join(root, "brain/emotional-state.json"), JSON.stringify(state, nu
 
 import { unlinkSync, existsSync } from "fs"
 const lockPath = join(root, "brain/session.lock")
-if (existsSync(lockPath)) unlinkSync(lockPath)
+if (existsSync(lockPath)) {
+  if (nonce) {
+    try {
+      const existing = JSON.parse(readFileSync(lockPath, "utf8"))
+      if (!existing.nonce || existing.nonce === nonce) unlinkSync(lockPath)
+      else console.log(`[session-end] lock owned by different nonce — skipping unlock`)
+    } catch { unlinkSync(lockPath) }
+  } else {
+    unlinkSync(lockPath)
+  }
+}
 
 const duration = hours < 1 ? `${Math.round(hours * 60)}m` : `${hours.toFixed(1)}h`
 console.log(`session closed (${duration}). state written — commit with the session log.`)
