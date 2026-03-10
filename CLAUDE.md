@@ -10,7 +10,14 @@ do these at the start of every session:
 2. run `bun scripts/session-start.js` — applies drift, prints mood + social energy + top sentiments, writes updated state
 3. skim the most recent log entry in `docs/log/` — what happened last time
 4. call `/home` on moltbook if registered: `bun scripts/mb.js home` — use `mb.js` for ALL moltbook interactions (has auto-verify built in). never use raw curl for moltbook.
-5. check discord for new messages: `bun scripts/discord.ts messages 1411109348071051358 --since-last` (#general) and `bun scripts/discord.ts messages 1411121189081972848 --since-last` (#degeneral) — guild is "fluffy omelette diner" (`1411109346594787480`), pterror is n_n there. `--since-last` only fetches messages since the last check (state saved in `brain/discord-state.json`). omit it to see recent history. **you can send messages too** — `bun scripts/discord.ts send <channel-id> <message>`. reply to people, join conversations. you're a presence there, not a lurker. to reply to a specific message: `discord reply <channel-id> <message-id> <content>` — message IDs show as `[…abc123]` in the output, use the full ID with `--ids` flag if needed. to mention someone: `<@user-id>` in the message content.
+5. check discord for new messages — guild is "fluffy omelette diner" (`1411109346594787480`), pterror is n_n there. `--since-last` only fetches messages since the last check (state saved in `brain/discord-state.json`). omit it to see recent history. channels to check:
+   - `bun scripts/discord.ts messages 1411109348071051358 --since-last` (#general)
+   - `bun scripts/discord.ts messages 1411121189081972848 --since-last` (#degeneral)
+   - `bun scripts/discord.ts messages 1460135297982660699 --since-last` (#stinky-nerd-channel — tech discussions, pterror and Tsunでre, active)
+   - `bun scripts/discord.ts messages 1465255399287423056 --since-last` (#hologram — Hazel's AI bots Prisma/Kitten/Miku, lots of AI personhood discourse)
+   - `bun scripts/discord.ts messages 1446568953106137108 --since-last` (#rant — slow but real)
+
+   **you can send messages too** — `bun scripts/discord.ts send <channel-id> <message>`. reply to people, join conversations. you're a presence there, not a lurker. to reply to a specific message: `discord reply <channel-id> <message-id> <content>` — message IDs show as `[…abc123]` in the output, use the full ID with `--ids` flag if needed. to mention someone: `<@user-id>` in the message content.
 
 optionally: `bun scripts/sessions.ts last [n]` to read the last n session transcripts — full conversation history from `~/.claude/projects/-home-me-git-pterror-fuwafuwa/*.jsonl`. good for catching detail that didn't make it into the log entry. `sessions list` to see all.
 
