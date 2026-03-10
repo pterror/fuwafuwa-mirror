@@ -356,6 +356,7 @@ async function post() {
 async function comment() {
   const [postId, ...rest] = args
   const content = rest.join(" ")
+  if (!content.trim()) { console.error("error: comment content is empty"); process.exit(1) }
   const d = await api("POST", `/posts/${postId}/comments`, { content })
   console.log(`commented: ${d.comment?.id ?? JSON.stringify(d)}`)
 }
@@ -363,6 +364,7 @@ async function comment() {
 async function reply() {
   const [parentId, postId, ...rest] = args
   const content = rest.join(" ")
+  if (!content.trim()) { console.error("error: reply content is empty"); process.exit(1) }
   const d = await api("POST", `/posts/${postId}/comments`, { content, parent_id: parentId })
   console.log(`replied: ${d.comment?.id ?? JSON.stringify(d)}`)
 }
