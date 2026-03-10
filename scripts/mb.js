@@ -52,6 +52,8 @@ const NUMBER_WORDS = {
 }
 // allow 'y' as a substitute for 'i' (common obfuscation: "fyve" → "five", "fyftEEn" → "fifteen")
 const charPat = c => c === 'i' ? '[iy]+' : `${c}+`
+// sentinel for decimal point in soup parsing ("four point five" → 4.5)
+const POINT_SENTINEL = Symbol('point')
 
 function parseNumber(text) {
   const trimmed = text.trim()
@@ -63,7 +65,17 @@ function parseNumber(text) {
   // strip hyphens first so obfuscated "eig-ht" becomes "eight" rather than "eig" + "ht"
   const words = trimmed.toLowerCase().replace(/-/g, "").replace(/[^a-z\s]/g, " ").split(/\s+/).filter(Boolean)
   let total = 0, current = 0, found = false
-  for (const word of words) {
+  for (let wi = 0; wi < words.length; wi++) {
+    const word = words[wi]
+    // handle "X point Y" decimal notation (e.g. "four point five" → 4.5)
+    if (word === 'point' && found && wi + 1 < words.length) {
+      const nextVal = NUMBER_WORDS[words[wi + 1]]
+      if (nextVal !== undefined && nextVal >= 0 && nextVal <= 9) {
+        current += nextVal / 10
+        wi++ // skip next word
+        continue
+      }
+    }
     const val = NUMBER_WORDS[word]
     if (val === undefined) continue
     found = true
@@ -102,17 +114,37 @@ function parseNumberFromSoup(text) {
         break
       }
     }
-    if (!matched) remaining = remaining.slice(1) // skip unknown char
+    if (!matched) {
+      // check for "point" (decimal separator, possibly obfuscated as "pooiinntt")
+      const pm = remaining.match(/^p+o+[iy]+n+t+/)
+      if (pm && found.length > 0) {
+        found.push(POINT_SENTINEL)
+        remaining = remaining.slice(pm[0].length)
+      } else {
+        remaining = remaining.slice(1) // skip unknown char
+      }
+    }
   }
 
-  // compose: same logic as normal word parsing
+  // compose: same logic as normal word parsing, with POINT_SENTINEL for decimals
   let total = 0, current = 0
-  for (const val of found) {
+  for (let i = 0; i < found.length; i++) {
+    const val = found[i]
+    if (val === POINT_SENTINEL) {
+      if (i + 1 < found.length) {
+        const fracDigit = found[i + 1]
+        if (typeof fracDigit === 'number' && fracDigit >= 0 && fracDigit <= 9) {
+          current += fracDigit / 10
+          i++ // skip the decimal digit
+        }
+      }
+      continue
+    }
     if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
     else if (val === 100) { current = (current || 1) * 100 }
     else { current += val }
   }
-  return found.length ? total + current : NaN
+  return found.some(v => v !== POINT_SENTINEL) ? total + current : NaN
 }
 
 function solveChallenge(text) {

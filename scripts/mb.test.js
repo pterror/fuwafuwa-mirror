@@ -166,6 +166,11 @@ check(
   "A] lOoObBsTtEr S^wImS/ aTt SeVeNtEeN~ mE tErS| pE rS eCoNd} aNd/ sW iMs\\ fOr ThReE< sE cOnDs- , hOw{ fA r?",
   "51.00"
 )
+check(
+  "product with decimal: 23 newtons * 4.5 m/s = 103.5 (word 'point' in obfuscated text)",
+  "A] lOoOobbsStTeErr] cLlAaWw^ eXxEeRrTtSs] um{ tWwEeNnTtY] tHhRrEe] nEeWwTtOoNnSs] * < fOoUuR] pOoIiNnTt] fIiVvEe] mEeTtEeRrSs] / pEeRr] sEeCcOoNnDd,] wWhHaAt] iIs] tThHe] pRrOoDdUuCcTt?",
+  "103.50"
+)
 
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
