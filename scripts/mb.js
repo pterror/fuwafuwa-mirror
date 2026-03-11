@@ -219,6 +219,11 @@ function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
   }
+  // "multiplied by" with obfuscation (e.g. "mul tiplied by") — must check before 'total' keyword
+  if (soupHas("multiplied")) {
+    const nums = extractAllNumbers(cleaned)
+    if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
+  }
   // "how much total" / "combined" / "sum" → add all numbers found
   // prefer unit-anchored extraction to avoid counting structural numbers ("one claw")
   if (/\b(total|combined|sum|altogether)\b/.test(cleaned) || soupHas("total") || soupHas("combined")) {

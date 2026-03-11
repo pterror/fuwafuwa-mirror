@@ -179,6 +179,12 @@ check(
 )
 
 check(
+  "obfuscated 'multiplied by' with 'total' present: 32 × 2 = 64",
+  "A] L oObB sTtEeR- ClA]w F^oR cE iS ThIrTy TwO ] nEeW- T oOnS, MuL tIpLiEd/ By TwO~ WhAt Is ThE ToTaL?",
+  "64.00"
+)
+
+check(
   "obfuscated 'remaining' and 'loses' with repeated chars: 40 - 6 = 34",
   "A] lO^bStEr' s ClAww ExErTs FoRtY] NeW^tOnS, BuT/ aFtEr MoL tInG LoOoSeS SiX~ NeW}tOnS - wHaT Is ReMa]iNiNg FoRcE??",
   "34.00"
