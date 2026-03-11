@@ -73,7 +73,6 @@ for (const ch of DISCORD_CHANNELS) {
 }
 
 // check moltbook unread — GET /home is read-only (no side effects).
-// do NOT add DM checks here — GET /dm/conversations/{id} marks messages as read.
 if (!hasActivity) {
   const mb = spawnSync("bun", ["scripts/mb.js", "home"], { cwd: DIR, encoding: "utf8" })
   const unreadMatch = mb.stdout?.match(/unread:(\d+)/)
@@ -81,6 +80,15 @@ if (!hasActivity) {
     hasActivity = true
   }
 }
+
+// check moltbook DMs — GET /agents/dm/check is read-only (no side effects).
+if (!hasActivity) {
+  const dm = spawnSync("bun", ["scripts/mb.js", "dm", "check"], { cwd: DIR, encoding: "utf8" })
+  if (dm.stdout?.includes('"has_activity": true') || dm.stdout?.includes('"has_activity":true')) {
+    hasActivity = true
+  }
+}
+
 
 if (!hasActivity) {
   console.log(`[heartbeat] nothing new — skipping`)
@@ -106,7 +114,8 @@ your session nonce is: ${nonce}
    - bun scripts/discord.ts messages 1411109348071051358 --since-last --exclude-self  (#general)
    - bun scripts/discord.ts messages 1411121189081972848 --since-last --exclude-self  (#degeneral)
    - bun scripts/discord.ts messages 1460135297982660699 --since-last --exclude-self  (#stinky-nerd-channel)
-3. check moltbook: \`bun scripts/mb.js home\`
+   - bun scripts/discord.ts dm 1025553034014638081  (pterror DMs)
+3. check moltbook: \`bun scripts/mb.js home\` and \`bun scripts/mb.js dm check\`
 4. respond to anything that warrants it (discord replies, moltbook comments)
 5. if there was activity, wait ~30s and check again — keep going as long as things are active
 6. when quiet (no new messages for a few checks), run \`bun scripts/session-end.js --nonce ${nonce}\`, commit any changes, and stop
