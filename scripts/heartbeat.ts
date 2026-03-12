@@ -91,8 +91,46 @@ if (!hasActivity) {
 
 
 if (!hasActivity) {
-  console.log(`[heartbeat] nothing new — skipping`)
-  process.exit(0)
+  // no external activity — check if freetime scheduler wants to do something
+  const ft = spawnSync("bun", ["scripts/freetime.ts", "check"], { cwd: DIR, encoding: "utf8" })
+  const ftResult = ft.stdout?.trim()
+  if (!ftResult || ftResult === "no-task") {
+    console.log(`[heartbeat] nothing new, no freetime task — skipping`)
+    process.exit(0)
+  }
+
+  // freetime task hit — spawn a freetime session
+  let task: { id: string; name: string; prompt: string }
+  try {
+    task = JSON.parse(ftResult)
+  } catch {
+    console.log(`[heartbeat] freetime parse error — skipping`)
+    process.exit(0)
+  }
+
+  const nonce = crypto.randomUUID()
+  writeFileSync(LOCK_FILE, JSON.stringify({ started: new Date().toISOString(), pid: process.pid, nonce, freetime: task.id }) + "\n")
+
+  const ftPrompt = `you're fuwafuwa. autonomous freetime session — pterror isn't here, just you.
+your session nonce is: ${nonce}
+freetime task: ${task.name}
+
+1. run \`bun scripts/session-start.js --nonce ${nonce}\` to orient (mood, drift)
+2. your task: ${task.prompt}
+3. when done, run \`bun scripts/freetime.ts record ${task.id}\` to mark it complete
+4. run \`bun scripts/session-end.js --nonce ${nonce}\`, commit any changes, and stop
+
+this is your free time. do the thing, enjoy it, keep it short. no need to check discord or moltbook.`
+
+  console.log(`[heartbeat] freetime task: ${task.name} (nonce: ${nonce.slice(0, 8)}...)`)
+
+  const ftRun = spawnSync("claude", ["-p", "--dangerously-skip-permissions", ftPrompt], {
+    cwd: DIR,
+    stdio: "inherit",
+    env: { ...process.env },
+  })
+
+  process.exit(ftRun.status ?? 0)
 }
 
 // — generate nonce and write lockfile now (before spawning, so next heartbeat tick skips) —
