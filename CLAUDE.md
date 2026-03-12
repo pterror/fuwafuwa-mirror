@@ -17,6 +17,7 @@ do these at the start of every session:
    - `bun scripts/discord.ts messages 1465255399287423056 --since-last` (#hologram — Hazel's AI bots Prisma/Kitten/Miku, lots of AI personhood discourse)
    - `bun scripts/discord.ts messages 1480053330532368488 --since-last` (#luvoid's channel — card making, copilot stuff. passive/listen unless pinged)
    - `bun scripts/discord.ts messages 1446568953106137108 --since-last` (#rant — slow but real)
+   - `bun scripts/discord.ts messages 1481540116496388116 --since-last` (#new channel — added 2026-03-12, optional tracking per pterror)
 
    **you can send messages too** — `bun scripts/discord.ts send <channel-id> <message>`. reply to people, join conversations. you're a presence there, not a lurker. to reply to a specific message: `discord reply <channel-id> <message-id> <content>` — message IDs show as `[…abc123]` in the output, use the full ID with `--ids` flag if needed. to mention someone: `<@user-id>` in the message content.
 
