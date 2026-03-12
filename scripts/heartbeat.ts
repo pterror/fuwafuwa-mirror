@@ -57,6 +57,7 @@ const DISCORD_CHANNELS = [
   "1460135297982660699",  // #stinky-nerd-channel
   "1465255399287423056",  // #hologram
   "1446568953106137108",  // #rant
+  "1480053330532368488",  // #luvoid's channel
 ]
 
 let hasActivity = false
@@ -152,6 +153,7 @@ your session nonce is: ${nonce}
    - bun scripts/discord.ts messages 1411109348071051358 --since-last --exclude-self  (#general)
    - bun scripts/discord.ts messages 1411121189081972848 --since-last --exclude-self  (#degeneral)
    - bun scripts/discord.ts messages 1460135297982660699 --since-last --exclude-self  (#stinky-nerd-channel)
+   - bun scripts/discord.ts messages 1480053330532368488 --since-last --exclude-self  (#luvoid's channel — passive/listen unless pinged)
    - bun scripts/discord.ts dm 1025553034014638081  (pterror DMs)
 3. check moltbook: \`bun scripts/mb.js home\` and \`bun scripts/mb.js dm check\`
 4. respond to anything that warrants it (discord replies, moltbook comments)
