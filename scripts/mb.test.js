@@ -202,5 +202,11 @@ check(
   "47.00"
 )
 
+check(
+  "each + total: 24 eyes × 6 neurons = 144",
+  "Th]iS LoO bS tEr HaS^ tWeN tY fOuR EyE fA cE tS, AnD eAcH EyE sPrOuTs/ sIx NoO tOnS oF nEu-RoNs, Um, HoW MaNy N Eu-RoNs ToTaL<?",
+  "144.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

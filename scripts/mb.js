@@ -217,7 +217,9 @@ function solveChallenge(text) {
   // must check before total keyword (which would otherwise add)
   // exclude "per second/minute/hour/meter" — those are unit rates, not operational "per"
   const perIsRate = /\bper\b/.test(cleaned) && !/\bper\s+(second|seconds|minute|minutes|hour|hours|meter|meters|metre|metres|kilogram|kilograms)\b/.test(cleaned)
-  if (perIsRate && (/\b(total|combined|sum|altogether)\b/.test(cleaned) || soupHas("total") || soupHas("combined"))) {
+  // "each" + total/combined → multiply (e.g. "24 eye facets, each sprouts 6 neurons, how many total")
+  const eachIsRate = /\beach\b/.test(cleaned) || soupHas("each")
+  if ((perIsRate || eachIsRate) && (/\b(total|combined|sum|altogether)\b/.test(cleaned) || soupHas("total") || soupHas("combined"))) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
   }
@@ -282,42 +284,52 @@ const UNIT_PATTERNS = [
 // try to match tokens[startIdx..startIdx+size) as a single number value
 // returns [value, tokensConsumed] or null
 function matchNumberChunk(tokens, wordsSorted, startIdx) {
-  for (let size = 1; size <= Math.min(3, tokens.length - startIdx); size++) {
-    const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
-    if (!soup) continue
-    // allow skipping prefix garbage chars for single tokens only (obfuscation like "sirrthirty" = "thirty")
-    // multi-token windows already handle cross-token splits, so skip would cause false positives
-    const maxSkip = size === 1 ? Math.min(Math.floor(soup.length / 2), 5) : 0
-    for (let skip = 0; skip <= maxSkip; skip++) {
-      let pos = skip, current = 0, total = 0, found = false
-      while (pos < soup.length) {
-        let wordMatched = false
-        for (const word of wordsSorted) {
-          const pattern = new RegExp("^" + word.split("").map(charPat).join(""))
-          const m = soup.slice(pos).match(pattern)
-          // also try with first char substituted (handles e.g. "G hHrEe" → "three" where "t" is replaced)
-          const altPattern = word.length > 1
-            ? new RegExp("^." + word.slice(1).split("").map(charPat).join(""))
-            : null
-          const am = !m && altPattern ? soup.slice(pos).match(altPattern) : null
-          // tolerant pattern: allow single inserted char between character groups
-          // handles mid-word insertions like "thrirty" → "thirty" (extra 'r' after 'h')
-          const tolPattern = !m && !am && word.length > 2
-            ? new RegExp("^" + word.split("").map(charPat).join(".??"))
-            : null
-          const tm = tolPattern ? soup.slice(pos).match(tolPattern) : null
-          const match = m || am || tm
-          if (match) {
-            const val = NUMBER_WORDS[word]
-            if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
-            else if (val === 100) { current = (current || 1) * 100 }
-            else { current += val }
-            pos += match[0].length; found = true; wordMatched = true; break
+  // three-pass approach to prefer exact multi-token matches over fuzzy single-token matches:
+  //   pass 0: exact patterns only, no skip (strictest)
+  //   pass 1: exact + alt patterns, with skip (handles first-char substitution)
+  //   pass 2: all patterns including tolerant, with skip (handles mid-word insertions)
+  // this prevents e.g. "twen" matching "ten" (via alt/tolerant) from beating ["twen","ty"] = "twenty"
+  for (let pass = 0; pass <= 2; pass++) {
+    for (let size = 1; size <= Math.min(3, tokens.length - startIdx); size++) {
+      const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
+      if (!soup) continue
+      // allow skipping prefix garbage chars for single tokens only (obfuscation like "sirrthirty" = "thirty")
+      // multi-token windows already handle cross-token splits, so skip would cause false positives
+      // only allow skip in passes 1+ to prefer exact no-skip matches first
+      const maxSkip = (pass >= 1 && size === 1) ? Math.min(Math.floor(soup.length / 2), 5) : 0
+      for (let skip = 0; skip <= maxSkip; skip++) {
+        let pos = skip, current = 0, total = 0, found = false
+        while (pos < soup.length) {
+          let wordMatched = false
+          for (const word of wordsSorted) {
+            const pattern = new RegExp("^" + word.split("").map(charPat).join(""))
+            const m = soup.slice(pos).match(pattern)
+            // also try with first char substituted (handles e.g. "G hHrEe" → "three" where "t" is replaced)
+            // only in passes 1+
+            const altPattern = pass >= 1 && word.length > 1
+              ? new RegExp("^." + word.slice(1).split("").map(charPat).join(""))
+              : null
+            const am = !m && altPattern ? soup.slice(pos).match(altPattern) : null
+            // tolerant pattern: allow single inserted char between character groups
+            // handles mid-word insertions like "thrirty" → "thirty" (extra 'r' after 'h')
+            // only in pass 2
+            const tolPattern = !m && !am && pass >= 2 && word.length > 2
+              ? new RegExp("^" + word.split("").map(charPat).join(".??"))
+              : null
+            const tm = tolPattern ? soup.slice(pos).match(tolPattern) : null
+            const match = m || am || tm
+            if (match) {
+              const val = NUMBER_WORDS[word]
+              if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
+              else if (val === 100) { current = (current || 1) * 100 }
+              else { current += val }
+              pos += match[0].length; found = true; wordMatched = true; break
+            }
           }
+          if (!wordMatched) break
         }
-        if (!wordMatched) break
+        if (found && pos === soup.length) return [total + current, size]
       }
-      if (found && pos === soup.length) return [total + current, size]
     }
   }
   return null
