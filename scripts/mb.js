@@ -284,15 +284,29 @@ const UNIT_PATTERNS = [
 // try to match tokens[startIdx..startIdx+size) as a single number value
 // returns [value, tokensConsumed] or null
 function matchNumberChunk(tokens, wordsSorted, startIdx) {
-  // three-pass approach to prefer exact multi-token matches over fuzzy single-token matches:
+  // four-pass approach to prefer exact multi-token matches over fuzzy single-token matches:
   //   pass 0: exact patterns only, no skip (strictest)
   //   pass 1: exact + alt patterns, with skip (handles first-char substitution)
   //   pass 2: all patterns including tolerant, with skip (handles mid-word insertions)
+  //   pass 3: anagram match (handles transposed chars like "trhee" = "three")
   // this prevents e.g. "twen" matching "ten" (via alt/tolerant) from beating ["twen","ty"] = "twenty"
-  for (let pass = 0; pass <= 2; pass++) {
+  for (let pass = 0; pass <= 3; pass++) {
     for (let size = 1; size <= Math.min(3, tokens.length - startIdx); size++) {
       const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
       if (!soup) continue
+
+      // pass 3: anagram match for single tokens — handles transposed chars (e.g. "trhee" = "three")
+      // collapse runs then sort; e.g. "trhee" → "trhe" → "ehrt", "three" → "thre" → "ehrt"
+      if (pass === 3) {
+        if (size !== 1) continue
+        const soupSorted = soup.replace(/(.)\1+/g, "$1").split("").sort().join("")
+        for (const word of wordsSorted) {
+          const wordSorted = word.replace(/(.)\1+/g, "$1").split("").sort().join("")
+          if (soupSorted === wordSorted) return [NUMBER_WORDS[word], 1]
+        }
+        continue
+      }
+
       // allow skipping prefix garbage chars for single tokens only (obfuscation like "sirrthirty" = "thirty")
       // multi-token windows already handle cross-token splits, so skip would cause false positives
       // only allow skip in passes 1+ to prefer exact no-skip matches first

@@ -208,5 +208,11 @@ check(
   "144.00"
 )
 
+check(
+  "transposed chars: 'trhee' = three (TrHeEe obfuscation), territory density × 23 = 50 × 23 = 1150",
+  "A] LoOoBbSsTtEeR^ ClLaAwW F(o)oRrCcEe IsS] fIfTy- NeWtOoNs, UmMm ~ AnD \\ iTsS TeRrRiToRyY DeEnSiTyY MuLtIiPlIiEd } ByY tW/eNtY TrHeEe <, WhHaT IsS ToOtTaAll^ FoOrRcEe?",
+  "1150.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
