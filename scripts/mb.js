@@ -543,6 +543,7 @@ async function read() {
 
 async function post() {
   const [submolt, title, ...rest] = args
+  if (!submolt || !title) { console.error("usage: mb post <submolt> <title> [content]"); process.exit(1) }
   let content = rest.join(" ") || undefined
   if (!content && !process.stdin.isTTY) {
     content = await new Promise(resolve => {
