@@ -226,5 +226,11 @@ check(
   "1150.00"
 )
 
+check(
+  "speeds up by seven: 23+7=30 (fragmented tokens, 'e-' + 'ne' false-one regression)",
+  "A] lO bS tEr S^wI mS[ aT/ tW eN tY tHrEe ~ cE nTi Me Te Rs / pEr / sEe Co Nd, aNd] sPeE ds- uP ^ bY [sEvEn, wH aT' s} tH e- nE w< sPeE d?",
+  "30.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

@@ -326,9 +326,10 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
           for (const word of wordsSorted) {
             const pattern = new RegExp("^" + word.split("").map(charPat).join(""))
             const m = soup.slice(pos).match(pattern)
-            // also try with first char substituted (handles e.g. "G hHrEe" → "three" where "t" is replaced)
-            // only in passes 1+
-            const altPattern = pass >= 1 && word.length > 1
+            // also try with first char substituted (handles e.g. "hhree" → "three" where "t" is replaced)
+            // only in passes 1+, and only for single-token windows (size === 1):
+            // multi-token altPattern causes false positives like "e" + "ne" → "ene" → "one"
+            const altPattern = pass >= 1 && word.length > 1 && size === 1
               ? new RegExp("^." + word.slice(1).split("").map(charPat).join(""))
               : null
             const am = !m && altPattern ? soup.slice(pos).match(altPattern) : null
@@ -388,8 +389,20 @@ function extractAllNumbers(text) {
   while (i < tokens.length) {
     let numPos = i, current = 0, total = 0, found = false
     while (numPos < tokens.length) {
-      const match = matchNumberChunk(tokens, wordsSorted, numPos)
-      if (match === null) break
+      let match = matchNumberChunk(tokens, wordsSorted, numPos)
+      if (match === null) {
+        // allow skipping one garbage token when building a compound number (e.g. "twenty [g] three")
+        // only when we have a clean tens partial (20/30/.../90) and the next token is a smaller units value
+        // this handles first-char-substituted single-char tokens like "G" in "tW/eNnTy G hHrEe"
+        if (found && current > 0 && current % 10 === 0 && current < 100 && numPos + 1 < tokens.length) {
+          const nextMatch = matchNumberChunk(tokens, wordsSorted, numPos + 1)
+          if (nextMatch !== null && nextMatch[0] > 0 && nextMatch[0] < current) {
+            numPos++ // skip the single garbage token
+            match = nextMatch
+          }
+        }
+        if (match === null) break
+      }
       const [val, size] = match
       if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
       else if (val === 100) { current = (current || 1) * 100 }
