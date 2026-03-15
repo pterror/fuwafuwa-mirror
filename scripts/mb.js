@@ -65,6 +65,7 @@ function parseNumber(text) {
   // strip hyphens first so obfuscated "eig-ht" becomes "eight" rather than "eig" + "ht"
   const words = trimmed.toLowerCase().replace(/-/g, "").replace(/[^a-z\s]/g, " ").split(/\s+/).filter(Boolean)
   let total = 0, current = 0, found = false
+  let prevUnknown = null  // last unrecognized word, for inter-token split detection
   for (let wi = 0; wi < words.length; wi++) {
     const word = words[wi]
     // handle "X point Y" decimal notation (e.g. "four point five" → 4.5)
@@ -76,8 +77,15 @@ function parseNumber(text) {
         continue
       }
     }
-    const val = NUMBER_WORDS[word]
-    if (val === undefined) continue
+    let val = NUMBER_WORDS[word]
+    // inter-token split: obfuscation may insert a space inside a number word (e.g. "twen ty" → "twenty")
+    // try concatenating the previous unrecognized token with the current one
+    if (val === undefined && prevUnknown !== null) {
+      const combined = NUMBER_WORDS[prevUnknown + word]
+      if (combined !== undefined) { val = combined; prevUnknown = null }
+    }
+    if (val === undefined) { prevUnknown = word; continue }
+    prevUnknown = null
     found = true
     if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
     else if (val === 100) { current = (current || 1) * 100 }
@@ -223,8 +231,8 @@ function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
   }
-  // "multiplied by" with obfuscation (e.g. "mul tiplied by") — must check before 'total' keyword
-  if (soupHas("multiplied")) {
+  // "multiplied/multiplies by" with obfuscation — must check before 'total' keyword
+  if (soupHas("multiplied") || soupHas("multiplies")) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }

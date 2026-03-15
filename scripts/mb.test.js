@@ -209,6 +209,18 @@ check(
 )
 
 check(
+  "multiplies by three: split 'twent y' + 'fiv e' + multiplies keyword (25×3=75)",
+  "A] LoO b-StErR~ ClAw^ ExErTs/ TwEnT y] FiV e- NoOtOnS| AnD~ In{ DoMiNaN ce/ PuSh} MuLtI pLiEs- By/ ThReE < WhAtS> ToTaL?",
+  "75.00"
+)
+
+check(
+  "net force: split 'twen ty' + clean 'three' — soup should win (23-7=16)",
+  "A] lObB-sT eRr'S ClAwW ExErT s^ tWeN tY ThReE NooToNs Um ] - RiV aL C lAwW ExErTs[ SeV eN, HoW^ MuCh NeT F oRcE?",
+  "16.00"
+)
+
+check(
   "transposed chars: 'trhee' = three (TrHeEe obfuscation), territory density × 23 = 50 × 23 = 1150",
   "A] LoOoBbSsTtEeR^ ClLaAwW F(o)oRrCcEe IsS] fIfTy- NeWtOoNs, UmMm ~ AnD \\ iTsS TeRrRiToRyY DeEnSiTyY MuLtIiPlIiEd } ByY tW/eNtY TrHeEe <, WhHaT IsS ToOtTaAll^ FoOrRcEe?",
   "1150.00"
