@@ -191,6 +191,12 @@ check(
 )
 
 check(
+  "dash-as-separator before 'and': 35+22=57, not subtraction (regression: was 14.00)",
+  "A] lO-bStEr Ex^ErTs ThIrTy FiVe NooOtOnS (nOoToNs) WiTh Um OnE ClAw - AnD TwEnTy TwO NeWtOnS OtHeR ClAw ~ WhAt Is ThE ToTaL FoR cE?",
+  "57.00"
+)
+
+check(
   "obfuscated 'remaining' and 'loses' with repeated chars: 40 - 6 = 34",
   "A] lO^bStEr' s ClAww ExErTs FoRtY] NeW^tOnS, BuT/ aFtEr MoL tInG LoOoSeS SiX~ NeW}tOnS - wHaT Is ReMa]iNiNg FoRcE??",
   "34.00"

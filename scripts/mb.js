@@ -185,6 +185,9 @@ function solveChallenge(text) {
     if (idx === -1) continue
     const left = cleaned.slice(0, idx)
     const right = cleaned.slice(idx + sym.length)
+    // " - " followed immediately by "and " is a dash-as-separator, not subtraction
+    // e.g. "thirty five nootons with one claw - and twenty two newtons" → skip, use total keyword
+    if (sym === " - " && right.trimStart().startsWith("and ")) continue
     const a = parseNumber(left)
     const b = parseNumber(right)
     if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
