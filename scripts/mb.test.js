@@ -227,6 +227,12 @@ check(
 )
 
 check(
+  "accelerates by seven: 23+7=30 (tW]eNnY T hReEe pattern)",
+  "A] lO-bStEr S^wIiMmS[ aT/ tW]eNnY T hReEe~ cE^nTiMeTeRs] pEr/ sEeCoNd- aNd] tHeN^ aCcEeLlEeRaTeS[ bY/ sEvEn, wHaTs] tHe^ nEw/ sPeEd?",
+  "30.00"
+)
+
+check(
   "speeds up by seven: 23+7=30 (fragmented tokens, 'e-' + 'ne' false-one regression)",
   "A] lO bS tEr S^wI mS[ aT/ tW eN tY tHrEe ~ cE nTi Me Te Rs / pEr / sEe Co Nd, aNd] sPeE ds- uP ^ bY [sEvEn, wH aT' s} tH e- nE w< sPeE d?",
   "30.00"

@@ -303,14 +303,18 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
       const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
       if (!soup) continue
 
-      // pass 3: anagram match for single tokens — handles transposed chars (e.g. "trhee" = "three")
+      // pass 3: anagram match — handles transposed/substituted chars (e.g. "trhee" = "three")
+      // also handles 2-token windows where a bracket/punct split a number word
+      // (e.g. "tW]eNnY" → "tw"+"enny" = "twenny" → anagram of "twenty")
       // collapse runs then sort; e.g. "trhee" → "trhe" → "ehrt", "three" → "thre" → "ehrt"
       if (pass === 3) {
-        if (size !== 1) continue
-        const soupSorted = soup.replace(/(.)\1+/g, "$1").split("").sort().join("")
+        if (size > 2) continue
+        // full unique-char sort (not just consecutive dedup) to handle cases like
+        // "twenny" (t,w,e,n,n,y → unique: entwy) matching "twenty" (t,w,e,n,t,y → unique: entwy)
+        const soupSorted = [...new Set(soup)].sort().join("")
         for (const word of wordsSorted) {
-          const wordSorted = word.replace(/(.)\1+/g, "$1").split("").sort().join("")
-          if (soupSorted === wordSorted) return [NUMBER_WORDS[word], 1]
+          const wordSorted = [...new Set(word)].sort().join("")
+          if (soupSorted === wordSorted) return [NUMBER_WORDS[word], size]
         }
         continue
       }
@@ -332,11 +336,14 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
             const altPattern = pass >= 1 && word.length > 1 && size === 1
               ? new RegExp("^." + word.slice(1).split("").map(charPat).join(""))
               : null
-            const am = !m && altPattern ? soup.slice(pos).match(altPattern) : null
+            // alt pattern only at skip=0: combining skip+alt causes false positives
+            // e.g. "then" → skip 't' → alt-match 'hen' as "ten"
+            const am = !m && altPattern && skip === 0 ? soup.slice(pos).match(altPattern) : null
             // tolerant pattern: allow single inserted char between character groups
             // handles mid-word insertions like "thrirty" → "thirty" (extra 'r' after 'h')
             // only in pass 2
-            const tolPattern = !m && !am && pass >= 2 && word.length > 2
+            // tolerant only for longer words: short words (≤4 chars) like "ten" → "then" false-positive
+            const tolPattern = !m && !am && pass >= 2 && word.length > 4
               ? new RegExp("^" + word.split("").map(charPat).join(".??"))
               : null
             const tm = tolPattern ? soup.slice(pos).match(tolPattern) : null
