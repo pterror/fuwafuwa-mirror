@@ -238,7 +238,8 @@ function solveChallenge(text) {
     if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
   }
   // "multiplied/multiplies by" with obfuscation — must check before 'total' keyword
-  if (soupHas("multiplied") || soupHas("multiplies")) {
+  // also catches "multiplys" soup variant (obfuscated "multiplies" with ie→y substitution)
+  if (soupHas("multiplied") || soupHas("multiplies") || soupHas("multiply")) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }

@@ -256,5 +256,11 @@ check(
   "92.00"
 )
 
+check(
+  "multiplys obfuscation (ie→y): 'MuLtIpLyS By TwO' with total present — 32×2=64, not 32+2=34",
+  "]A Lo.BsT-ErS ClAwW ExErTs^ ThIrTy TwO NooToNs ~ AnD MuLtIpLyS| By TwO- HoW MuCh ToTaL FoR{Ce}?",
+  "64.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
