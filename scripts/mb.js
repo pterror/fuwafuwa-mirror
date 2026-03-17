@@ -188,6 +188,9 @@ function solveChallenge(text) {
     // " - " followed immediately by "and " is a dash-as-separator, not subtraction
     // e.g. "thirty five nootons with one claw - and twenty two newtons" → skip, use total keyword
     if (sym === " - " && right.trimStart().startsWith("and ")) continue
+    // * directly attached to a non-digit letter (e.g. "d*") is obfuscation noise, not multiplication
+    // digit-adjacent * (e.g. "*6") and isolated * (e.g. "newtons] * <") are real operators
+    if (sym === " * " && /[a-zA-Z]\*|\*[a-zA-Z]/.test(text)) continue
     const a = parseNumber(left)
     const b = parseNumber(right)
     if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {

@@ -179,6 +179,12 @@ check(
 )
 
 check(
+  "obfuscated * noise in word (d*): 32 cm/s × 4 newtons = 128 (product, not explicit *)",
+  "A] LoOoBbSsTtEr Um] sW^iMmS[ aT ThIr- tY TwOo] cMeEnT sPeR] sEcOoN d* FoR]cE iS FoOoUr] NeW~tOnS, WhAt] Is ThE PrOdUcT?",
+  "128.00"
+)
+
+check(
   "obfuscated 'multiplied by' with 'total' present: 32 × 2 = 64",
   "A] L oObB sTtEeR- ClA]w F^oR cE iS ThIrTy TwO ] nEeW- T oOnS, MuL tIpLiEd/ By TwO~ WhAt Is ThE ToTaL?",
   "64.00"
