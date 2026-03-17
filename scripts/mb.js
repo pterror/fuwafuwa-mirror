@@ -363,7 +363,9 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
             // also try with first char substituted (handles e.g. "hhree" → "three" where "t" is replaced)
             // only in passes 1+, and only for single-token windows (size === 1):
             // multi-token altPattern causes false positives like "e" + "ne" → "ene" → "one"
-            const altPattern = pass >= 1 && word.length > 1 && size === 1
+            // only for words length > 4: short words (ten/six/one/nine/five/four) have too many
+            // false positives e.g. "cen" (from "centimeters") → "ten" via ^.e+n+
+            const altPattern = pass >= 1 && word.length > 4 && size === 1
               ? new RegExp("^." + word.slice(1).split("").map(charPat).join(""))
               : null
             // alt pattern only at skip=0: combining skip+alt causes false positives
@@ -443,7 +445,12 @@ function extractAllNumbers(text) {
       const [val, size] = match
       if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
       else if (val === 100) { current = (current || 1) * 100 }
-      else { current += val }
+      else {
+        // once units digit is set (e.g. current=27), stop — can't add more units without hundred/thousand
+        // prevents "twenty seven cen(timeters)" from accumulating to 37 via "cen" → "ten"
+        if (found && current % 10 !== 0) break
+        current += val
+      }
       found = true; numPos += size
     }
     if (found) {

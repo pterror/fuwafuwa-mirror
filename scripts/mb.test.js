@@ -274,5 +274,11 @@ check(
   "27.00"
 )
 
+check(
+  "unit fragment 'cen' must not match 'ten': twenty seven + fifteen = 42, not 37+15=52",
+  "A] lO b-StEr SwImS^ lOoOoOobsssTeR-ly Um aT/ tWeNtY sEvEn] ceN.tImE- tErS/ pEr S/eCoNd, Um] dUrInG mOlTtInG iT/ gAiNs^ veLoowiTy yy bY/ fIfTeEn~, hOw/ mUcH iS tHe^ nEw] spEeD?",
+  "42.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
