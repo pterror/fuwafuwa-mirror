@@ -262,5 +262,17 @@ check(
   "64.00"
 )
 
+check(
+  "obfuscated token in left operand: 'fiiv-e' → five, 35 * 2 = 70",
+  "A] lOoB-stErS ClAw] FoR-cE iS tHiR-ty FiiV-e N[eWtOnS * tW/o, hOw MuCh] ToTaL FoR^cE iS tHeRe, uM lo.b st errr looobsssster phyysxics um?",
+  "70.00"
+)
+
+check(
+  "anagram false positive: 'neeo' (from nEeO oT oNs) must not match 'one' — 22+5=27 not 23+5=28",
+  "A] lO b.StErS cL aW fO rCe Is tW eN tYy tW o] nEeO oT oNs~ aNd- AfTeR m O lT iN g iT iN crEaSeS bY- fI vEe, hOw/ mUcH tOt Al- fO rCe^ nOw?",
+  "27.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

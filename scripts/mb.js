@@ -69,8 +69,16 @@ function parseNumber(text) {
   for (let wi = 0; wi < words.length; wi++) {
     const word = words[wi]
     // handle "X point Y" decimal notation (e.g. "four point five" → 4.5)
-    if (word === 'point' && found && wi + 1 < words.length) {
-      const nextVal = NUMBER_WORDS[words[wi + 1]]
+    // also handles obfuscated "point" like "pooiinntt"
+    if (/^p+o+[iy]+n+t+$/.test(word) && found && wi + 1 < words.length) {
+      const nextWord = words[wi + 1]
+      let nextVal = NUMBER_WORDS[nextWord]
+      // also try obfuscated single digit (e.g. "fiive" → 5)
+      if (nextVal === undefined) {
+        for (const [nw, nv] of Object.entries(NUMBER_WORDS)) {
+          if (new RegExp("^" + nw.split("").map(charPat).join("") + "$").test(nextWord)) { nextVal = nv; break }
+        }
+      }
       if (nextVal !== undefined && nextVal >= 0 && nextVal <= 9) {
         current += nextVal / 10
         wi++ // skip next word
@@ -83,6 +91,13 @@ function parseNumber(text) {
     if (val === undefined && prevUnknown !== null) {
       const combined = NUMBER_WORDS[prevUnknown + word]
       if (combined !== undefined) { val = combined; prevUnknown = null }
+    }
+    // obfuscated single-token match: handles duplicate letters like "fiive" → "five"
+    // (exact dict lookup above handles clean tokens; this catches repeated-char variants)
+    if (val === undefined) {
+      for (const [nw, nv] of Object.entries(NUMBER_WORDS)) {
+        if (new RegExp("^" + nw.split("").map(charPat).join("") + "$").test(word)) { val = nv; break }
+      }
     }
     if (val === undefined) { prevUnknown = word; continue }
     prevUnknown = null
@@ -321,7 +336,15 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
         const soupSorted = [...new Set(soup)].sort().join("")
         for (const word of wordsSorted) {
           const wordSorted = [...new Set(word)].sort().join("")
-          if (soupSorted === wordSorted) return [NUMBER_WORDS[word], size]
+          if (soupSorted === wordSorted) {
+            // reject if soup is too long: extra chars must be explainable by repeated chars in word
+            // e.g. "neeo" (4) vs "one" (3, 0 repeats) → diff=1 > 0, reject
+            // e.g. "trheee" (6) vs "three" (5, 1 repeat: e) → diff=1 ≤ 1, accept
+            const repeatsInWord = word.length - [...new Set(word)].length
+            if (Math.abs(soup.length - word.length) <= repeatsInWord) {
+              return [NUMBER_WORDS[word], size]
+            }
+          }
         }
         continue
       }
