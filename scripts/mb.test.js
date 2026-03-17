@@ -250,5 +250,11 @@ check(
   "30.00"
 )
 
+check(
+  "distance = speed × time: 23 m/s for 4 seconds = 92 (regression: was 27 from fallback add)",
+  "A] LoOoBbSsTtEr SwImS^ aT TwEnTy ThReE MeTeRs/PeR SeCoNd] AnD PuShEs\\ FoR FoUr SeCoNdS, HoW MuCh DiStAnCe~DoEs ThE Lo.b-st Err TrAvEl?",
+  "92.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

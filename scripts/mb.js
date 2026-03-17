@@ -259,8 +259,8 @@ function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
   }
-  // "how far" → distance = speed × time (multiply)
-  if (/\bhow\s+far\b/.test(cleaned) || soupHas("howfar")) {
+  // "how far" / "how much distance" → distance = speed × time (multiply)
+  if (/\bhow\s+far\b/.test(cleaned) || soupHas("howfar") || /\bdistance\b/.test(cleaned)) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }
