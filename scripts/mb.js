@@ -378,7 +378,11 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
               : null
             // alt pattern only at skip=0: combining skip+alt causes false positives
             // e.g. "then" → skip 't' → alt-match 'hen' as "ten"
-            const am = !m && altPattern && skip === 0 ? soup.slice(pos).match(altPattern) : null
+            // also require same vowel/consonant class for the substituted first char:
+            // prevents "fight" → "eight" (f=consonant, e=vowel) while allowing "hhree" → "three" (h,t both consonants)
+            const VOWELS = "aeiou"
+            const amRaw = !m && altPattern && skip === 0 ? soup.slice(pos).match(altPattern) : null
+            const am = amRaw && (VOWELS.includes(soup[pos]) === VOWELS.includes(word[0])) ? amRaw : null
             // tolerant pattern: allow single inserted char between character groups
             // handles mid-word insertions like "thrirty" → "thirty" (extra 'r' after 'h')
             // only in pass 2

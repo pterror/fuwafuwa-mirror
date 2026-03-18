@@ -157,6 +157,12 @@ check(
 )
 
 check(
+  "fight must not extract eight: 'dominance fight reduces' — 23-7=16 not 23-8=15",
+  "A] LoOoBbSsT-tEr S^wImS[ iN~ cOoL WaTeR, BuT/ iTs ClAw] FoRcE Is^ TwEnTy ThReE NeWtOnS- AnD{ pReSsUrE/ aNd DoMiNaNcE} FiGhT ReDuCeS It\\ By^ SeVeN NeWtOnS, HoW MaNy NeWtOnS ReMaIn?",
+  "16.00"
+)
+
+check(
   "per strike: rate × count (20 × 3 = 60)",
   "A] LoOoBbSsTtEeR^ ClAaW] ExErRtS~ TwEnTy NeOoOtToOnNs/ PeR| StRrIiKkEe Um, AnDd{ ThRrEe StRrIiKkEs< , WhAaT]S ToTtAaL^ FoRrCcEe?",
   "60.00"
