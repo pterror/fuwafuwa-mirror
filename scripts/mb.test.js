@@ -346,5 +346,11 @@ check(
   "46.00"
 )
 
+check(
+  "two claws × thirty newtons = 60: 'there are two claws' should not parse 'there' as 'three'",
+  "A] LoOoBbSsStTeRr ] cLaWw ] eXxEeRrTtSs ] ThIrTy ] NeWwToOnNs ~ aNd ] thErE ] aRrEe ] TwOo ] cLlAaWwSs, ] hOoW ] mUcH ] tOoTaLl ] fOoRrCe? ]",
+  "60.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

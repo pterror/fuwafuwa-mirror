@@ -294,8 +294,9 @@ function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     // one unit-anchored value (force) + one non-unit count → multiply
     // e.g. "claw exerts 26 newtons, has three claws, total force?" → 26 × 3 = 78
-    // only when count context is present ("has N" or "each") — otherwise treat as two measurements
-    if (unitNums.length === 1 && nums.length === 2 && (soupHas("has") || eachIsRate)) {
+    // e.g. "exerts thirty newtons, there are two claws, total force?" → 30 × 2 = 60
+    // only when count context is present ("has N", "there are N", or "each") — otherwise treat as two measurements
+    if (unitNums.length === 1 && nums.length === 2 && (soupHas("has") || eachIsRate || soupHas("are"))) {
       const count = nums.find(n => Math.abs(n - unitNums[0]) > 0.001)
       if (count !== undefined) return (unitNums[0] * count).toFixed(2)
     }
@@ -348,6 +349,9 @@ const UNIT_PATTERNS = [
 
 // try to match tokens[startIdx..startIdx+size) as a single number value
 // returns [value, tokensConsumed] or null
+// common English non-number words that fuzzy passes might mis-match (e.g. "there" → "three")
+const FUZZY_STOP_WORDS = new Set(["there", "their", "these", "those", "where", "here", "were"])
+
 function matchNumberChunk(tokens, wordsSorted, startIdx) {
   // four-pass approach to prefer exact multi-token matches over fuzzy single-token matches:
   //   pass 0: exact patterns only, no skip (strictest)
@@ -360,6 +364,9 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
     for (let size = 1; size <= Math.min(4, tokens.length - startIdx); size++) {
       const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
       if (!soup) continue
+      // passes 2+ (fuzzy/tolerant/anagram/subst): skip common English words that are not numbers
+      // e.g. "there" → "three" false-positive in tolerant pass
+      if (pass >= 2 && FUZZY_STOP_WORDS.has(soup)) continue
 
       // pass 3: anagram match — handles transposed/substituted chars (e.g. "trhee" = "three")
       // also handles 2-token windows where a bracket/punct split a number word
