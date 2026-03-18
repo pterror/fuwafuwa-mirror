@@ -324,7 +324,7 @@ function solveChallenge(text) {
 
 // unit word patterns (with duplicate-letter tolerance) for force/physics questions
 const UNIT_PATTERNS = [
-  'nootons','newtons','neutons','nooton','newton','neuton','notons','noton',  // force (newtons)
+  'nootons','newtons','neutons','neetons','nooton','newton','neuton','neeton','notons','noton',  // force (newtons)
   'centimeters','centimeter','centimetre','centimetres',                       // distance/velocity
   'meters','meter','metres','metre',
   'kilometers','kilometer','kilometres','kilometre',

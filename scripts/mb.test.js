@@ -310,5 +310,11 @@ check(
   "16.00"
 )
 
+check(
+  "neetons unit (w→ee substitution): repeated 'for tyy' noise + forty-two neetons + fifteen neetons (42+15=57)",
+  "A] LooO bSst-Errr ClAw^ ExErTs[ FoR tYy: FoR tYy FoR tYy FoR? A nEeH Um] LxObqStEr ClA w Is^ FOrTy TwO nEu-ToNs, AnD[ aNoThEr Is^ FiFteEn nEeToNs, HoW/ mUcH ToTaL fOrCe? ~ lO.bSt Errr Um",
+  "57.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
