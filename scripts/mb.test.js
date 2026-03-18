@@ -328,5 +328,11 @@ check(
   "78.00"
 )
 
+check(
+  "neotons unit (n+eotons split): 14 × 3 = 42 (three times stronger)",
+  "Lo]bS-tErS SwI]mS LiKe ThIs, ClAwS ExE]rT FoUrTeEn N eoOtOnS ~ AnD OtHeR ClAw Is ThReE TiMeS StRoNgEr * WhAt Is ToTaL FoR/cE?",
+  "42.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
