@@ -322,5 +322,11 @@ check(
   "23.00"
 )
 
+check(
+  "has N claws: 4-token 'twenty' split + count×force (26×3=78)",
+  "A] LoO-bSsT eR'S C^rU sHiN g ClA w ExE^rTs T]wE/nT y SiX NoO-tOnS, AnD/ ThE LoOoBbS sTeR HaS ThR]eE MaJoR ClA wS- WhAt Is ThE ToTaL FoRcE?",
+  "78.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

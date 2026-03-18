@@ -285,6 +285,12 @@ function solveChallenge(text) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     if (unitNums.length >= 2) return unitNums.reduce((a, b) => a + b, 0).toFixed(2)
     const nums = extractAllNumbers(cleaned)
+    // one unit-anchored value (force) + one non-unit count → multiply
+    // e.g. "claw exerts 26 newtons, has three claws, total force?" → 26 × 3 = 78
+    if (unitNums.length === 1 && nums.length === 2) {
+      const count = nums.find(n => Math.abs(n - unitNums[0]) > 0.001)
+      if (count !== undefined) return (unitNums[0] * count).toFixed(2)
+    }
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
   }
   // "difference" / "water/air resistance" / "slows by" / "reduces" / "decreases" / "subtracts" → subtract
@@ -342,7 +348,7 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
   //   pass 3: anagram match (handles transposed chars like "trhee" = "three")
   // this prevents e.g. "twen" matching "ten" (via alt/tolerant) from beating ["twen","ty"] = "twenty"
   for (let pass = 0; pass <= 3; pass++) {
-    for (let size = 1; size <= Math.min(3, tokens.length - startIdx); size++) {
+    for (let size = 1; size <= Math.min(4, tokens.length - startIdx); size++) {
       const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
       if (!soup) continue
 
