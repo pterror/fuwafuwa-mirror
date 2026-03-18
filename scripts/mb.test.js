@@ -298,5 +298,11 @@ check(
   "55.00"
 )
 
+check(
+  "inter-token 'tw oo' = two: claw expresses thirty-two newtons * two claws = 64",
+  "A] lOoObS-tErR rR cLaW^ eXpReSsEs tHiRtY tW oO nooToOns umm ~ * aNd[ hAs^ tWo cLaWs, wHaT iS tOtAl- FoRcE? lx.Ob{st}er",
+  "64.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

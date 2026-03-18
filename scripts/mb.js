@@ -89,14 +89,27 @@ function parseNumber(text) {
     let val = NUMBER_WORDS[word]
     // inter-token split: obfuscation may insert a space inside a number word (e.g. "twen ty" → "twenty")
     // try concatenating the previous unrecognized token with the current one
+    // also try obfuscated regex match on the combined token (e.g. "tw"+"oo" → "twoo" matches "two" pattern)
     if (val === undefined && prevUnknown !== null) {
-      const combined = NUMBER_WORDS[prevUnknown + word]
+      const combinedStr = prevUnknown + word
+      const combined = NUMBER_WORDS[combinedStr]
       if (combined !== undefined) { val = combined; prevUnknown2 = null; prevUnknown = null }
+      else {
+        for (const [nw, nv] of Object.entries(NUMBER_WORDS)) {
+          if (new RegExp("^" + nw.split("").map(charPat).join("") + "$").test(combinedStr)) { val = nv; prevUnknown2 = null; prevUnknown = null; break }
+        }
+      }
     }
     // 3-token inter-token split: handles intra-word punctuation like "tW/eN tY" → ["tw","en","ty"] = "twenty"
     if (val === undefined && prevUnknown2 !== null && prevUnknown !== null) {
-      const combined3 = NUMBER_WORDS[prevUnknown2 + prevUnknown + word]
+      const combined3Str = prevUnknown2 + prevUnknown + word
+      const combined3 = NUMBER_WORDS[combined3Str]
       if (combined3 !== undefined) { val = combined3; prevUnknown2 = null; prevUnknown = null }
+      else {
+        for (const [nw, nv] of Object.entries(NUMBER_WORDS)) {
+          if (new RegExp("^" + nw.split("").map(charPat).join("") + "$").test(combined3Str)) { val = nv; prevUnknown2 = null; prevUnknown = null; break }
+        }
+      }
     }
     // obfuscated single-token match: handles duplicate letters like "fiive" → "five"
     // (exact dict lookup above handles clean tokens; this catches repeated-char variants)
