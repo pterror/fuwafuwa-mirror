@@ -227,8 +227,15 @@ function solveChallenge(text) {
     // * directly attached to a non-digit letter (e.g. "d*") is obfuscation noise, not multiplication
     // digit-adjacent * (e.g. "*6") and isolated * (e.g. "newtons] * <") are real operators
     if (sym === " * " && /[a-zA-Z]\*|\*[a-zA-Z]/.test(text)) continue
-    const a = parseNumber(left)
-    const b = parseNumber(right)
+    // use tokens nearest to the operator to avoid accumulating numbers from the narrative
+    // e.g. "claw exerts twenty three nootons ... product of twenty three * seven"
+    //      parseNumber(full left) accumulates 23+7+23=53; parsing last ~8 tokens gives 23
+    const leftTokens = left.trim().split(/\s+/)
+    const rightTokens = right.trim().split(/\s+/)
+    const nearLeft = leftTokens.slice(-8).join(" ")
+    const nearRight = rightTokens.slice(0, 8).join(" ")
+    const a = parseNumber(nearLeft)
+    const b = parseNumber(nearRight)
     if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
       return fn(a, b).toFixed(2)
     }

@@ -334,5 +334,11 @@ check(
   "42.00"
 )
 
+check(
+  "product: explicit '* seven' with narrative numbers on left (23*7=161, not 53*7=371)",
+  "A] lOoObSsTeR ClAaW] eX^eRrTs[ tW/eNnTtY tH/rEe NoOoToOnNs~ AnD| aNnOtThHeR ClL^aW eX^eRrTs[ sEvEn, sO^ wHaT Is] tHe/ pRoDdDuUcT oF tWeNnTtY tH/rEe * sEvEn?",
+  "161.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
