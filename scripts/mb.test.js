@@ -340,5 +340,11 @@ check(
   "161.00"
 )
 
+check(
+  "single-char substitution: 'fourleen' → fourteen (l substitutes t), 32+14=46",
+  "A] lO^bSt-Er S[wImS aNd] cLiMps- cLaW] fIgHtS, uM lOoobsssster- cLaW eXerTss- thI r.ty TwO ] nEwToNs^ aNd- tHe OtHeR cLaW- eXerTss- fOuRlEeN, hOw/ mUcH- tOtAl^ fOrCe? {uhh}",
+  "46.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

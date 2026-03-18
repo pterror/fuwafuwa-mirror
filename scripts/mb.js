@@ -294,7 +294,8 @@ function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     // one unit-anchored value (force) + one non-unit count → multiply
     // e.g. "claw exerts 26 newtons, has three claws, total force?" → 26 × 3 = 78
-    if (unitNums.length === 1 && nums.length === 2) {
+    // only when count context is present ("has N" or "each") — otherwise treat as two measurements
+    if (unitNums.length === 1 && nums.length === 2 && (soupHas("has") || eachIsRate)) {
       const count = nums.find(n => Math.abs(n - unitNums[0]) > 0.001)
       if (count !== undefined) return (unitNums[0] * count).toFixed(2)
     }
@@ -353,8 +354,9 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
   //   pass 1: exact + alt patterns, with skip (handles first-char substitution)
   //   pass 2: all patterns including tolerant, with skip (handles mid-word insertions)
   //   pass 3: anagram match (handles transposed chars like "trhee" = "three")
+  //   pass 4: single-char substitution (handles e.g. "fourleen" → "fourteen", l→t)
   // this prevents e.g. "twen" matching "ten" (via alt/tolerant) from beating ["twen","ty"] = "twenty"
-  for (let pass = 0; pass <= 3; pass++) {
+  for (let pass = 0; pass <= 4; pass++) {
     for (let size = 1; size <= Math.min(4, tokens.length - startIdx); size++) {
       const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
       if (!soup) continue
@@ -382,6 +384,31 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
               return [NUMBER_WORDS[word], size]
             }
           }
+        }
+        continue
+      }
+
+      // pass 4: single-char substitution — handles e.g. "fourleen" → "fourteen" (l substitutes t)
+      // requires same vowel/consonant class for the substituted char to avoid false positives
+      // like "fight" → "eight" (f=consonant, e=vowel)
+      if (pass === 4) {
+        if (size > 2) continue
+        const VOWELS = "aeiou"
+        const soupDedup = soup.replace(/(.)\1+/g, "$1")
+        for (const word of wordsSorted) {
+          if (word.length <= 4) continue
+          const wordDedup = word.replace(/(.)\1+/g, "$1")
+          if (soupDedup.length !== wordDedup.length) continue
+          let diffs = 0, ok = true
+          for (let i = 0; i < soupDedup.length; i++) {
+            const sc = soupDedup[i], wc = wordDedup[i]
+            if (!new RegExp(`^${charPat(wc)}$`).test(sc)) {
+              if (VOWELS.includes(sc) !== VOWELS.includes(wc)) { ok = false; break }
+              diffs++
+              if (diffs > 1) { ok = false; break }
+            }
+          }
+          if (ok && diffs === 1) return [NUMBER_WORDS[word], size]
         }
         continue
       }
