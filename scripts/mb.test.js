@@ -304,5 +304,11 @@ check(
   "64.00"
 )
 
+check(
+  "resists by: exerts twenty three notons, resists by seven notons — net force (23-7=16)",
+  "ThIs] LoOoObSsT-ErR^ 'S ClAw] ExErTs/ TwEnTy ThReE NoOoToNs, AnD ReSiStS By^ SeVeN NoOoToNs\u2014 WhAt Is NeT FoRcE?",
+  "16.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
