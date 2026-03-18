@@ -197,6 +197,12 @@ check(
 )
 
 check(
+  "'and - speeds up': dash after 'and' is separator, not subtraction (23+7=30)",
+  "A} LoBoSsTtEr ] sW^iMmS { aT < tWeNtY ThReE > mEteRsPeR sEcOnD ~ aNd - sPeEeDdS / uP | bY { sEvEn } , wHaT } iS < tHe > nEw } vElAwCiTy ? ummmm",
+  "30.00"
+)
+
+check(
   "dash-as-separator before 'and': 35+22=57, not subtraction (regression: was 14.00)",
   "A] lO-bStEr Ex^ErTs ThIrTy FiVe NooOtOnS (nOoToNs) WiTh Um OnE ClAw - AnD TwEnTy TwO NeWtOnS OtHeR ClAw ~ WhAt Is ThE ToTaL FoR cE?",
   "57.00"

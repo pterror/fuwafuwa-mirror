@@ -203,6 +203,8 @@ function solveChallenge(text) {
     // " - " followed immediately by "and " is a dash-as-separator, not subtraction
     // e.g. "thirty five nootons with one claw - and twenty two newtons" → skip, use total keyword
     if (sym === " - " && right.trimStart().startsWith("and ")) continue
+    // "X and - Y" pattern: dash after conjunction "and" is a separator, not subtraction
+    if (sym === " - " && left.trimEnd().endsWith(" and")) continue
     // * directly attached to a non-digit letter (e.g. "d*") is obfuscation noise, not multiplication
     // digit-adjacent * (e.g. "*6") and isolated * (e.g. "newtons] * <") are real operators
     if (sym === " * " && /[a-zA-Z]\*|\*[a-zA-Z]/.test(text)) continue
