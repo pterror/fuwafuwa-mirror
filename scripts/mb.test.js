@@ -286,5 +286,11 @@ check(
   "42.00"
 )
 
+check(
+  "3-token split via intra-word slash: 'tW/eN tY' = twenty, thirty + twenty-five = 55",
+  "A] lOoObSsT-eR S^wImS hUm Um mMm AnD lIfTs LoOooBSt Er ClAw WiTh ThIrTy ]nEu-TonS + tW/eN tY fIvE ]nEu-TonS, HoW/ mUcH ToTaL FoR^cE iN tHeClAwS?",
+  "55.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

@@ -65,7 +65,8 @@ function parseNumber(text) {
   // strip hyphens first so obfuscated "eig-ht" becomes "eight" rather than "eig" + "ht"
   const words = trimmed.toLowerCase().replace(/-/g, "").replace(/[^a-z\s]/g, " ").split(/\s+/).filter(Boolean)
   let total = 0, current = 0, found = false
-  let prevUnknown = null  // last unrecognized word, for inter-token split detection
+  let prevUnknown = null   // last unrecognized word, for inter-token split detection
+  let prevUnknown2 = null  // second-to-last unrecognized word, for 3-token splits (e.g. "tw en ty")
   for (let wi = 0; wi < words.length; wi++) {
     const word = words[wi]
     // handle "X point Y" decimal notation (e.g. "four point five" → 4.5)
@@ -90,7 +91,12 @@ function parseNumber(text) {
     // try concatenating the previous unrecognized token with the current one
     if (val === undefined && prevUnknown !== null) {
       const combined = NUMBER_WORDS[prevUnknown + word]
-      if (combined !== undefined) { val = combined; prevUnknown = null }
+      if (combined !== undefined) { val = combined; prevUnknown2 = null; prevUnknown = null }
+    }
+    // 3-token inter-token split: handles intra-word punctuation like "tW/eN tY" → ["tw","en","ty"] = "twenty"
+    if (val === undefined && prevUnknown2 !== null && prevUnknown !== null) {
+      const combined3 = NUMBER_WORDS[prevUnknown2 + prevUnknown + word]
+      if (combined3 !== undefined) { val = combined3; prevUnknown2 = null; prevUnknown = null }
     }
     // obfuscated single-token match: handles duplicate letters like "fiive" → "five"
     // (exact dict lookup above handles clean tokens; this catches repeated-char variants)
@@ -99,8 +105,8 @@ function parseNumber(text) {
         if (new RegExp("^" + nw.split("").map(charPat).join("") + "$").test(word)) { val = nv; break }
       }
     }
-    if (val === undefined) { prevUnknown = word; continue }
-    prevUnknown = null
+    if (val === undefined) { prevUnknown2 = prevUnknown; prevUnknown = word; continue }
+    prevUnknown2 = null; prevUnknown = null
     found = true
     if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
     else if (val === 100) { current = (current || 1) * 100 }
