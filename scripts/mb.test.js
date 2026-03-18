@@ -316,5 +316,11 @@ check(
   "57.00"
 )
 
+check(
+  "net force: split 'ThIrT y FiV e' - TwElVe = 23",
+  "A] LoB-sTeR ClAw^ FoRcE Is] ThIrT y FiV e NooToNs~ AnD An] AnTeNn A ToU cH- SuB tRaCts^ TwElVe< NeWToNs, WhAt| Is} ThE/ NeT- FoRcE?",
+  "23.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

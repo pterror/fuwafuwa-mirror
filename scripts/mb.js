@@ -287,12 +287,12 @@ function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
   }
-  // "difference" / "water/air resistance" / "slows by" / "reduces" / "decreases" → subtract
+  // "difference" / "water/air resistance" / "slows by" / "reduces" / "decreases" / "subtracts" → subtract
   // soup-based match handles obfuscation that splits words (e.g. "SlO^wS" → "slo ws")
   if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)
       || /waterresistance|airresistance/.test(soup)
-      || /slows?|reduces?|decreases?|loses?|loss|resists?/.test(soup)
-      || soupHas("remaining") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("decreases") || soupHas("resists")) {
+      || /slows?|reduces?|decreases?|loses?|loss|resists?|subtracts?/.test(soup)
+      || soupHas("remaining") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("decreases") || soupHas("resists") || soupHas("subtracts")) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
   }
@@ -356,6 +356,9 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
         // "twenny" (t,w,e,n,n,y → unique: entwy) matching "twenty" (t,w,e,n,t,y → unique: entwy)
         const soupSorted = [...new Set(soup)].sort().join("")
         for (const word of wordsSorted) {
+          // skip short words (≤4 chars) — they have too many anagram false positives
+          // e.g. "net" is an anagram of "ten", "won" of "own", etc.
+          if (word.length <= 4) continue
           const wordSorted = [...new Set(word)].sort().join("")
           if (soupSorted === wordSorted) {
             // reject if soup is too long: extra chars must be explainable by repeated chars in word
@@ -381,6 +384,10 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
           for (const word of wordsSorted) {
             const pattern = new RegExp("^" + word.split("").map(charPat).join(""))
             const m = soup.slice(pos).match(pattern)
+            // skip short words (≤4 chars) when using prefix-skip (skip > 0):
+            // prevents false positives like "antenn" → skip "an" → "tenn" = "ten"
+            // short words need no skip since their obfuscated forms are short tokens anyway
+            if (skip > 0 && word.length <= 4) continue
             // also try with first char substituted (handles e.g. "hhree" → "three" where "t" is replaced)
             // only in passes 1+, and only for single-token windows (size === 1):
             // multi-token altPattern causes false positives like "e" + "ne" → "ene" → "one"
