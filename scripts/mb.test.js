@@ -353,6 +353,12 @@ check(
 )
 
 check(
+  "six embedded in 'physical' (PhY sIx Ix Al) should not count as a number: 25+3=28",
+  "A] lO b-S tEr'S ClA w- ExE rT s TwEn Ty FiV e + ThRe E, Um] lO oObSstTeR PhY sIx Ix Al ReAcTs ToOo NoOtOnS, hOw] mUcH ToTa L fO rCe^?",
+  "28.00"
+)
+
+check(
   "two garbage tokens between tens and units: 'twenty ghh treee] three' = 23, 23+7=30",
   "A] LoObBsTsTeEr ^sWImS lOoOoOoN gGg,, uMm ]cLaW fOrCeE sHaReS/ tHe^ mOoTlInG- bOdY, Lo.b St Errr ]ClAw ExErTs^ tWeNtY gHh TrEeE] ThReE- nEeW^tOnS, aNd] tHe/ oPpOsInG- pInCeR aPpLlIiEs^ sEvEn- nEeW^tOnS, wHaT] iS^ tHe/ rEsUlTaNt- fOrCeE iF tHeY aDd?",
   "30.00"

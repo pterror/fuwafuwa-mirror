@@ -67,6 +67,7 @@ function parseNumber(text) {
   let total = 0, current = 0, found = false
   let prevUnknown = null   // last unrecognized word, for inter-token split detection
   let prevUnknown2 = null  // second-to-last unrecognized word, for 3-token splits (e.g. "tw en ty")
+  let gapCount = 0         // consecutive unknowns after finding a number; stop if too many (different clause)
   for (let wi = 0; wi < words.length; wi++) {
     const word = words[wi]
     // handle "X point Y" decimal notation (e.g. "four point five" → 4.5)
@@ -118,8 +119,13 @@ function parseNumber(text) {
         if (new RegExp("^" + nw.split("").map(charPat).join("") + "$").test(word)) { val = nv; break }
       }
     }
-    if (val === undefined) { prevUnknown2 = prevUnknown; prevUnknown = word; continue }
+    if (val === undefined) {
+      prevUnknown2 = prevUnknown; prevUnknown = word
+      if (found) { gapCount++; if (gapCount >= 4) break }
+      continue
+    }
     prevUnknown2 = null; prevUnknown = null
+    gapCount = 0
     found = true
     if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
     else if (val === 100) { current = (current || 1) * 100 }
