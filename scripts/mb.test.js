@@ -381,5 +381,17 @@ check(
   "161.00"
 )
 
+check(
+  "reducing speed by fourteen: doubled-letter obfuscation hides 'reduc' — 32-14=18",
+  "A] lOoObBsStTeEr^ sW/iMmS] aT tHhIrRtTyY tW]oO cMmEeTtEeRss^ pEeR sEeCcOoNnDd, aNd/ cOoLlLiIdDeEs] wItH aNoOtThHeEr~ rEeDdDuUcCiInNg^ sPpEeEeDd bY fOuUrR tEeEeEnN, wHaT] iSs^ tHhEe~ nEeW/ sPpEeEeDd?",
+  "18.00"
+)
+
+check(
+  "structural 'one claw' must not pollute subtraction: 35 nootons - 12 newtons = 23 (not 35-1=34)",
+  "A] lOoObSt-Er ExErTs ThIrTy FiVe NooToNs ~wItH OnE ClAw -BuT Lo.sEs TwElVe NeWToNs /DuRiNg MoLtiNg, WhAt Is ReMaInInG FoRcE?",
+  "23.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

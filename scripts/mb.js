@@ -326,7 +326,9 @@ if (unitNums.length === 1 && nums.length === 2) {
   if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)
       || /waterresistance|airresistance/.test(soup)
       || /slows?|reduces?|decreases?|loses?|loss|resists?|subtracts?/.test(soup)
-      || soupHas("remaining") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("decreases") || soupHas("resists") || soupHas("subtracts")) {
+      || soupHas("remaining") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("reducing") || soupHas("decreases") || soupHas("resists") || soupHas("subtracts")) {
+    const unitNums = extractNumbersPrecedingUnits(cleaned)
+    if (unitNums.length === 2) return Math.abs(unitNums[0] - unitNums[1]).toFixed(2)
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
   }
@@ -380,6 +382,7 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
   //   pass 4: single-char substitution (handles e.g. "fourleen" → "fourteen", l→t)
   // this prevents e.g. "twen" matching "ten" (via alt/tolerant) from beating ["twen","ty"] = "twenty"
   for (let pass = 0; pass <= 4; pass++) {
+    let bestMatch = null
     for (let size = 1; size <= Math.min(4, tokens.length - startIdx); size++) {
       const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
       if (!soup) continue
@@ -490,9 +493,18 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
           }
           if (!wordMatched) break
         }
-        if (found && pos === soup.length) return [total + current, size]
+        if (found && pos === soup.length) {
+          const candidate = [total + current, size]
+          // prefer higher value (e.g. "fouurr"+"teeeeenn"=14 over "fouurr"=4)
+          // same value: prefer smaller size to avoid consuming extra tokens (e.g. "fourteen"+"n" → keep size=1)
+          if (bestMatch === null || candidate[0] > bestMatch[0] || (candidate[0] === bestMatch[0] && candidate[1] < bestMatch[1])) {
+            bestMatch = candidate
+          }
+          break  // stop trying more skips for this size; continue to next size
+        }
       }
     }
+    if (bestMatch !== null) return bestMatch
   }
   return null
 }
