@@ -352,5 +352,11 @@ check(
   "60.00"
 )
 
+check(
+  "two garbage tokens between tens and units: 'twenty ghh treee] three' = 23, 23+7=30",
+  "A] LoObBsTsTeEr ^sWImS lOoOoOoN gGg,, uMm ]cLaW fOrCeE sHaReS/ tHe^ mOoTlInG- bOdY, Lo.b St Errr ]ClAw ExErTs^ tWeNtY gHh TrEeE] ThReE- nEeW^tOnS, aNd] tHe/ oPpOsInG- pInCeR aPpLlIiEs^ sEvEn- nEeW^tOnS, wHaT] iS^ tHe/ rEsUlTaNt- fOrCeE iF tHeY aDd?",
+  "30.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

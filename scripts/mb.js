@@ -509,14 +509,18 @@ function extractAllNumbers(text) {
     while (numPos < tokens.length) {
       let match = matchNumberChunk(tokens, wordsSorted, numPos)
       if (match === null) {
-        // allow skipping one garbage token when building a compound number (e.g. "twenty [g] three")
+        // allow skipping up to two garbage tokens when building a compound number (e.g. "twenty [g] three")
         // only when we have a clean tens partial (20/30/.../90) and the next token is a smaller units value
         // this handles first-char-substituted single-char tokens like "G" in "tW/eNnTy G hHrEe"
-        if (found && current > 0 && current % 10 === 0 && current < 100 && numPos + 1 < tokens.length) {
-          const nextMatch = matchNumberChunk(tokens, wordsSorted, numPos + 1)
-          if (nextMatch !== null && nextMatch[0] > 0 && nextMatch[0] < current) {
-            numPos++ // skip the single garbage token
-            match = nextMatch
+        // also handles cases like "twenty ghh treee] three" where two tokens separate tens and units
+        if (found && current > 0 && current % 10 === 0 && current < 100) {
+          for (let skip = 1; skip <= 2 && numPos + skip < tokens.length; skip++) {
+            const nextMatch = matchNumberChunk(tokens, wordsSorted, numPos + skip)
+            if (nextMatch !== null && nextMatch[0] > 0 && nextMatch[0] < current) {
+              numPos += skip // skip garbage token(s)
+              match = nextMatch
+              break
+            }
           }
         }
         if (match === null) break
