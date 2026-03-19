@@ -302,7 +302,8 @@ function solveChallenge(text) {
     // e.g. "claw exerts 26 newtons, has three claws, total force?" → 26 × 3 = 78
     // e.g. "exerts thirty newtons, there are two claws, total force?" → 30 × 2 = 60
     // only when count context is present ("has N", "there are N", or "each") — otherwise treat as two measurements
-    if (unitNums.length === 1 && nums.length === 2 && (soupHas("has") || eachIsRate || soupHas("are"))) {
+    // "other" signals same unit type (e.g. "the other claw has twelve [newtons]") — don't multiply
+    if (unitNums.length === 1 && nums.length === 2 && !soupHas("other") && (soupHas("has") || eachIsRate || soupHas("are"))) {
       const count = nums.find(n => Math.abs(n - unitNums[0]) > 0.001)
       if (count !== undefined) return (unitNums[0] * count).toFixed(2)
     }

@@ -92,6 +92,11 @@ check(
   "42.00"
 )
 check(
+  "total force: other claw has N (no unit) → add not multiply (33+12)",
+  "A] LoB- StEr^ ClA w| FoR ce~ In^ A DoMmInAnCe F i.gH t, ThE* ClA w HoLdS tHiR ty] ThReE{ NeW tOnS- AnD/ ThE oThEr ClA w HaS TwElvE<, ToTaL] FoR ce+?",
+  "45.00"
+)
+check(
   "total force: one claw plus another adds (34+6)",
   "A] LoOobBsTtEr ] ClLaAwW^ FoOrRcEe- OfF ] ThHiIrRtTyY { FoOuUrR ] NeEwWtToOnNs ~ aNdD ] ThHeE ] OtThHeErR ] ClLaAwW / AdDdSs ] SiIxX ] NeEwWtToOnNs, ] WhHaAtT ] IiSs ] ToOtTaAlL } FoOrRcEe < ?",
   "40.00"
