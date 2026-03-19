@@ -375,5 +375,11 @@ check(
   "75.00"
 )
 
+check(
+  "simultaneous pushes: 23 notons × 7 pushes = 161 (dash-as-separator before 'in')",
+  "A] lOoObBsStTeRr ] eX^eRrTs [ a] cL^aW fOoRrCcE } oF/ tW]eNnTtY ThRrEe } nOoOtoOnSs ~ aNd [ iT } eN gAaGgEeSs - iN ] sEeVvEeN / sImU lTaNeEeOus ] pUuSsHhEs < hOw/ mUcH } tOoTaLl ] fOoRrCcE*",
+  "161.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

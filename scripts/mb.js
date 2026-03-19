@@ -230,6 +230,8 @@ function solveChallenge(text) {
     if (sym === " - " && right.trimStart().startsWith("and ")) continue
     // "X and - Y" pattern: dash after conjunction "and" is a separator, not subtraction
     if (sym === " - " && left.trimEnd().endsWith(" and")) continue
+    // " - in/into" pattern: preposition follows dash, indicating a separator (e.g. "engages - in seven pushes")
+    if (sym === " - " && /^(in|into)\b/.test(right.trimStart())) continue
     // * directly attached to a non-digit letter (e.g. "d*") is obfuscation noise, not multiplication
     // digit-adjacent * (e.g. "*6") and isolated * (e.g. "newtons] * <") are real operators
     if (sym === " * " && /[a-zA-Z]\*|\*[a-zA-Z]/.test(text)) continue
@@ -262,6 +264,16 @@ function solveChallenge(text) {
       const nums = extractAllNumbers(cleaned)
       if (nums.length === 1) return (nums[0] * mult).toFixed(2)
     }
+  }
+  // "N simultaneous [actions]" → force × count (e.g. "force of 23 notons, seven simultaneous pushes, total force?")
+  if (soupHas("simultaneous")) {
+    const unitNums = extractNumbersPrecedingUnits(cleaned)
+    const nums = extractAllNumbers(cleaned)
+if (unitNums.length === 1 && nums.length === 2) {
+      const count = nums.find(n => Math.abs(n - unitNums[0]) > 0.001)
+      if (count !== undefined) return (unitNums[0] * count).toFixed(2)
+    }
+    if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
   }
   // "N times" as trailing multiplier (e.g. "gains three times") — must check before 'total' keyword
   // handles "exerts X notons and gains N times" → X * N
@@ -393,8 +405,10 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
             // reject if soup is too long: extra chars must be explainable by repeated chars in word
             // e.g. "neeo" (4) vs "one" (3, 0 repeats) → diff=1 > 0, reject
             // e.g. "trheee" (6) vs "three" (5, 1 repeat: e) → diff=1 ≤ 1, accept
+            // also reject if soup is too SHORT relative to the word (prevents e.g. "iten" matching "nineteen")
+            // e.g. "iten" (4) vs "nineteen" (8): 4*2=8 is NOT > 8, reject
             const repeatsInWord = word.length - [...new Set(word)].length
-            if (Math.abs(soup.length - word.length) <= repeatsInWord) {
+            if (Math.abs(soup.length - word.length) <= repeatsInWord && soup.length * 2 > word.length) {
               return [NUMBER_WORDS[word], size]
             }
           }
