@@ -399,5 +399,11 @@ check(
   "19.00"
 )
 
+check(
+  "foldly multiplication: 23 * 7 = 161",
+  "A] lObSt-ErS^ ClAw[s ExErTs/ tWeNtY ThReE^ nEu-RoNs , aNd~ ItS SwImMiNg{ InCrEaSeS* sEvEn }fOoLdLy - wHaT] Is^ ToTaL* FoRcE?",
+  "161.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

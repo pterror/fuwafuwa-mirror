@@ -288,6 +288,11 @@ if (unitNums.length === 1 && nums.length === 2) {
       }
     }
   }
+  // "increases N foldly" / "N fold" → multiply (e.g. "swimming increases seven foldly" → base × 7)
+  if (soupHas("fold") || soupHas("foldly")) {
+    const nums = extractAllNumbers(cleaned)
+    if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
+  }
   // "X per [action], N [action]s, total" → rate × count (e.g. "twenty neotons per strike, three strikes")
   // must check before total keyword (which would otherwise add)
   // exclude "per second/minute/hour/meter" — those are unit rates, not operational "per"
