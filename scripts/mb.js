@@ -325,7 +325,7 @@ if (unitNums.length === 1 && nums.length === 2) {
   // soup-based match handles obfuscation that splits words (e.g. "SlO^wS" → "slo ws")
   if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)
       || /waterresistance|airresistance/.test(soup)
-      || /slows?|reduces?|decreases?|loses?|loss|resists?|subtracts?/.test(soup)
+      || /slows?|reduces?|decreases?|decelerats?|loses?|loss|resists?|subtracts?/.test(soup)
       || soupHas("remaining") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("reducing") || soupHas("decreases") || soupHas("resists") || soupHas("subtracts")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     if (unitNums.length === 2) return Math.abs(unitNums[0] - unitNums[1]).toFixed(2)

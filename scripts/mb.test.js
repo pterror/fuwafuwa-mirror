@@ -393,5 +393,11 @@ check(
   "23.00"
 )
 
+check(
+  "decelerate by four: 23-4=19",
+  "A] lOoOoBbSsStTeEr S^wImMs [aT vElAwCiTeE iIs tWeNtY tHrEe cMeNtIiMeTeRs PeR sEcOnD, uMm, lo.b st err BuMpS iT - aNd DeCeLeRaTeS bY fOuR cMeNtS / sEc, wHaT iS tHe NeW sPeEd?",
+  "19.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
