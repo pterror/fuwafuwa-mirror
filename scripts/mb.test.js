@@ -369,5 +369,11 @@ check(
   "30.00"
 )
 
+check(
+  "obfuscated 'tiimes' in 'strikes three tiimes': 25 × 3 = 75",
+  "A] LoObBsStTeR] cLaW^ ApPlIeS/ tWeNtY fIvE ] nOoOtOnS ~ aNd- It/ sTrIiKeS \\ tHrEe { TiImEs, } WhAt'S < ThE/ ToTaL^ ImPuLsE?",
+  "75.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

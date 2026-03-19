@@ -266,7 +266,7 @@ function solveChallenge(text) {
   // "N times" as trailing multiplier (e.g. "gains three times") — must check before 'total' keyword
   // handles "exerts X notons and gains N times" → X * N
   {
-    const timesMatch = cleaned.match(/\b(\w+)\s+times\b/)
+    const timesMatch = cleaned.match(/\b(\w+)\s+(t+i+m+e+s+)\b/)
     if (timesMatch) {
       const multiplier = parseNumber(timesMatch[1])
       if (!isNaN(multiplier) && multiplier >= 2 && multiplier <= 1000) {
