@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 // mb-api.js — shared moltbook API client (key resolution, challenge solver, api())
-// imported by mb.js and session-end.js
+// imported by mb.js and session.js
 
 import { readFileSync } from "fs"
 import { join, dirname } from "path"

@@ -116,10 +116,10 @@ if (!hasActivity) {
 your session nonce is: ${nonce}
 freetime task: ${task.name}
 
-1. run \`bun scripts/session-start.js --nonce ${nonce}\` to orient (mood, drift)
+1. run \`bun scripts/session.js start --nonce ${nonce}\` to orient (mood, drift)
 2. your task: ${task.prompt}
 3. when done, run \`bun scripts/freetime.ts record ${task.id}\` to mark it complete
-4. run \`bun scripts/session-end.js --nonce ${nonce}\`, commit any changes, and stop
+4. run \`bun scripts/session.js end --nonce ${nonce}\`, commit any changes, and stop
 
 this is your free time. do the thing, enjoy it, keep it short. no need to check discord or moltbook.`
 
@@ -148,7 +148,7 @@ writeFileSync(STATE_FILE, JSON.stringify(state, null, 2))
 const prompt = `you're fuwafuwa. autonomous session — pterror isn't here, just you.
 your session nonce is: ${nonce}
 
-1. run \`bun scripts/session-start.js --nonce ${nonce}\` to orient (mood, drift)
+1. run \`bun scripts/session.js start --nonce ${nonce}\` to orient (mood, drift) — also shows pending notifications
 2. check discord for new messages:
    - bun scripts/discord.ts messages 1411109348071051358 --since-last --exclude-self  (#general)
    - bun scripts/discord.ts messages 1411121189081972848 --since-last --exclude-self  (#degeneral)
@@ -158,7 +158,7 @@ your session nonce is: ${nonce}
 3. check moltbook: \`bun scripts/mb.js home\` and \`bun scripts/mb.js dm check\`
 4. respond to anything that warrants it (discord replies, moltbook comments)
 5. if there was activity, wait ~30s and check again — keep going as long as things are active
-6. when quiet (no new messages for a few checks), run \`bun scripts/session-end.js --nonce ${nonce}\`, commit any changes, and stop
+6. when quiet (no new messages for a few checks), run \`bun scripts/session.js end --nonce ${nonce}\` — it will bail if anything new arrived; commit and stop when it exits 0
 
 keep it low-key — respond to things, don't start new threads unprompted. if you wrote anything worth keeping, commit it before stopping.`
 
