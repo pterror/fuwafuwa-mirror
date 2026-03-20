@@ -277,6 +277,7 @@ if (unitNums.length === 1 && nums.length === 2) {
   }
   // "N times" as trailing multiplier (e.g. "gains three times") — must check before 'total' keyword
   // handles "exerts X notons and gains N times" → X * N
+  // also handles "X [unit] times Y" (e.g. "twenty three newtons times seven") → X * Y
   {
     const timesMatch = cleaned.match(/\b(\w+)\s+(t+i+m+e+s+)\b/)
     if (timesMatch) {
@@ -285,6 +286,17 @@ if (unitNums.length === 1 && nums.length === 2) {
         const unitNums = extractNumbersPrecedingUnits(cleaned)
         const baseNums = unitNums.filter(n => n !== multiplier)
         if (baseNums.length === 1) return (baseNums[0] * multiplier).toFixed(2)
+      }
+      // fallback: word before "times" is a unit word, not a number (e.g. "newtons times seven")
+      // try the number AFTER "times" as the multiplier, and unit-anchored number as the base
+      const timesEnd = cleaned.indexOf(timesMatch[0]) + timesMatch[0].length
+      const afterTimes = cleaned.slice(timesEnd).trim().split(/\s+/).slice(0, 8).join(" ")
+      const afterNum = parseNumber(afterTimes)
+      if (!isNaN(afterNum) && afterNum >= 1) {
+        const unitNums = extractNumbersPrecedingUnits(cleaned)
+        if (unitNums.length >= 1) return (unitNums[0] * afterNum).toFixed(2)
+        const allNums = extractAllNumbers(cleaned).filter(n => Math.abs(n - afterNum) > 0.001)
+        if (allNums.length >= 1) return (allNums[0] * afterNum).toFixed(2)
       }
     }
   }

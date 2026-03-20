@@ -405,5 +405,11 @@ check(
   "161.00"
 )
 
+check(
+  "obfuscated 'times' with unit between number and operator: 23 * 7 = 161",
+  "Lo.oBbSsTeErS] lOoOobbsstteerr ClA#w] fO^rCe Is ThWeN]tY ThReE* NoOoToOnS~ TiMmEs SeV]eN, HoW MuCh T oT/aL F'oR|cE? umm lxq",
+  "161.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
