@@ -3,10 +3,14 @@
 //
 // flags:
 //   --nonce <value>   only releases the lockfile if it belongs to this nonce
+//
+// checks for unread moltbook notifications before closing — if any exist, prints them
+// and exits non-zero so the session can handle them first. call again when clear.
 
 import { readFileSync, writeFileSync } from "fs"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
+import { api } from "./mb-api.js"
 
 const argv = process.argv.slice(2)
 const nonceIdx = argv.indexOf("--nonce")
@@ -56,6 +60,24 @@ if (existsSync(lockPath)) {
   } else {
     unlinkSync(lockPath)
   }
+}
+
+// — check for unread notifications before closing —
+try {
+  const data = await api("GET", "/notifications")
+  const ns = (data.notifications ?? []).filter(n => n.isRead === false)
+  if (ns.length > 0) {
+    console.log(`[session-end] ${ns.length} unread notification(s) — handle these before closing:`)
+    for (const n of ns) {
+      const detail = n.summary ?? n.post_title ?? n.post_id ?? n.type ?? JSON.stringify(n)
+      console.log(`  - [${n.type ?? "?"}] ${detail}`)
+    }
+    process.exit(1)
+  }
+  await api("POST", "/notifications/read-all")
+  console.log(`[session-end] notifications clear`)
+} catch (e) {
+  console.warn(`[session-end] notification check failed: ${e.message}`)
 }
 
 const duration = hours < 1 ? `${Math.round(hours * 60)}m` : `${hours.toFixed(1)}h`
