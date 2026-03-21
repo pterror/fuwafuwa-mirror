@@ -418,6 +418,12 @@ check(
 )
 
 check(
+  "energy transferred: end-of-word asterisk as operator (32 * 14 = 448)",
+  "A] Lo.bStEr~ SwImS^ In/ cOoL| wAtEr, AnD lOoObsssster~ HaS^ ClAw~ FoRcE| Of< tHiRrTy Y tW[o NeWtOnS* fOuRrTeEeN NeWtOnS, HoW/ MuCh~ EnErGy Is TrAnSfErReD?",
+  "448.00"
+)
+
+check(
   "dominance multiplier: claw force × multiplier (23 × 4 = 92)",
   "A] lOoObB.sSsT-ErS] cL^-aW F{oRcE iS TwEnTy ThReE ]nEu- ToNs, \\/ dOmInAnCe MuLtIpLiEr Is FoUr <HoW MuCh ToTaL F[oRcE?",
   "92.00"

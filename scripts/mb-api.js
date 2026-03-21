@@ -339,8 +339,8 @@ export function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }
-  // "impulse" → force × time (multiply)
-  if (soupHas("impulse")) {
+  // "impulse" / "energy" → force × time or force × distance (multiply)
+  if (soupHas("impulse") || soupHas("energy")) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }
