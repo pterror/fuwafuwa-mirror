@@ -435,5 +435,11 @@ check(
   "30.00"
 )
 
+check(
+  "product keyword split by space: 'pRoDuC t' — 33 cm/s × 9 newtons = 297 (was 42 from fallback add)",
+  "A] lO-bS tEr sW/iMmS {wItH} vE lAwCiTeE umm, tHiR tY ThReE] cEnTeMmS pEr] sE cOnD ~ aNd| iTs ClAw} eXeR tS nInE^ nE wToNs * wHaT{ iS} tHe} pRoDuC t??",
+  "297.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

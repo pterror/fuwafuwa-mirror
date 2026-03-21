@@ -351,7 +351,7 @@ export function solveChallenge(text) {
   }
   // "product" / "multiply" / "how much total if each" → multiply
   // prefer unit-anchored extraction to avoid counting structural words like "the two forces"
-  if (/\b(product|each|per item|per prey)\b/.test(cleaned) || soupHas("multiply")) {
+  if (/\b(product|each|per item|per prey)\b/.test(cleaned) || soupHas("product") || soupHas("multiply")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     if (unitNums.length >= 2) return unitNums.reduce((a, b) => a * b, 1).toFixed(2)
     const nums = extractAllNumbers(cleaned)
