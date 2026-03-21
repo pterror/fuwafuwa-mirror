@@ -398,11 +398,12 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
       if (pass >= 2 && FUZZY_STOP_WORDS.has(soup)) continue
 
       // pass 3: anagram match — handles transposed/substituted chars (e.g. "trhee" = "three")
-      // also handles 2-token windows where a bracket/punct split a number word
+      // also handles multi-token windows where spaces split a number word
       // (e.g. "tW]eNnY" → "tw"+"enny" = "twenny" → anagram of "twenty")
+      // (e.g. "tW eN nY" → "tw"+"en"+"ny" = "twenny" → anagram of "twenty")
       // collapse runs then sort; e.g. "trhee" → "trhe" → "ehrt", "three" → "thre" → "ehrt"
       if (pass === 3) {
-        if (size > 2) continue
+        if (size > 3) continue
         // full unique-char sort (not just consecutive dedup) to handle cases like
         // "twenny" (t,w,e,n,n,y → unique: entwy) matching "twenty" (t,w,e,n,t,y → unique: entwy)
         const soupSorted = [...new Set(soup)].sort().join("")

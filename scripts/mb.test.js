@@ -429,5 +429,11 @@ check(
   "92.00"
 )
 
+check(
+  "accelerates by seven: 'tW eN nY tH rEe' = twenty-three, 'eN eW' noise in question (23+7=30)",
+  "A] lO- bS tEr ] lOoOo bSsT eRrR sW/ iMmS aT tW eN nY tH rEe ^ cE m/ eNt I mEe rS ] pE rS eC oN d aNd- aC cE lE rA tEs ] bY sE vE n~, uM wH/ aT iS ] tH eN eW- vE lO cI tY?",
+  "30.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
