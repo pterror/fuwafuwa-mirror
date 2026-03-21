@@ -8,6 +8,7 @@ import { readdirSync, readFileSync, statSync, readlinkSync } from "fs"
 import { join } from "path"
 
 const PROJECTS_DIR = "/home/me/.claude/projects/"
+const TMP_DIR = "/tmp/claude-1000/"
 const GIT_ROOT = "/home/me/git/"
 
 interface ActiveSession {
@@ -16,8 +17,8 @@ interface ActiveSession {
   projectPath: string | null
   lastJsonl: string | null
   lastWrite: Date | null
-  isZombie: boolean
-  status: string
+  statusType: "ACTIVE" | "IDLE" | "ZOMBIE"
+  statusMessage: string
   subagents: SubAgentStatus[]
 }
 
@@ -26,6 +27,13 @@ interface SubAgentStatus {
   lastWrite: Date
   status: string
   path: string
+}
+
+interface BackgroundTask {
+  project: string
+  id: string
+  mtime: Date
+  contentSnippet: string
 }
 
 function getStatusFromLog(path: string): string {
@@ -83,11 +91,9 @@ async function getActiveSessions(): Promise<ActiveSession[]> {
       if (cwd.startsWith(GIT_ROOT)) {
         projectSlug = cwd.replace(GIT_ROOT, "").replace(/\//g, "-")
       } else {
-        // Handle paths outside ~/git/ - minimal slug generation
         projectSlug = cwd.split("/").filter(Boolean).join("-")
       }
       
-      // also check for "rhizone-" prefix if it's a rhizone project
       const possibleProjectDirs = readdirSync(PROJECTS_DIR).filter(d => 
         d.includes(projectSlug) || d.includes("rhizone-" + projectSlug)
       )
@@ -119,7 +125,6 @@ async function getActiveSessions(): Promise<ActiveSession[]> {
         } catch {}
       }
 
-      // Check for subagents in the most active session folder
       if (lastJsonl && projectPath) {
         const sessionId = lastJsonl.split("/").pop()?.replace(".jsonl", "")
         const subagentsDir = join(projectPath, sessionId || "", "subagents")
@@ -132,7 +137,7 @@ async function getActiveSessions(): Promise<ActiveSession[]> {
                 return { path, mtime: statSync(path).mtime }
               })
               .sort((a, b) => b.mtime.getTime() - a.mtime.getTime())
-              .filter(s => Date.now() - s.mtime.getTime() < 60 * 60 * 1000) // Only recent subagents (1h)
+              .filter(s => Date.now() - s.mtime.getTime() < 60 * 60 * 1000)
 
             for (const sub of subs) {
               subagents.push({
@@ -146,8 +151,16 @@ async function getActiveSessions(): Promise<ActiveSession[]> {
         } catch {}
       }
 
-      const isZombie = lastWrite ? (Date.now() - lastWrite.getTime() > 20 * 60 * 1000) : false
-      const status = lastJsonl ? getStatusFromLog(lastJsonl) : "no log found"
+      let statusType: "ACTIVE" | "IDLE" | "ZOMBIE" = "ACTIVE"
+      if (lastWrite) {
+        const age = Date.now() - lastWrite.getTime()
+        if (age > 20 * 60 * 1000) statusType = "ZOMBIE"
+        else if (age > 5 * 60 * 1000) statusType = "IDLE"
+      } else {
+        statusType = "ZOMBIE" // No logs found
+      }
+
+      const statusMessage = lastJsonl ? getStatusFromLog(lastJsonl) : "no log found"
 
       sessions.push({
         pid,
@@ -155,16 +168,50 @@ async function getActiveSessions(): Promise<ActiveSession[]> {
         projectPath: possibleProjectDirs[0] || null,
         lastJsonl,
         lastWrite,
-        isZombie,
-        status,
+        statusType,
+        statusMessage,
         subagents
       })
     } catch (e) {
-      // Process might have ended or permission denied
+      // Process ended or permission denied
     }
   }
 
   return sessions
+}
+
+async function getBackgroundTasks(): Promise<BackgroundTask[]> {
+  const tasks: BackgroundTask[] = []
+  try {
+    const projects = readdirSync(TMP_DIR)
+    for (const p of projects) {
+      const tasksDir = join(TMP_DIR, p, "tasks")
+      try {
+        if (statSync(tasksDir).isDirectory()) {
+          const files = readdirSync(tasksDir).filter(f => f.endsWith(".output"))
+          for (const f of files) {
+            const path = join(tasksDir, f)
+            const mtime = statSync(path).mtime
+            // Only show recent tasks (last 24h)
+            if (Date.now() - mtime.getTime() < 24 * 60 * 60 * 1000) {
+              let contentSnippet = ""
+              try {
+                const content = readFileSync(path, "utf8")
+                contentSnippet = content.slice(-80).replace(/\n/g, " ")
+              } catch {}
+              tasks.push({
+                project: p.replace("-home-me-git-", "").replace("rhizone-", ""),
+                id: f.replace(".output", ""),
+                mtime,
+                contentSnippet
+              })
+            }
+          }
+        }
+      } catch {}
+    }
+  } catch {}
+  return tasks.sort((a, b) => b.mtime.getTime() - a.mtime.getTime())
 }
 
 async function getMemoryUsage() {
@@ -183,19 +230,23 @@ async function main() {
   console.log(`\n─── status ${new Date().toLocaleString()} ───\n`)
 
   const sessions = await getActiveSessions()
+  const backgroundTasks = await getBackgroundTasks()
   const mem = await getMemoryUsage()
 
   console.log(`memory: ${mem.used}MB / ${mem.total}MB used (${mem.available}MB available)\n`)
 
   if (sessions.length === 0) {
-    console.log("no active claude sessions found.")
+    console.log("no active interactive sessions.")
   } else {
-    console.log("active sessions:")
+    console.log("interactive sessions:")
     for (const s of sessions) {
       const lastUpdate = s.lastWrite ? s.lastWrite.toLocaleTimeString() : "unknown"
-      const statusIcon = s.isZombie ? "⚠️  ZOMBIE?" : "✅ ACTIVE"
+      let icon = "✅"
+      if (s.statusType === "IDLE") icon = "⏳"
+      if (s.statusType === "ZOMBIE") icon = "🧟"
+      
       console.log(`  [${s.pid}] ${s.cwd.replace(GIT_ROOT, "")}`)
-      console.log(`     ${statusIcon} ${lastUpdate} — ${s.status}`)
+      console.log(`     ${icon} ${s.statusType} (${lastUpdate}) — ${s.statusMessage}`)
       
       if (s.subagents.length > 0) {
         console.log(`     ↳ subagents:`)
@@ -204,14 +255,23 @@ async function main() {
         }
       }
       
-      if (s.isZombie) {
+      if (s.statusType === "ZOMBIE") {
         console.log(`     path: ${s.lastJsonl}`)
       }
       console.log()
     }
   }
 
-  // Also show recent global history (last 5 sessions across all projects)
+  if (backgroundTasks.length > 0) {
+    console.log("background tasks (headless):")
+    for (const t of backgroundTasks) {
+      console.log(`  [${t.project}] ${t.id} (${t.mtime.toLocaleTimeString()})`)
+      console.log(`     ↳ ...${t.contentSnippet}`)
+    }
+    console.log()
+  }
+
+  // Also show recent global history
   console.log("recent activity (all projects):")
   const allJsonls: { path: string; mtime: Date }[] = []
   const projectDirs = readdirSync(PROJECTS_DIR)
