@@ -306,6 +306,15 @@ export function solveChallenge(text) {
   // prefer unit-anchored extraction to avoid counting structural numbers ("one claw")
   if (/\b(total|combined|sum|altogether)\b/.test(cleaned) || soupHas("total") || soupHas("combined")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
+    // "total X*Y" in question clause: * between identifier names → multiply
+    // e.g. "force is thirty newtons, growth is five cm, like total force*growth?" → 30 × 5 = 150
+    const lastCommaIdx = cleaned.lastIndexOf(",")
+    const questionClause = lastCommaIdx >= 0 ? cleaned.slice(lastCommaIdx) : cleaned.slice(-60)
+    if (/ \* /.test(questionClause)) {
+      if (unitNums.length >= 2) return unitNums.reduce((a, b) => a * b, 1).toFixed(2)
+      const allNums = extractAllNumbers(cleaned)
+      if (allNums.length === 2) return (allNums[0] * allNums[1]).toFixed(2)
+    }
     if (unitNums.length >= 2) return unitNums.reduce((a, b) => a + b, 0).toFixed(2)
     const nums = extractAllNumbers(cleaned)
     // one unit-anchored value (force) + one non-unit count → multiply

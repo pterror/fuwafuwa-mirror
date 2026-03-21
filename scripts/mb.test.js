@@ -447,5 +447,11 @@ check(
   "640.00"
 )
 
+check(
+  "total force*growth in question clause: 30 * 5 = 150 (was 35 from add)",
+  "A] lOoBbSsTtEeRrr ClAw] F[oR^cE Is] ThIrTtY ~ NeWwToNs, Um| AnD/ ItS] MoLtInG GrOwTh Is] FiVvEe < cMm, LiKe } ToTaL/ FoRcE*GrOwTh?",
+  "150.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
