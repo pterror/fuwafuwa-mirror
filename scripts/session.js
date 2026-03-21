@@ -235,7 +235,7 @@ async function end() {
   }
 
   const duration = hours < 1 ? `${Math.round(hours * 60)}m` : `${hours.toFixed(1)}h`
-  console.log(`session closed (${duration}). state written — commit with the session log.`)
+  console.log(`session closed (${duration}). state written — commit if anything's worth keeping (log entry optional for quiet sessions).`)
 }
 
 // ——————————————————————————————————————————
