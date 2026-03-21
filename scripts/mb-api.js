@@ -212,9 +212,6 @@ export function solveChallenge(text) {
     if (sym === " - " && left.trimEnd().endsWith(" and")) continue
     // " - in/into" pattern: preposition follows dash, indicating a separator (e.g. "engages - in seven pushes")
     if (sym === " - " && /^(in|into)\b/.test(right.trimStart())) continue
-    // * directly attached to a non-digit letter (e.g. "d*") is obfuscation noise, not multiplication
-    // digit-adjacent * (e.g. "*6") and isolated * (e.g. "newtons] * <") are real operators
-    if (sym === " * " && /[a-zA-Z]\*|\*[a-zA-Z]/.test(text)) continue
     // use tokens nearest to the operator to avoid accumulating numbers from the narrative
     // e.g. "claw exerts twenty three nootons ... product of twenty three * seven"
     //      parseNumber(full left) accumulates 23+7+23=53; parsing last ~8 tokens gives 23
@@ -225,8 +222,12 @@ export function solveChallenge(text) {
     const a = parseNumber(nearLeft)
     const b = parseNumber(nearRight)
     if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
-      return fn(a, b).toFixed(2)
+      // for *, only trust parsed numbers if the original text had a "real" *:
+      // a * preceded by space or digit (e.g. "forty * sixteen", "*6") vs letter noise ("ThReE*", "x*I")
+      if (sym !== " * " || /[\s\d]\*/.test(text)) return fn(a, b).toFixed(2)
     }
+    // * only attached to letters (no space/digit before any *) is pure obfuscation noise — skip
+    if (sym === " * " && /[a-zA-Z]\*/.test(text) && !/[\s\d]\*/.test(text)) continue
   }
 
   // soup of the full text — used for keyword matching when obfuscation may split words

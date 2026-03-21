@@ -441,5 +441,11 @@ check(
   "297.00"
 )
 
+check(
+  "explicit * operator with letter*letter noise in question: forty * sixteen = 640 (was skipped due to x*I)",
+  "A] L{o}oObS-tErRr ClAw^ FoRcE Is] FoRtY * SiXtEeN ~ AnTeNnA CoN-tAcTs PeR/ SeCoNd, HoW/ mUcH N{o}oTx*ImPuLsE^?",
+  "640.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
