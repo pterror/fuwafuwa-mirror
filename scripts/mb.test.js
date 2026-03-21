@@ -417,5 +417,11 @@ check(
   "448.00"
 )
 
+check(
+  "dominance multiplier: claw force × multiplier (23 × 4 = 92)",
+  "A] lOoObB.sSsT-ErS] cL^-aW F{oRcE iS TwEnTy ThReE ]nEu- ToNs, \\/ dOmInAnCe MuLtIpLiEr Is FoUr <HoW MuCh ToTaL F[oRcE?",
+  "92.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

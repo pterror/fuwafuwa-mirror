@@ -297,7 +297,7 @@ export function solveChallenge(text) {
   }
   // "multiplied/multiplies by" with obfuscation — must check before 'total' keyword
   // also catches "multiplys" soup variant (obfuscated "multiplies" with ie→y substitution)
-  if (soupHas("multiplied") || soupHas("multiplies") || soupHas("multiply")) {
+  if (soupHas("multiplied") || soupHas("multiplies") || soupHas("multiply") || soupHas("multiplier")) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }
