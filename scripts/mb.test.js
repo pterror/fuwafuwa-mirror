@@ -411,5 +411,11 @@ check(
   "161.00"
 )
 
+check(
+  "impulse = force × time: 32 * 14 = 448",
+  "A] lO b-StErS cL]aW^ fO rC e Is ThIrTy TwO ] nEwToNs ~ AnD ApPlIeS OvEr FoUrTeEn \\ sEcOnDs - WhAt Is ThE ImPuLsE? umm lxobqsterrr",
+  "448.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
