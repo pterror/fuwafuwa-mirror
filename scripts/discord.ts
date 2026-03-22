@@ -188,6 +188,7 @@ async function messages() {
     message_snapshots?: { message: { content: string; attachments: { filename: string; url: string }[] } }[]
     message_reference?: { message_id: string }
     referenced_message?: { content: string; author: { username: string; global_name?: string } }
+    mentions: { id: string; username: string; global_name?: string }[]
   }[]
 
   // newest-first from api, display chronologically
@@ -213,17 +214,20 @@ async function messages() {
     const idPrefix = showIds ? `[${m.id}] ` : `[…${m.id.slice(-6)}] `
     const pad = " ".repeat(ts.length + 2 + idPrefix.length)
 
+    const mentionMap = Object.fromEntries(m.mentions.map(u => [u.id, u.global_name ?? u.username]))
+    const resolve = (text: string) => text.replace(/<@!?(\d+)>/g, (_, id) => `@${mentionMap[id] ?? id}`)
+
     const lines: string[] = []
 
     if (m.referenced_message) {
       const r = m.referenced_message
       const rname = r.author.global_name ?? r.author.username
-      const preview = r.content.trim().split("\n")[0].slice(0, 80)
+      const preview = resolve(r.content.trim()).split("\n")[0].slice(0, 80)
       lines.push(`${" ".repeat(ts.length + 2 + idPrefix.length)}↩ ${rname}: ${preview}${r.content.length > 80 ? "…" : ""}`)
     }
 
     if (m.content.trim()) {
-      lines.push(`${ts}  ${idPrefix}${name}: ${m.content.trim().split("\n").join("\n" + pad + " ".repeat(name.length + 2))}`)
+      lines.push(`${ts}  ${idPrefix}${name}: ${resolve(m.content.trim()).split("\n").join("\n" + pad + " ".repeat(name.length + 2))}`)
     }
 
     for (const e of m.embeds) {
@@ -260,6 +264,28 @@ async function send() {
   const content = rest.join(" ")
   const data = await api("POST", `/channels/${channelId}/messages`, { content }) as { id: string }
   console.log(`sent — message id: ${data.id}`)
+}
+
+async function attach() {
+  const [channelId, filePath, ...rest] = posArgs
+  if (!channelId || !filePath) {
+    console.error("usage: discord attach <channel-id> <file-path> [content]")
+    process.exit(1)
+  }
+  const content = rest.join(" ")
+  const file = Bun.file(filePath)
+  const filename = filePath.split("/").pop()!
+  const form = new FormData()
+  form.append("payload_json", JSON.stringify({ content }))
+  form.append("files[0]", new Blob([await file.arrayBuffer()], { type: file.type || "application/octet-stream" }), filename)
+  const res = await fetch(`${BASE}/channels/${channelId}/messages`, {
+    method: "POST",
+    headers: { "Authorization": `Bot ${TOKEN}` },
+    body: form,
+  })
+  if (!res.ok) throw new Error(`discord api error ${res.status}: ${await res.text()}`)
+  const data = await res.json() as { id: string }
+  console.log(`sent with attachment — message id: ${data.id}`)
 }
 
 async function reply() {
@@ -375,7 +401,7 @@ async function react() {
 }
 
 // — dispatch —
-const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, reply, react, view, dm }
+const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, attach, reply, react, view, dm }
 
 if (!cmd || !commands[cmd]) {
   console.log(`usage: discord <${Object.keys(commands).join("|")}> [args]`)
