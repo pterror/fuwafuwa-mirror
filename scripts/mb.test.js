@@ -453,5 +453,17 @@ check(
   "150.00"
 )
 
+check(
+  "N lobbers push together: dominant claw exerts 26N, three lobbers together → 3×26=78 (was 29 from add)",
+  "A] Lo.bStErRrS~ DoMmInAnT cL-AwW eXeRtS^ TwEnTy SiX NeWToNs | AnD ThReE LoB bErS PuShH ToGeThEr, WhAtS ToTaL FoRcE?",
+  "78.00"
+)
+
+check(
+  "tolerant merge: 'ThWeN tY' → twenty (extra consonant in token split) × four = 92",
+  "A] LoBb-S tEr' s ClAw] FoRcE^ Of ThWeN tY] ThReE NoOotOns~ TiMeS\\ ItS SwImMiN g VeLooOciTy] Of FoUr MeTeRs/ PeR SeCoNd, WhAtS^ ThE PoWeR< In WaTtS?",
+  "92.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

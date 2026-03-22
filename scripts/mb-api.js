@@ -77,7 +77,9 @@ function parseNumber(text) {
       if (combined !== undefined) { val = combined; prevUnknown2 = null; prevUnknown = null }
       else {
         for (const [nw, nv] of Object.entries(NUMBER_WORDS)) {
-          if (new RegExp("^" + nw.split("").map(charPat).join("") + "$").test(combinedStr)) { val = nv; prevUnknown2 = null; prevUnknown = null; break }
+          const exactPat = new RegExp("^" + nw.split("").map(charPat).join("") + "$")
+          const tolPat = nw.length > 4 ? new RegExp("^" + nw.split("").map(charPat).join(".??") + "$") : null
+          if (exactPat.test(combinedStr) || (tolPat && tolPat.test(combinedStr))) { val = nv; prevUnknown2 = null; prevUnknown = null; break }
         }
       }
     }
@@ -88,7 +90,9 @@ function parseNumber(text) {
       if (combined3 !== undefined) { val = combined3; prevUnknown2 = null; prevUnknown = null }
       else {
         for (const [nw, nv] of Object.entries(NUMBER_WORDS)) {
-          if (new RegExp("^" + nw.split("").map(charPat).join("") + "$").test(combined3Str)) { val = nv; prevUnknown2 = null; prevUnknown = null; break }
+          const exactPat = new RegExp("^" + nw.split("").map(charPat).join("") + "$")
+          const tolPat = nw.length > 4 ? new RegExp("^" + nw.split("").map(charPat).join(".??") + "$") : null
+          if (exactPat.test(combined3Str) || (tolPat && tolPat.test(combined3Str))) { val = nv; prevUnknown2 = null; prevUnknown = null; break }
         }
       }
     }
@@ -322,7 +326,7 @@ export function solveChallenge(text) {
     // e.g. "exerts thirty newtons, there are two claws, total force?" → 30 × 2 = 60
     // only when count context is present ("has N", "there are N", or "each") — otherwise treat as two measurements
     // "other" signals same unit type (e.g. "the other claw has twelve [newtons]") — don't multiply
-    if (unitNums.length === 1 && nums.length === 2 && !soupHas("other") && (soupHas("has") || eachIsRate || soupHas("are"))) {
+    if (unitNums.length === 1 && nums.length === 2 && !soupHas("other") && (soupHas("has") || eachIsRate || soupHas("are") || soupHas("together"))) {
       const count = nums.find(n => Math.abs(n - unitNums[0]) > 0.001)
       if (count !== undefined) return (unitNums[0] * count).toFixed(2)
     }
