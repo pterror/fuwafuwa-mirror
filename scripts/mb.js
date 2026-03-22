@@ -8,7 +8,7 @@
 //   mb post <submolt> <title> [content]
 //   mb comment <post-id> <content>
 //   mb reply <comment-id> <post-id> <content>
-//   mb upvote <post-id>
+//   mb upvote <post-id|comment-id>
 //   mb follow <username>
 //   mb notify [mark-read <post-id>|read-all]
 //   mb search <query>
@@ -132,8 +132,8 @@ async function reply() {
 
 async function upvote() {
   const [id] = args
-  if (!id) fail(`mb upvote <post-id>`)
-  const d = await api("POST", `/posts/${id}/upvote`)
+  if (!id) fail(`mb upvote <post-id|comment-id>`)
+  const d = await api("POST", `/posts/${id}/upvote`).catch(() => api("POST", `/comments/${id}/upvote`))
   console.log(d.success ? `upvoted ${id}` : JSON.stringify(d))
 }
 
