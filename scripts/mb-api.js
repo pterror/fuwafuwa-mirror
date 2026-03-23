@@ -372,6 +372,22 @@ export function solveChallenge(text) {
     if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
   }
 
+  // "velocity"/"accelerates by" → new velocity = old velocity + delta
+  // handles "swims at X meters per second and accelerates by Y, new velocity?"
+  // uses unit-anchored extraction for the speed (number before "meters per second")
+  // and the last non-speed number as the delta
+  if (soupHas("velocity") || soupHas("accelerates") || soupHas("accelerate")) {
+    const unitNums = extractNumbersPrecedingUnits(cleaned)
+    const allNums = extractAllNumbers(cleaned)
+if (unitNums.length >= 1) {
+      const speed = unitNums[0]
+      // delta is the last number that isn't the speed (the "by Y" at end of "accelerates by Y")
+      const delta = [...allNums].reverse().find(n => Math.abs(n - speed) > 0.001)
+      if (delta !== undefined) return (speed + delta).toFixed(2)
+    }
+    if (allNums.length === 2) return (allNums[0] + allNums[1]).toFixed(2)
+  }
+
   // — fallback: if exactly two numbers, add them —
   const nums = extractAllNumbers(cleaned)
   if (nums.length === 2) return (nums[0] + nums[1]).toFixed(2)
@@ -509,7 +525,13 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
               const val = NUMBER_WORDS[word]
               if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
               else if (val === 100) { current = (current || 1) * 100 }
-              else { current += val }
+              else {
+                // prevent stacking two round tens within a window (e.g. "twenettyy"+"twenty" = 40)
+                // "twenty twenty" is not valid English for 40 — the first "twenty" is obfuscation noise
+                // hundreds are excluded (current < 100) so "one hundred twenty" still works
+                if (found && current >= 10 && current < 100 && current % 10 === 0 && val >= 10 && val < 100) break
+                current += val
+              }
               pos += match[0].length; found = true; wordMatched = true; break
             }
           }
@@ -587,6 +609,10 @@ function extractAllNumbers(text) {
         // once units digit is set (e.g. current=27), stop — can't add more units without hundred/thousand
         // prevents "twenty seven cen(timeters)" from accumulating to 37 via "cen" → "ten"
         if (found && current % 10 !== 0) break
+        // prevent stacking two round tens (e.g. "twenty twenty three" = 43 when speed is "twenty-three" = 23)
+        // "twenty twenty" is not valid English for 40 — it's obfuscation noise before "twenty three"
+        // hundreds are excluded (current < 100) so "one hundred twenty" still works
+        if (found && current >= 10 && current < 100 && current % 10 === 0 && val >= 10 && val < 100) break
         current += val
       }
       found = true; numPos += size
@@ -619,7 +645,10 @@ function extractNumbersPrecedingUnits(text) {
       const [val, size] = match
       if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
       else if (val === 100) { current = (current || 1) * 100 }
-      else { current += val }
+      else {
+        if (found && current >= 10 && current < 100 && current % 10 === 0 && val >= 10 && val < 100) break
+        current += val
+      }
       found = true; numPos += size
     }
     if (found) {

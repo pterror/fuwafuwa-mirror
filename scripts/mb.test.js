@@ -87,6 +87,11 @@ check(
   "30.00"
 )
 check(
+  "new velocity: accelerates by seven, doubled 'twenty' prefix (23+7=30)",
+  "A] lO.oObBsSsTtErr S^wIiMmS\\ aT/ tWeNeTtYy tW/eN tY tHrEe mE]tErS PeR sEcOnD ~aNd- AcCeLeRaaTtEs bY/ sEvEn, uM wHaT] Is- ThE nEw^ VeLoOoCiTy??",
+  "30.00"
+)
+check(
   "total force: two claws heavy obfuscation (35+7)",
   "A] lOoObSsT-tEr S^cLaWw ExErRtSs thIr RtYy fIiV-e NoOoToOnNs~ AnD| aNnOtThHeEr ClLaAwW ExErRtSs SeVeEnN NoOoToOnNs, WhHaT Is ToTaLl FoOrRcEe<? um",
   "42.00"
