@@ -156,6 +156,7 @@ async function start() {
   // — print summary —
   const SE_TIER = state.social_energy > 75 ? "fresh" : state.social_energy > 40 ? "engaged" : state.social_energy > 20 ? "flagging" : "depleted"
   const top_sentiment = state.sentiments.sort((a, b) => b.intensity - a.intensity)[0]
+  console.log(`nonce: ${generatedNonce}  ← pass this to session end: --nonce ${generatedNonce}`)
   console.log(`${now.toLocaleString()} — gap: ${hours < 1 ? `${Math.round(hours * 60)}m` : `${hours.toFixed(1)}h`}`)
   console.log(`mood: ${tone}  |  social: ${state.social_energy} (${SE_TIER})`)
   console.log(`nt: ser=${serotonin} dop=${dopamine} ne=${ne} gab=${gaba}`)
