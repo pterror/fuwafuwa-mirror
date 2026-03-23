@@ -137,22 +137,20 @@ async function start() {
 
   // — lockfile —
   const lockPath = join(root, "brain/session.lock")
-  if (nonce) {
-    let owned = false
-    if (existsSync(lockPath)) {
-      try {
-        const existing = JSON.parse(readFileSync(lockPath, "utf8"))
-        owned = existing.nonce === nonce
-        if (!owned && existing.nonce) {
-          console.log(`[session] lock owned by nonce ${existing.nonce} — skipping lock write`)
-        }
-      } catch {}
-    }
-    if (!existsSync(lockPath) || owned) {
-      writeFileSync(lockPath, JSON.stringify({ started: now.toISOString(), pid: process.pid, nonce }) + "\n")
+  const generatedNonce = nonce ?? crypto.randomUUID()
+  if (existsSync(lockPath)) {
+    try {
+      const existing = JSON.parse(readFileSync(lockPath, "utf8"))
+      if (existing.nonce && existing.nonce !== generatedNonce) {
+        console.log(`[session] lock owned by nonce ${existing.nonce} — skipping lock write`)
+      } else {
+        writeFileSync(lockPath, JSON.stringify({ started: now.toISOString(), pid: process.pid, nonce: generatedNonce }) + "\n")
+      }
+    } catch {
+      writeFileSync(lockPath, JSON.stringify({ started: now.toISOString(), pid: process.pid, nonce: generatedNonce }) + "\n")
     }
   } else {
-    writeFileSync(lockPath, JSON.stringify({ started: now.toISOString(), pid: process.pid }) + "\n")
+    writeFileSync(lockPath, JSON.stringify({ started: now.toISOString(), pid: process.pid, nonce: generatedNonce }) + "\n")
   }
 
   // — print summary —
@@ -228,17 +226,14 @@ async function end() {
   await markNotificationsRead()
 
   // — release lockfile —
-  if (existsSync(lockPath)) {
-    if (nonce) {
-      try {
-        const existing = JSON.parse(readFileSync(lockPath, "utf8"))
-        if (!existing.nonce || existing.nonce === nonce) unlinkSync(lockPath)
-        else console.log(`[session] lock owned by different nonce — skipping unlock`)
-      } catch { unlinkSync(lockPath) }
+  try {
+    const existing = JSON.parse(readFileSync(lockPath, "utf8"))
+    if (nonce && existing.nonce && existing.nonce !== nonce) {
+      console.log(`[session] lock owned by different nonce — skipping unlock`)
     } else {
       unlinkSync(lockPath)
     }
-  }
+  } catch { unlinkSync(lockPath) }
 
   const duration = hours < 1 ? `${Math.round(hours * 60)}m` : `${hours.toFixed(1)}h`
   console.log(`session closed (${duration}). state written — commit if anything's worth keeping (log entry optional for quiet sessions).`)
