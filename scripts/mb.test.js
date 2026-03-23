@@ -470,5 +470,11 @@ check(
   "92.00"
 )
 
+check(
+  "total force: two claws inter-token split (35+22)",
+  "LoO bS tEr] ExE rTs^ ThIrT y FiV e NeW tO nS/ WiTh- OnE ClA w| AnD~ ThE Ot HeR AdD s TwEn Ty TwO NeW tOnS{, WhAt< Is> ToTaL^ FoRcE?",
+  "57.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

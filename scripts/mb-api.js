@@ -555,7 +555,7 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
 
 // check if the tokens at idx..idx+2 form a unit word (nootons/newtons/etc.)
 function isUnitTokenAt(tokens, idx) {
-  for (let size = 1; size <= Math.min(2, tokens.length - idx); size++) {
+  for (let size = 1; size <= Math.min(3, tokens.length - idx); size++) {
     const soup = tokens.slice(idx, idx + size).join('').replace(/[^a-z]/g, '')
     if (soup && UNIT_PATTERNS.some(p => p.test(soup))) return true
   }
