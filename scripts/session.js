@@ -187,11 +187,18 @@ async function end() {
     process.exit(1)
   }
 
+  const lockPath = join(root, "brain/session.lock")
+  if (!existsSync(lockPath)) {
+    console.error(`[session] error: no session.lock found — run 'session start' first. aborting to avoid corrupt state.`)
+    process.exit(1)
+  }
+  const lockData = (() => { try { return JSON.parse(readFileSync(lockPath, "utf8")) } catch { return null } })()
+
   const state = JSON.parse(readFileSync(join(root, "brain/emotional-state.json"), "utf8"))
   const personality = JSON.parse(readFileSync(join(root, "brain/personality.json"), "utf8"))
 
   const now = new Date()
-  const started = new Date(state.session?.started ?? state.updated)
+  const started = new Date(lockData?.started ?? state.session?.started ?? state.updated)
   const hours = (now - started) / 3_600_000
 
   const { inertia } = personality._derived
@@ -221,7 +228,6 @@ async function end() {
   await markNotificationsRead()
 
   // — release lockfile —
-  const lockPath = join(root, "brain/session.lock")
   if (existsSync(lockPath)) {
     if (nonce) {
       try {
