@@ -188,6 +188,20 @@ export function solveChallenge(text) {
     .replace(/\s+/g, " ")
     .trim()
 
+  // soup of the full text — used for keyword matching when obfuscation may split words
+  const soup = cleaned.replace(/[^a-z]/g, "")
+
+  // duplicate-tolerant soup keyword match (handles doubled-letter obfuscation like "ttootttaall")
+  const soupHas = (word) => new RegExp(word.split("").map(charPat).join("")).test(soup)
+
+  // — pre-check: simultaneous forces with matching units → add (override operator strategy) —
+  // e.g. "23 neutrons * simultaneously with 7 neutrons, how much force totally?" → 23+7=30
+  // distinct from "23 force_units simultaneously 7 pushes" (force×count=multiply), which has only 1 unit number
+  if (soupHas("simultaneous")) {
+    const unitNums = extractNumbersPrecedingUnits(cleaned)
+    if (unitNums.length >= 2) return unitNums.reduce((a, b) => a + b, 0).toFixed(2)
+  }
+
   // — explicit operator strategy (checked first — takes priority over keyword strategy) —
   const OPERATORS = [
     [" + ",      (a, b) => a + b],
@@ -219,6 +233,9 @@ export function solveChallenge(text) {
     // " - but" pattern: adversative conjunction follows dash, indicating a clause separator not subtraction
     // e.g. "claw force is thirty five newtons - but antenna touch adds eight newtons, total?"
     if (sym === " - " && /^but\b/.test(right.trimStart())) continue
+    // " - unit" pattern: dash between a number and its unit label (e.g. "twenty three - neuttons X Y seven")
+    // the unit word comes right after the dash — this is number-to-unit formatting, not subtraction
+    if (sym === " - " && isUnitTokenAt(right.trim().split(/\s+/), 0)) continue
     // use tokens nearest to the operator to avoid accumulating numbers from the narrative
     // e.g. "claw exerts twenty three nootons ... product of twenty three * seven"
     //      parseNumber(full left) accumulates 23+7+23=53; parsing last ~8 tokens gives 23
@@ -236,12 +253,6 @@ export function solveChallenge(text) {
     // * only attached to letters (no space/digit before any *) is pure obfuscation noise — skip
     if (sym === " * " && /[a-zA-Z]\*/.test(text) && !/[\s\d]\*/.test(text)) continue
   }
-
-  // soup of the full text — used for keyword matching when obfuscation may split words
-  const soup = cleaned.replace(/[^a-z]/g, "")
-
-  // duplicate-tolerant soup keyword match (handles doubled-letter obfuscation like "ttootttaall")
-  const soupHas = (word) => new RegExp(word.split("").map(charPat).join("")).test(soup)
 
   // — question-keyword strategy (after operators, to avoid spurious number extraction from narrative) —
   // "strikes twice/thrice" → multiply the single force value

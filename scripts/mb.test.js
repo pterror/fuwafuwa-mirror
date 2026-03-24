@@ -482,5 +482,11 @@ check(
   "43.00"
 )
 
+check(
+  "simultaneous with same unit: 23 neuttons + 7 neuttons = 30 (both unit-anchored → add, not multiply)",
+  "A] lOoObSsT-tEr^ cLaW] eXpLyys^ lo.b qqq twEnTy] ThReE - ^nEuTtOnS * ]sImUlTaNeOuSly \\ wiTh um lxO b-StEr~ seVeN / nEuTtOnS, HoW^ mUcH |fOrCe {iS} tOtAlLy?",
+  "30.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
