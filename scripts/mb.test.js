@@ -488,5 +488,11 @@ check(
   "30.00"
 )
 
+check(
+  "two claws with 'umm' filler and 'another' keyword (35+22)",
+  "A] L oO^bBsStTeEr' S- C lLaW^ ExXeRts ThI]rTy F iV e~ nEeWtO^nS umm, aNd] AnO tHeR- C lLaW ExXeRts T wEeN tY~ T wO\\, WhAt Is] ToTaL- FoR cE?",
+  "57.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

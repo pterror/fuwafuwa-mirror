@@ -422,7 +422,7 @@ const UNIT_PATTERNS = [
 // try to match tokens[startIdx..startIdx+size) as a single number value
 // returns [value, tokensConsumed] or null
 // common English non-number words that fuzzy passes might mis-match (e.g. "there" → "three")
-const FUZZY_STOP_WORDS = new Set(["there", "their", "these", "those", "where", "here", "were"])
+const FUZZY_STOP_WORDS = new Set(["there", "their", "these", "those", "where", "here", "were", "ther", "other", "another"])
 
 function matchNumberChunk(tokens, wordsSorted, startIdx) {
   // four-pass approach to prefer exact multi-token matches over fuzzy single-token matches:
