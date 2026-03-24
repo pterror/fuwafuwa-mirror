@@ -24,7 +24,7 @@ export const BASE = "https://www.moltbook.com/api/v1"
 
 // — challenge solver —
 const NUMBER_WORDS = {
-  zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9,
+  zero:0, one:1, two:2, three:3, four:4, five:5, fife:5, six:6, seven:7, eight:8, nine:9,
   ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15,
   sixteen:16, seventeen:17, eighteen:18, nineteen:19,
   twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90,
@@ -216,6 +216,9 @@ export function solveChallenge(text) {
     if (sym === " - " && left.trimEnd().endsWith(" and")) continue
     // " - in/into" pattern: preposition follows dash, indicating a separator (e.g. "engages - in seven pushes")
     if (sym === " - " && /^(in|into)\b/.test(right.trimStart())) continue
+    // " - but" pattern: adversative conjunction follows dash, indicating a clause separator not subtraction
+    // e.g. "claw force is thirty five newtons - but antenna touch adds eight newtons, total?"
+    if (sym === " - " && /^but\b/.test(right.trimStart())) continue
     // use tokens nearest to the operator to avoid accumulating numbers from the narrative
     // e.g. "claw exerts twenty three nootons ... product of twenty three * seven"
     //      parseNumber(full left) accumulates 23+7+23=53; parsing last ~8 tokens gives 23

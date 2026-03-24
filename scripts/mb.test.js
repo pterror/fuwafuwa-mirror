@@ -476,5 +476,11 @@ check(
   "57.00"
 )
 
+check(
+  "v→f obfuscation + '- but' separator: 'fIfE' = five, total 35+8 (was 22 from 30-8)",
+  "A] lO b-StEr^'s C|lAw ]fO rCe- Is~ tHiR ty fIfE {nEeW}ToNs - bUt^ AnTeNnA tOuCh- aDdS <eIgHt> nEeWtOnS, wHaT-s] tHe^ ToTaL fOrCe?",
+  "43.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
