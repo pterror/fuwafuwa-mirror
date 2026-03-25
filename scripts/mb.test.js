@@ -500,6 +500,14 @@ check(
   "47.00"
 )
 
+// anagram false positive: "ts"+"seven-"+"teen" had unique chars matching "seventeen"
+// causing extractNumbersPrecedingUnits to see 27 (17+10) instead of 17, giving 32+27=59
+check(
+  "lobster two-claw force: 32+17=49 (was 59 from anagram false positive on 'ts'+'seven-')",
+  "A] lOoOobS tEr^ cLaW] eXeR tS~ thIr-Ty ]TwO nEwToNs/ um, aNd- tHe] oThEr^ cLaW eXeR tS sEvEn- TeEn }nEwToNs, lOo.k LiKe] tHe/ qUeStIoN }is: HoW mUcH~ ToTaL| fOrCe< fRoM tHe] lOoobss tErS?",
+  "49.00"
+)
+
 // F=ma acceleration (force / mass)
 check(
   "acceleration from force and mass (24/3=8)",

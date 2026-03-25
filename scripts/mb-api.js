@@ -494,8 +494,10 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
             // e.g. "trheee" (6) vs "three" (5, 1 repeat: e) → diff=1 ≤ 1, accept
             // also reject if soup is too SHORT relative to the word (prevents e.g. "iten" matching "nineteen")
             // e.g. "iten" (4) vs "nineteen" (8): 4*2=8 is NOT > 8, reject
+            // also reject if soup is shorter than word: can't form an anagram of a longer word
+            // e.g. "tsseven" (7) should not match "seventeen" (9) even if unique chars match
             const repeatsInWord = word.length - [...new Set(word)].length
-            if (Math.abs(soup.length - word.length) <= repeatsInWord && soup.length * 2 > word.length) {
+            if (soup.length >= word.length && Math.abs(soup.length - word.length) <= repeatsInWord && soup.length * 2 > word.length) {
               return [NUMBER_WORDS[word], size]
             }
           }
