@@ -243,8 +243,16 @@ export function solveChallenge(text) {
     const rightTokens = right.trim().split(/\s+/)
     const nearLeft = leftTokens.slice(-8).join(" ")
     const nearRight = rightTokens.slice(0, 8).join(" ")
-    const a = parseNumber(nearLeft)
-    const b = parseNumber(nearRight)
+    // try both parseNumber (handles decimals) and extractAllNumbers (handles fragmented obfuscation)
+    // prefer larger result since partial parses always undercount
+    const parseA = parseNumber(nearLeft)
+    const parseB = parseNumber(nearRight)
+    const extractLeftNums = extractAllNumbers(nearLeft)
+    const extractRightNums = extractAllNumbers(nearRight)
+    const extractA = extractLeftNums.length > 0 ? extractLeftNums[extractLeftNums.length - 1] : NaN
+    const extractB = extractRightNums.length > 0 ? extractRightNums[0] : NaN
+    const a = (!isNaN(extractA) && (isNaN(parseA) || extractA > parseA)) ? extractA : parseA
+    const b = (!isNaN(extractB) && (isNaN(parseB) || extractB > parseB)) ? extractB : parseB
     if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
       // for *, only trust parsed numbers if the original text had a "real" *:
       // a * preceded by space or digit (e.g. "forty * sixteen", "*6") vs letter noise ("ThReE*", "x*I")

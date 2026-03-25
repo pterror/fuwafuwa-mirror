@@ -494,5 +494,11 @@ check(
   "57.00"
 )
 
+check(
+  "fragmented 'T hIr]TtY F iV]e' plus 'T wE]lV e': 35+12=47 (was 17 from 8-token window cutoff)",
+  "A] lOoObBsStTeR ClAw] FoR^cE iS T hIr]TtY F iV]e N oO^tOnS ~ pLuS { T wE]lV e } N oO^tOnS, H oW- mAnY ]N eW^tOnS ToTaL?",
+  "47.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
