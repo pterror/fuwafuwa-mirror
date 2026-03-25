@@ -394,6 +394,21 @@ export function solveChallenge(text) {
     if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
   }
 
+  // "what is acceleration" with force + mass context → a = F/m (divide)
+  // e.g. "force is 24 newtons, mass of 3 kilograms, what is acceleration?" → 24/3 = 8.00
+  // must check before the velocity/accelerates handler which would add instead of divide
+  if (soupHas("acceleration") && (soupHas("mass") || soupHas("kilogram"))) {
+    const nums = extractAllNumbers(cleaned)
+    if (nums.length === 2) {
+      // find force value: number before a newton-like unit
+      const forceVal = extractNumberBeforeUnitType(cleaned, FORCE_UNIT_PATTERNS)
+      const massVal = extractNumberBeforeUnitType(cleaned, MASS_UNIT_PATTERNS)
+      if (forceVal !== null && massVal !== null && massVal !== 0) return (forceVal / massVal).toFixed(2)
+      // fallback: first number / second number (force stated first typically)
+      if (nums[1] !== 0) return (nums[0] / nums[1]).toFixed(2)
+    }
+  }
+
   // "velocity"/"accelerates by" → new velocity = old velocity + delta
   // handles "swims at X meters per second and accelerates by Y, new velocity?"
   // uses unit-anchored extraction for the speed (number before "meters per second")
@@ -426,6 +441,15 @@ const UNIT_PATTERNS = [
   'seconds','second','kilograms','kilogram',
 ]
   .map(w => new RegExp('^' + w.split('').map(c => `${c}+`).join('') + '$'))
+
+// subset patterns for F=ma disambiguation
+const FORCE_UNIT_PATTERNS = [
+  'nootons','newtons','neutons','neetons','neotons','nooton','newton','neuton','neeton','neoton','notons','noton',
+].map(w => new RegExp('^' + w.split('').map(c => `${c}+`).join('') + '$'))
+
+const MASS_UNIT_PATTERNS = [
+  'kilograms','kilogram',
+].map(w => new RegExp('^' + w.split('').map(c => `${c}+`).join('') + '$'))
 
 // try to match tokens[startIdx..startIdx+size) as a single number value
 // returns [value, tokensConsumed] or null
@@ -683,6 +707,38 @@ function extractNumbersPrecedingUnits(text) {
   }
 
   return results
+}
+
+// extract the first number preceding a specific unit type (e.g. force units vs mass units)
+function extractNumberBeforeUnitType(text, unitPatterns) {
+  const tokens = text.toLowerCase().split(/\s+/).filter(Boolean)
+  const wordsSorted = Object.keys(NUMBER_WORDS).sort((a, b) => b.length - a.length)
+  const isTargetUnit = (toks, idx) => {
+    for (let size = 1; size <= Math.min(3, toks.length - idx); size++) {
+      const soup = toks.slice(idx, idx + size).join('').replace(/[^a-z]/g, '')
+      if (soup && unitPatterns.some(p => p.test(soup))) return true
+    }
+    return false
+  }
+  let i = 0
+  while (i < tokens.length) {
+    let numPos = i, current = 0, total = 0, found = false
+    while (numPos < tokens.length) {
+      const match = matchNumberChunk(tokens, wordsSorted, numPos)
+      if (match === null) break
+      const [val, size] = match
+      if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
+      else if (val === 100) { current = (current || 1) * 100 }
+      else { current += val }
+      found = true; numPos += size
+    }
+    if (found) {
+      const num = total + current
+      if (num > 0 && isTargetUnit(tokens, numPos)) return num
+      i = numPos
+    } else { i++ }
+  }
+  return null
 }
 
 export const FETCH_TIMEOUT_MS = 30_000

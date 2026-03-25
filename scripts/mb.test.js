@@ -500,5 +500,12 @@ check(
   "47.00"
 )
 
+// F=ma acceleration (force / mass)
+check(
+  "acceleration from force and mass (24/3=8)",
+  "A] Lo.bBsT-Er^ ClAw} FoRcE/ Is] TwEnTy FoUr] NeUwToNs~ AnD| It ExErTs/ On] MaSs^ Of ThReE] KiLoGrAmS<, WhAt Is AcCeLeRaTiOn? umm",
+  "8.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
