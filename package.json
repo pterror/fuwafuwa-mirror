@@ -1,0 +1,19 @@
+{
+  "name": "fuwafuwa",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.19.2",
+    "@snazzah/davey": "^0.1.10",
+    "discord.js": "^14.25.1",
+    "opusscript": "^0.1.1",
+    "sodium-native": "^5.1.0"
+  }
+}
