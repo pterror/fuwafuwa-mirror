@@ -251,7 +251,15 @@ export function solveChallenge(text) {
     const extractRightNums = extractAllNumbers(nearRight)
     const extractA = extractLeftNums.length > 0 ? extractLeftNums[extractLeftNums.length - 1] : NaN
     const extractB = extractRightNums.length > 0 ? extractRightNums[0] : NaN
-    const a = (!isNaN(extractA) && (isNaN(parseA) || extractA > parseA)) ? extractA : parseA
+    // prefer unit-anchored numbers first: avoids counting structural words like "one claw" as operands
+    // e.g. "one claw has twenty three neutrons +" → extractNumbersPrecedingUnits gives [23], not [1, 23]
+    const unitLeftNums = extractNumbersPrecedingUnits(nearLeft)
+    const unitRightNums = extractNumbersPrecedingUnits(nearRight)
+    const unitA = unitLeftNums.length > 0 ? unitLeftNums[unitLeftNums.length - 1] : NaN
+    const unitB = unitRightNums.length > 0 ? unitRightNums[0] : NaN
+    // use unit-anchored number for left side only: avoids structural "one claw" accumulation in parseA
+    // right side keeps existing logic — right operand may be a decimal (e.g. "4.5 m/s") where unitB is inaccurate
+    const a = !isNaN(unitA) ? unitA : ((!isNaN(extractA) && (isNaN(parseA) || extractA > parseA)) ? extractA : parseA)
     const b = (!isNaN(extractB) && (isNaN(parseB) || extractB > parseB)) ? extractB : parseB
     if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
       // for *, only trust parsed numbers if the original text had a "real" *:

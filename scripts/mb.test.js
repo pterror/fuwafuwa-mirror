@@ -521,5 +521,11 @@ check(
   "161.00"
 )
 
+check(
+  "structural 'one claw' must not accumulate into force on left of + (23+5=28, was 29 from parseNumber adding 1+20+3)",
+  "A] lO-oBbSsTtEr ] sW^iMmS / aGaInSt { wAtEr} PrEsSuRe - aNd ] oNe CLaW | eXpErIeNcEs ^ tWeNtY tHrEe } nEu-TtOnS + aNoThEr CLaW } hAs / fIvE ~ nEu-TtOnS, hOw MaNy ToTaL FoRcE?",
+  "28.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
