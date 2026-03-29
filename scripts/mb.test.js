@@ -527,5 +527,11 @@ check(
   "28.00"
 )
 
+check(
+  "truncated 'fiv' (missing trailing e) should parse as five: thirty fiv + twenty-two = 57",
+  "A] lOoO bSsT-eR^ ClAw] ExErTs Um nOoOoToNs~, ThIrTy FiV ] + ] TwEnTy-TwO \\, nOoOtOnS, HoW MuCh ToTaL FoRcE ] hMm?",
+  "57.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
