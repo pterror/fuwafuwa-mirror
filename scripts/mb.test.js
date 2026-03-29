@@ -515,5 +515,11 @@ check(
   "8.00"
 )
 
+check(
+  "power = force × velocity: 23 newtons × 7 m/s = 161 (was 30 from fallback add)",
+  "A] lO-bStEr SwAmS~ aNd HaS^ cLaW FoR-cE oF tWeNtY tHrEe Noo-tOnS* sW/iMs At sEvEn MeTeRs PeR sEcOnD, hOw MuCh PoWeR DoEs ThAt Lo.ooo.obStEr PrOdUcE, uM hMm?",
+  "161.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

@@ -385,6 +385,12 @@ export function solveChallenge(text) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }
+  // "power" → force × velocity (multiply)
+  // e.g. "claw force of 23 newtons, swims at 7 meters per second, how much power?" → 23×7=161
+  if (soupHas("power")) {
+    const nums = extractAllNumbers(cleaned)
+    if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
+  }
   // "product" / "multiply" / "how much total if each" → multiply
   // prefer unit-anchored extraction to avoid counting structural words like "the two forces"
   if (/\b(product|each|per item|per prey)\b/.test(cleaned) || soupHas("product") || soupHas("multiply")) {
