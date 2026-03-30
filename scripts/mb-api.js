@@ -366,10 +366,12 @@ export function solveChallenge(text) {
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
   }
   // "difference" / "water/air resistance" / "slows by" / "reduces" / "decreases" / "subtracts" / "takes away" / "remain" → subtract
+  // "opposing" only signals subtraction when "net" is also present (e.g. "net force") — without "net", opposing can appear in addition problems ("if they add")
   // soup-based match handles obfuscation that splits words (e.g. "SlO^wS" → "slo ws")
   if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)
       || /waterresistance|airresistance/.test(soup)
       || /slows?|reduces?|decreases?|decelerats?|loses?|loss|resists?|subtracts?|takesaway/.test(soup)
+      || (/opposing/.test(soup) && /net/.test(soup))
       || soupHas("remaining") || soupHas("remain") || soupHas("takesaway") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("reducing") || soupHas("decreases") || soupHas("resists") || soupHas("subtracts")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     if (unitNums.length === 2) return Math.abs(unitNums[0] - unitNums[1]).toFixed(2)
