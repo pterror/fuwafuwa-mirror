@@ -545,5 +545,11 @@ check(
   "30.00"
 )
 
+check(
+  "claw force outside 8-token window: 'thirty two + fourteen' where 'getting plus' separates them (32+14=46, was 24 from 'ten' in itengages soup)",
+  "A] LoB-StEr] WiTh^ A] ClAw] FoRcE] Of] ThIrTy] TwO] NeWtOnS,] AnD] iT] EnGaGeS^ In] A] DoMiNaNcE] FiGhT,] GeTtInG] PlUs] FoUrTeEn] NeWtOnS—] WhAt] Is] ThE] ToTaL] FoRcE?]",
+  "46.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

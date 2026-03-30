@@ -253,7 +253,10 @@ export function solveChallenge(text) {
     const extractB = extractRightNums.length > 0 ? extractRightNums[0] : NaN
     // prefer unit-anchored numbers first: avoids counting structural words like "one claw" as operands
     // e.g. "one claw has twenty three neutrons +" → extractNumbersPrecedingUnits gives [23], not [1, 23]
-    const unitLeftNums = extractNumbersPrecedingUnits(nearLeft)
+    // use full left string (not nearLeft) so the 8-token window can't cut off the actual number:
+    // e.g. "thirty two newtons and it engages in a dominance fight getting + fourteen" → 32+14=46
+    // unit-anchoring (requires unit word immediately after) prevents false positives from "one claw" etc.
+    const unitLeftNums = extractNumbersPrecedingUnits(left.trim())
     const unitRightNums = extractNumbersPrecedingUnits(nearRight)
     const unitA = unitLeftNums.length > 0 ? unitLeftNums[unitLeftNums.length - 1] : NaN
     const unitB = unitRightNums.length > 0 ? unitRightNums[0] : NaN
