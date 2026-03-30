@@ -365,12 +365,12 @@ export function solveChallenge(text) {
     }
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
   }
-  // "difference" / "water/air resistance" / "slows by" / "reduces" / "decreases" / "subtracts" → subtract
+  // "difference" / "water/air resistance" / "slows by" / "reduces" / "decreases" / "subtracts" / "takes away" / "remain" → subtract
   // soup-based match handles obfuscation that splits words (e.g. "SlO^wS" → "slo ws")
   if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)
       || /waterresistance|airresistance/.test(soup)
-      || /slows?|reduces?|decreases?|decelerats?|loses?|loss|resists?|subtracts?/.test(soup)
-      || soupHas("remaining") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("reducing") || soupHas("decreases") || soupHas("resists") || soupHas("subtracts")) {
+      || /slows?|reduces?|decreases?|decelerats?|loses?|loss|resists?|subtracts?|takesaway/.test(soup)
+      || soupHas("remaining") || soupHas("remain") || soupHas("takesaway") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("reducing") || soupHas("decreases") || soupHas("resists") || soupHas("subtracts")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     if (unitNums.length === 2) return Math.abs(unitNums[0] - unitNums[1]).toFixed(2)
     const nums = extractAllNumbers(cleaned)

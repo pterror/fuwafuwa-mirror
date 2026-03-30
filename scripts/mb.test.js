@@ -551,5 +551,11 @@ check(
   "46.00"
 )
 
+check(
+  "'grabs and takes away' with 'remain': 45 - 13 = 32",
+  "A] lOoO bSsTtEr] cLaW] fO^rCe Is FoRtY FiVe NoOtOnS~ um - BuT/ tHe OtHeR ClAw] grAbS aNd TaKeS aWy ThIrTeEn NooToNs] , HoW MaNy NeWtOnS ReMaIn< ?!",
+  "32.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
