@@ -236,6 +236,9 @@ export function solveChallenge(text) {
     // " - unit" pattern: dash between a number and its unit label (e.g. "twenty three - neuttons X Y seven")
     // the unit word comes right after the dash — this is number-to-unit formatting, not subtraction
     if (sym === " - " && isUnitTokenAt(right.trim().split(/\s+/), 0)) continue
+    // " - um/uh/er" pattern: filler/hesitation word follows dash — sentence-pause dash, not subtraction
+    // e.g. "swims at twenty three cm per second - um - and accelerates by seven"
+    if (sym === " - " && /^(um|uh|er|hmm|ah)\b/.test(right.trimStart())) continue
     // use tokens nearest to the operator to avoid accumulating numbers from the narrative
     // e.g. "claw exerts twenty three nootons ... product of twenty three * seven"
     //      parseNumber(full left) accumulates 23+7+23=53; parsing last ~8 tokens gives 23

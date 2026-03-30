@@ -563,6 +563,12 @@ check(
 )
 
 check(
+  "filler 'um' after dash: '- um -' is sentence pause not subtraction, accelerates (23+7=30)",
+  "A] lOo.bS-tEr ]S wImS/ aT tWeNtY ThReE cm/ pEr sEcOnD - um - aNd^ aCcElErAaTes\\ bY sEvEn ~ wHaT's< tHe ]nEw| veLaWcItee?",
+  "30.00"
+)
+
+check(
   "'grabs and takes away' with 'remain': 45 - 13 = 32",
   "A] lOoO bSsTtEr] cLaW] fO^rCe Is FoRtY FiVe NoOtOnS~ um - BuT/ tHe OtHeR ClAw] grAbS aNd TaKeS aWy ThIrTeEn NooToNs] , HoW MaNy NeWtOnS ReMaIn< ?!",
   "32.00"
