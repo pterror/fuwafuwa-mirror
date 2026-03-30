@@ -539,5 +539,11 @@ check(
   "38.00"
 )
 
+check(
+  "new velocity with 'increases by' and obfuscated 'velowcitee': 23+7=30 (was throw: no velocity/accelerates match)",
+  "A] Lo.bS-tEr Um S^wImS| aT/ tW/eN tY ThIrTy? Noo oops um tW]eNtY ThReE cEm^tImEtErS PeR SeCoNd, AnD^ iNcrReEaSeS\\ bY[ SeVeN, WhAt] Is ThE NeW VeLoWcItEe?",
+  "30.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

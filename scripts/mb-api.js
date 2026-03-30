@@ -427,7 +427,7 @@ export function solveChallenge(text) {
   // handles "swims at X meters per second and accelerates by Y, new velocity?"
   // uses unit-anchored extraction for the speed (number before "meters per second")
   // and the last non-speed number as the delta
-  if (soupHas("velocity") || soupHas("accelerates") || soupHas("accelerate")) {
+  if (soupHas("velocity") || soupHas("accelerates") || soupHas("accelerate") || soupHas("increases")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     const allNums = extractAllNumbers(cleaned)
 if (unitNums.length >= 1) {
@@ -437,6 +437,25 @@ if (unitNums.length >= 1) {
       if (delta !== undefined) return (speed + delta).toFixed(2)
     }
     if (allNums.length === 2) return (allNums[0] + allNums[1]).toFixed(2)
+    // fallback: when unit-anchored extraction fails (e.g. unit split across tokens like "cem timeters"),
+    // find speed as last number before "per", delta as first number after "by"
+    {
+      const toks = cleaned.split(/\s+/).filter(Boolean)
+      const perIdx = toks.findIndex(t => /^p+e+r+$/.test(t))
+      const byIdx = toks.findLastIndex(t => /^b+y+$/.test(t))
+      if (perIdx > 0) {
+        const speedCandidates = extractAllNumbers(toks.slice(0, perIdx).join(' '))
+        if (speedCandidates.length > 0) {
+          const speed = speedCandidates.at(-1)
+          if (byIdx > perIdx) {
+            const deltaCandidates = extractAllNumbers(toks.slice(byIdx + 1).join(' '))
+            if (deltaCandidates.length > 0) return (speed + deltaCandidates[0]).toFixed(2)
+          }
+          const delta = [...allNums].reverse().find(n => Math.abs(n - speed) > 0.001)
+          if (delta !== undefined) return (speed + delta).toFixed(2)
+        }
+      }
+    }
   }
 
   // — fallback: if exactly two numbers, add them —
