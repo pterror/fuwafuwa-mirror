@@ -323,7 +323,7 @@ export function solveChallenge(text) {
   // "X per [action], N [action]s, total" → rate × count (e.g. "twenty neotons per strike, three strikes")
   // must check before total keyword (which would otherwise add)
   // exclude "per second/minute/hour/meter" — those are unit rates, not operational "per"
-  const perIsRate = /\bper\b/.test(cleaned) && !/\bper\s+(second|seconds|minute|minutes|hour|hours|meter|meters|metre|metres|kilogram|kilograms)\b/.test(cleaned)
+  const perIsRate = /\bper\b/.test(cleaned) && !/\bper\s+(second|seconds|minute|minutes|hour|hours|meter|meters|metre|metres|kilogram|kilograms)\b/.test(cleaned) && !/(persec|permin|perhour|permeter|permetre)/.test(soup)
   // "each" + total/combined → multiply (e.g. "24 eye facets, each sprouts 6 neurons, how many total")
   const eachIsRate = /\beach\b/.test(cleaned) || soupHas("each")
   if ((perIsRate || eachIsRate) && (/\b(total|combined|sum|altogether)\b/.test(cleaned) || soupHas("total") || soupHas("combined"))) {

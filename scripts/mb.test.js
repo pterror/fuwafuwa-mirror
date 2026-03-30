@@ -533,5 +533,11 @@ check(
   "57.00"
 )
 
+check(
+  "total force: obfuscated 'per sec^ond' must not trigger perIsRate multiply (23+15=38)",
+  "A] LoObBsT- Er SwImS LiKe Um At tW/eNtY ThReE cMeN tS PeR SeC^oNd, AnD ClAwS ExErT FiFtEeN NoOtOnS - WhAt Is ThE/ ToTaL FoRcE?",
+  "38.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
