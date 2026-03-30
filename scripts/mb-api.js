@@ -492,7 +492,7 @@ const MASS_UNIT_PATTERNS = [
 // try to match tokens[startIdx..startIdx+size) as a single number value
 // returns [value, tokensConsumed] or null
 // common English non-number words that fuzzy passes might mis-match (e.g. "there" → "three")
-const FUZZY_STOP_WORDS = new Set(["there", "their", "these", "those", "where", "here", "were", "ther", "other", "another"])
+const FUZZY_STOP_WORDS = new Set(["there", "their", "these", "those", "where", "here", "were", "ther", "other", "another", "then"])
 
 function matchNumberChunk(tokens, wordsSorted, startIdx) {
   // four-pass approach to prefer exact multi-token matches over fuzzy single-token matches:
@@ -502,7 +502,7 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
   //   pass 3: anagram match (handles transposed chars like "trhee" = "three")
   //   pass 4: single-char substitution (handles e.g. "fourleen" → "fourteen", l→t)
   // this prevents e.g. "twen" matching "ten" (via alt/tolerant) from beating ["twen","ty"] = "twenty"
-  for (let pass = 0; pass <= 4; pass++) {
+  for (let pass = 0; pass <= 5; pass++) {
     let bestMatch = null
     for (let size = 1; size <= Math.min(4, tokens.length - startIdx); size++) {
       const soup = tokens.slice(startIdx, startIdx + size).join("").replace(/[^a-z]/g, "")
@@ -564,6 +564,20 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
             }
           }
           if (ok && diffs === 1) return [NUMBER_WORDS[word], size]
+        }
+        continue
+      }
+
+      // pass 5: tolerant single-token — handles one noise char inserted between required letters
+      // e.g. "foolur" → "four" (extra 'l' inserted between 'o' and 'u')
+      // uses .? between each charPat to absorb one optional noise char between letters
+      if (pass === 5) {
+        if (size !== 1) continue
+        if (FUZZY_STOP_WORDS.has(soup)) continue
+        for (const word of wordsSorted) {
+          if (word.length < 3) continue
+          const tolPat = new RegExp("^" + word.split("").map(charPat).join(".?") + "$")
+          if (tolPat.test(soup)) return [NUMBER_WORDS[word], 1]
         }
         continue
       }

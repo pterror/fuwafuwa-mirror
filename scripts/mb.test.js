@@ -563,5 +563,11 @@ check(
   "32.00"
 )
 
+check(
+  "noise char in 'four': 'fOoLuR' → four, twenty-four × three claws = 72",
+  "lOoO-bSsStEr~ sW/iMmS, uMm, aNd^ hAs~ cLlAaWw F-oRcE oF tWwEeNtY{ fOoLuR} nEeWtOoNs| aNd~ hAs< tHhRrEe> cLlAaWwS, wHaT| iS~ tOoTaAl- fOoRcE?",
+  "72.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
