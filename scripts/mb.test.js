@@ -72,6 +72,11 @@ check(
   "15.00"
 )
 check(
+  "slows down by: 3 unit-anchored numbers (23 m/s, 6 nootons noise, 7 m/s) → 23-7=16",
+  "A] lO^bSt-Er S[wImS lOo0oNg]ly At- tW/eN tY ThReE mEtErS PeR- SeCoNd, Uhm, WhIlE iTs ClAw-ExErT sIx- nOotOns- Of -fOrCe Um, aNd- iT sLoWs- DoWn bY- sEvEn- mEtErS- PeR- SeCoNd, wHaT iS iTs FiNaL- VeLo0oCiTy?",
+  "16.00"
+)
+check(
   "total force: two claws same direction (23+15)",
   "A] Lo.BbSsT-tEr S^wI mMs UmM, ClAw ExErTs TwEnTy ThReE NeW^tOnS, AnOtHeR ClAw ExErTs FiFtEeN NeW|tOnS, WhAtS ToTaL FoRcE?",
   "38.00"

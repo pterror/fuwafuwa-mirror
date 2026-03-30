@@ -375,6 +375,16 @@ export function solveChallenge(text) {
       || soupHas("remaining") || soupHas("remain") || soupHas("takesaway") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("reducing") || soupHas("decreases") || soupHas("resists") || soupHas("subtracts")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     if (unitNums.length === 2) return Math.abs(unitNums[0] - unitNums[1]).toFixed(2)
+    // 3+ unit-anchored numbers: find "by [N unit]" to isolate the delta (e.g. "slows down by 7 m/s" with noise "6 newtons")
+    if (unitNums.length >= 3) {
+      const tokens = cleaned.split(/\s+/)
+      const byIdx = tokens.findIndex(t => t.replace(/[^a-z]/g, '') === 'by')
+      if (byIdx !== -1) {
+        const afterBy = tokens.slice(byIdx + 1).join(' ')
+        const afterByNums = extractNumbersPrecedingUnits(afterBy)
+        if (afterByNums.length > 0) return Math.abs(unitNums[0] - afterByNums[0]).toFixed(2)
+      }
+    }
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
   }
