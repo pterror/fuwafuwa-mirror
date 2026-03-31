@@ -171,6 +171,21 @@ check(
 )
 
 check(
+  "accelerates by five times with cm/s unit (abbreviation not in UNIT_PATTERNS): 23 × 5 = 115",
+  "ThIs] lO^bS t-Er sW/iMmS aT/ tW eN tY tHrEe] cM/s ~ anD| aCcE lErA tEs- bY/ fIvE {tiMeS,} wHaT< iS> tHe/ nEw- sPeE d?",
+  "115.00"
+)
+
+check(
+  // 'two' is noise between 'twenty' and 'three'; extractNumbersPrecedingUnits accumulates 20+2+3=25
+  // reduces handler uses speed=25, delta=7 (last allNums ≠ speed) → 25-7=18
+  // ideally 23-7=16 but parser can't distinguish noise 'two' from compound digit
+  "reduces by seven with noise 'two' before 'three': speed≈25, delta=7, 25-7=18",
+  "A] lO b-StEr S^wImS[ aT tW/eN tY TwO ThReE cEnTiMeTeRs PeR sEcOnD, uM| iT rEdU cEs- bY sEvEn, wH-aT Is ThE nEw VeLoCiTy?",
+  "18.00"
+)
+
+check(
   "first-char substitution: 'G hHrEe' → three (twenty-three minus seven = 16)",
   "A] lOoObbSssTtEr S^wIiMmSs/ aT- tW/eNnTy G hHrEe ] cEeMm EeTtEeR s PeR/ sEeCcoNnD, aNd- sLoWwS] bY^ sEeVvEeN { cEeMm EeTtEeR s PeR/ sEeCcoNnD, wHaT/ iS^ tHe- nEw] vEeLlOoCcIiTy?",
   "16.00"

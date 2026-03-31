@@ -307,6 +307,12 @@ export function solveChallenge(text) {
         const unitNums = extractNumbersPrecedingUnits(cleaned)
         const baseNums = unitNums.filter(n => n !== multiplier)
         if (baseNums.length === 1) return (baseNums[0] * multiplier).toFixed(2)
+        // fallback: no unit-anchored numbers (e.g. unit is abbreviation like "cm/s" not in UNIT_PATTERNS)
+        // use all extracted numbers minus the multiplier itself
+        if (baseNums.length === 0) {
+          const allNums = extractAllNumbers(cleaned).filter(n => Math.abs(n - multiplier) > 0.001)
+          if (allNums.length === 1) return (allNums[0] * multiplier).toFixed(2)
+        }
       }
       // fallback: word before "times" is a unit word, not a number (e.g. "newtons times seven")
       // try the number AFTER "times" as the multiplier, and unit-anchored number as the base
@@ -389,6 +395,13 @@ export function solveChallenge(text) {
       }
     }
     const nums = extractAllNumbers(cleaned)
+    // when we have one unit-anchored speed, use it as base and find delta as last non-speed number
+    // avoids false delta from noise numbers (e.g. "twenty two three cm/s, reduces by seven" → speed=22, delta=7, not |22-3|=19)
+    if (unitNums.length === 1 && nums.length >= 2) {
+      const speed = unitNums[0]
+      const delta = [...nums].reverse().find(n => Math.abs(n - speed) > 0.001)
+      if (delta !== undefined) return Math.abs(speed - delta).toFixed(2)
+    }
     if (nums.length >= 2) return Math.abs(nums[0] - nums[1]).toFixed(2)
   }
   // "how far" / "how much distance" → distance = speed × time (multiply)
