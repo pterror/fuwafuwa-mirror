@@ -92,6 +92,11 @@ check(
   "30.00"
 )
 check(
+  "new velocity: 'doubled by two' means ×2, not +2 (23×2=46)",
+  "A] lOoO bSsT-Er sW/iMmS aT tWeN tY tHrEe] mE^tErS pEr] mInUtE, aFtEr- mOlTtInG iT's vElAwCiTyy dOoUbLlEeD bY tWo/ , wHaT' s tHe] nEw- sPeEeD?",
+  "46.00"
+)
+check(
   "new velocity: accelerates by seven, doubled 'twenty' prefix (23+7=30)",
   "A] lO.oObBsSsTtErr S^wIiMmS\\ aT/ tWeNeTtYy tW/eN tY tHrEe mE]tErS PeR sEcOnD ~aNd- AcCeLeRaaTtEs bY/ sEvEn, uM wHaT] Is- ThE nEw^ VeLoOoCiTy??",
   "30.00"

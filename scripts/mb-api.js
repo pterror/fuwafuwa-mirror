@@ -441,6 +441,23 @@ export function solveChallenge(text) {
     }
   }
 
+  // "velocity doubled [by N]" → new velocity = old velocity × N (or ×2 if N absent)
+  // "doubled by two" means the velocity is doubled (×2), not incremented by 2
+  if (soupHas("doubled")) {
+    const unitNums = extractNumbersPrecedingUnits(cleaned)
+    const allNums = extractAllNumbers(cleaned)
+    const speed = unitNums.length >= 1 ? unitNums[0] : allNums[0]
+    if (!isNaN(speed)) {
+      // look for a multiplier after "doubled by"
+      const doubledByMatch = cleaned.match(/doubled\s+by\s+(\w+)/)
+      if (doubledByMatch) {
+        const multiplier = parseNumber(doubledByMatch[1])
+        if (!isNaN(multiplier) && multiplier >= 1) return (speed * multiplier).toFixed(2)
+      }
+      return (speed * 2).toFixed(2)
+    }
+  }
+
   // "velocity"/"accelerates by" → new velocity = old velocity + delta
   // handles "swims at X meters per second and accelerates by Y, new velocity?"
   // uses unit-anchored extraction for the speed (number before "meters per second")
