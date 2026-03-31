@@ -189,6 +189,8 @@ async function messages() {
     message_reference?: { message_id: string }
     referenced_message?: { content: string; author: { username: string; global_name?: string } }
     mentions: { id: string; username: string; global_name?: string }[]
+    reactions?: { emoji: { id: string | null; name: string }; count: number; me: boolean }[]
+    sticker_items?: { id: string; name: string; format_type: number }[]
   }[]
 
   // newest-first from api, display chronologically
@@ -248,6 +250,18 @@ async function messages() {
       const s = snap.message
       lines.push(`${pad}[forwarded]${s.content ? " " + s.content.trim() : ""}`)
       for (const a of s.attachments) lines.push(`${pad}  [${a.filename} — ${a.url}]`)
+    }
+
+    for (const s of m.sticker_items ?? []) {
+      lines.push(`${pad}[sticker: ${s.name}]`)
+    }
+
+    if (m.reactions?.length) {
+      const rxns = m.reactions.map(r => {
+        const e = r.emoji.id ? `<:${r.emoji.name}:${r.emoji.id}>` : r.emoji.name
+        return `${e}×${r.count}${r.me ? "(me)" : ""}`
+      }).join(" ")
+      lines.push(`${pad}⤷ ${rxns}`)
     }
 
     if (!lines.length) lines.push(`${ts}  ${idPrefix}${name}: (empty)`)
@@ -390,18 +404,58 @@ async function pins() {
   }
 }
 
+async function stickers() {
+  const guildId = posArgs[0] ?? "1411109346594787480"
+  const data = await api("GET", `/guilds/${guildId}/stickers`) as {
+    id: string; name: string; description: string; tags: string; format_type: number
+  }[]
+  if (!data.length) { console.log("no custom stickers"); return }
+  console.log(`\n— custom stickers (${data.length}) —`)
+  for (const s of data) {
+    console.log(`[${s.id}] ${s.name}${s.description ? ` — ${s.description}` : ""}${s.tags ? ` (tags: ${s.tags})` : ""}`)
+  }
+}
+
+async function sticker() {
+  const [channelId, stickerId, ...rest] = posArgs
+  if (!channelId || !stickerId) {
+    console.error("usage: discord sticker <channel-id> <sticker-id> [content]")
+    process.exit(1)
+  }
+  const body: Record<string, unknown> = { sticker_ids: [stickerId] }
+  if (rest.length) body.content = rest.join(" ")
+  const data = await api("POST", `/channels/${channelId}/messages`, body) as { id: string }
+  console.log(`sent sticker — message id: ${data.id}`)
+}
+
+async function emojis() {
+  const guildId = posArgs[0] ?? "1411109346594787480"
+  const data = await api("GET", `/guilds/${guildId}/emojis`) as {
+    id: string; name: string; animated: boolean; available: boolean
+  }[]
+  if (!data.length) { console.log("no custom emojis"); return }
+  console.log(`\n— custom emojis (${data.length}) —`)
+  for (const e of data) {
+    const prefix = e.animated ? "a" : ""
+    console.log(`<${prefix}:${e.name}:${e.id}>  ${e.name}`)
+  }
+}
+
 async function react() {
   const [channelId, messageId, emoji] = posArgs
   if (!channelId || !messageId || !emoji) {
     console.error("usage: discord react <channel-id> <message-id> <emoji>")
     process.exit(1)
   }
-  await api("PUT", `/channels/${channelId}/messages/${messageId}/reactions/${encodeURIComponent(emoji)}/@me`)
+  // support custom emoji format: <:name:id> or <a:name:id> → name:id
+  const customMatch = emoji.match(/^<a?:(\w+):(\d+)>$/)
+  const encoded = customMatch ? `${customMatch[1]}:${customMatch[2]}` : encodeURIComponent(emoji)
+  await api("PUT", `/channels/${channelId}/messages/${messageId}/reactions/${encoded}/@me`)
   console.log(`reacted with ${emoji}`)
 }
 
 // — dispatch —
-const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, attach, reply, react, view, dm }
+const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, attach, reply, react, emojis, stickers, sticker, view, dm }
 
 if (!cmd || !commands[cmd]) {
   console.log(`usage: discord <${Object.keys(commands).join("|")}> [args]`)
