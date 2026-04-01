@@ -87,6 +87,11 @@ check(
   "52.00"
 )
 check(
+  "total force: single claw, asterisk obfuscation splits thirty*two, how much total (32)",
+  "A] LooObSstt-Er]s ClA^w F[oRce Is ThI rT y* T wO, HoW/ MuCh^ ToTaL F[oRce] wIlL tHe Lo.oBstErS< ExErCisE, BlAh Um?",
+  "32.00"
+)
+check(
   "new speed: adds seven (23+7)",
   "A] LoO b-StErS S^wImS [aT tW/eN tY ThReE mE^tErS PeR SeCoNd ~AnD AnTeNnA ToUcH AdDs SeVeN, WhAt Is ThE NeW SpEeD?",
   "30.00"
@@ -598,6 +603,12 @@ check(
   "noise char in 'four': 'fOoLuR' → four, twenty-four × three claws = 72",
   "lOoO-bSsStEr~ sW/iMmS, uMm, aNd^ hAs~ cLlAaWw F-oRcE oF tWwEeNtY{ fOoLuR} nEeWtOoNs| aNd~ hAs< tHhRrEe> cLlAaWwS, wHaT| iS~ tOoTaAl- fOoRcE?",
   "72.00"
+)
+
+check(
+  "doubles during molting: 32 × 2 = 64 ('doubles' not 'doubled')",
+  "ThE] DoMiNaNt ]Lo.oB-StErR S^ ClAw] FoR^cE Is] tHiR tY] tW/oO ]NeOwT/OnS umm, AnD] iT] DoUbLeS] DuRiNg] MoL- tInG ]So] wHaT] Is] ThE] nEw] FoR^cE? ~",
+  "64.00"
 )
 
 console.log(`\n${passed} passed, ${failed} failed`)

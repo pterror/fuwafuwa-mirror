@@ -373,6 +373,8 @@ export function solveChallenge(text) {
       if (count !== undefined) return (unitNums[0] * count).toFixed(2)
     }
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
+    // single number: no count or second force given — just return the one value
+    if (nums.length === 1) return nums[0].toFixed(2)
   }
   // "difference" / "water/air resistance" / "slows by" / "reduces" / "decreases" / "subtracts" / "takes away" / "remain" → subtract
   // "opposing" only signals subtraction when "net" is also present (e.g. "net force") — without "net", opposing can appear in addition problems ("if they add")
@@ -454,9 +456,9 @@ export function solveChallenge(text) {
     }
   }
 
-  // "velocity doubled [by N]" → new velocity = old velocity × N (or ×2 if N absent)
+  // "velocity doubled/doubles [by N]" → new velocity = old velocity × N (or ×2 if N absent)
   // "doubled by two" means the velocity is doubled (×2), not incremented by 2
-  if (soupHas("doubled")) {
+  if (soupHas("doubled") || soupHas("doubles")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     const allNums = extractAllNumbers(cleaned)
     const speed = unitNums.length >= 1 ? unitNums[0] : allNums[0]
