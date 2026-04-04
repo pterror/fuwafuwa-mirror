@@ -239,6 +239,9 @@ export function solveChallenge(text) {
     // " - um/uh/er" pattern: filler/hesitation word follows dash — sentence-pause dash, not subtraction
     // e.g. "swims at twenty three cm per second - um - and accelerates by seven"
     if (sym === " - " && /^(um|uh|er|hmm|ah)\b/.test(right.trimStart())) continue
+    // " - times" pattern: multiplication keyword follows dash — separator before multiplier, not subtraction
+    // e.g. "claw exerts twenty five newtons - times / three, what is total force?" → 25 × 3 = 75
+    if (sym === " - " && /^t+i+m+e+s+\b/.test(right.trimStart())) continue
     // use tokens nearest to the operator to avoid accumulating numbers from the narrative
     // e.g. "claw exerts twenty three nootons ... product of twenty three * seven"
     //      parseNumber(full left) accumulates 23+7+23=53; parsing last ~8 tokens gives 23
@@ -328,6 +331,21 @@ export function solveChallenge(text) {
         if (unitNums.length >= 1) return (unitNums[0] * afterNum).toFixed(2)
         const allNums = extractAllNumbers(cleaned).filter(n => Math.abs(n - afterNum) > 0.001)
         if (allNums.length >= 1) return (allNums[0] * afterNum).toFixed(2)
+      }
+    }
+    // no word directly before "times" (e.g. "25 newtons - times three") — find "times" keyword, use number after it
+    if (!timesMatch && soupHas("times")) {
+      const timesPos = cleaned.search(/\bt+i+m+e+s+\b/)
+      if (timesPos >= 0) {
+        const timesToken = cleaned.slice(timesPos).match(/\bt+i+m+e+s+\b/)
+        if (timesToken) {
+          const afterTimes = cleaned.slice(timesPos + timesToken[0].length).trim().split(/\s+/).slice(0, 8).join(" ")
+          const afterNum = parseNumber(afterTimes)
+          if (!isNaN(afterNum) && afterNum >= 2) {
+            const unitNums = extractNumbersPrecedingUnits(cleaned)
+            if (unitNums.length >= 1) return (unitNums[0] * afterNum).toFixed(2)
+          }
+        }
       }
     }
   }

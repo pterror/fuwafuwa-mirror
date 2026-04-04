@@ -623,5 +623,11 @@ check(
   "3.00"
 )
 
+check(
+  "total force: '- timess' dash before times is separator not subtraction (25×3=75)",
+  "A] LoOoBbSsTtEeR ] ClLaAwW ExX eRrT sS ^ tW/eN tY fI vE nEeW tOoN sS - TiMmEsS / ThHrReEe, WhHaT ] IsS ToTaL FoOrRcEe?",
+  "75.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
