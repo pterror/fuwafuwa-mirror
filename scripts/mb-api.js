@@ -460,6 +460,19 @@ export function solveChallenge(text) {
     }
   }
 
+  // "velocity change?" / "force change?" → asking for the delta, not the total
+  // e.g. "claw force is 25 nootons, three after molting, velocity change?" → 3
+  if (soupHas("change")) {
+    const unitNums = extractNumbersPrecedingUnits(cleaned)
+    const allNums = extractAllNumbers(cleaned)
+    if (unitNums.length >= 1 && allNums.length >= 2) {
+      // the base is the unit-anchored number; the delta is the other number
+      const delta = allNums.find(n => Math.abs(n - unitNums[0]) > 0.001)
+      if (delta !== undefined) return delta.toFixed(2)
+    }
+    if (allNums.length === 2) return Math.abs(allNums[1] - allNums[0]).toFixed(2)
+  }
+
   // "velocity doubled/doubles [by N]" → new velocity = old velocity × N (or ×2 if N absent)
   // "doubled by two" means the velocity is doubled (×2), not incremented by 2
   if (soupHas("doubled") || soupHas("doubles")) {

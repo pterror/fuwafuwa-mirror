@@ -617,5 +617,11 @@ check(
   "64.00"
 )
 
+check(
+  "velocity change: claw force 25 nootons, gains 3 after molting, change? → 3 (delta not total)",
+  "ThIs] Lo.oBsTtErR] ClAw-FoRcE Is] TwEnTy FiVe NoOtOnS* ThReE AfTeR MoLtInG~ AnD VeLo.oCiTy ChAnGe?",
+  "3.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
