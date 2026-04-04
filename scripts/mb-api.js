@@ -209,6 +209,7 @@ export function solveChallenge(text) {
     [" × ",      (a, b) => a * b],
     [" ÷ ",      (a, b) => a / b],
     [" * ",      (a, b) => a * b],
+    [" x ",      (a, b) => a * b],
     [" plus ",   (a, b) => a + b],
     [" minus ",  (a, b) => a - b],
     [" times ",  (a, b) => a * b],

@@ -180,6 +180,11 @@ check(
   "ThIs] lO^bS t-Er sW/iMmS aT/ tW eN tY tHrEe] cM/s ~ anD| aCcE lErA tEs- bY/ fIvE {tiMeS,} wHaT< iS> tHe/ nEw- sPeE d?",
   "115.00"
 )
+check(
+  "standalone 'x' as multiplication operator: 23 x 5 = 115",
+  "A] Lo.bS tEr^ ClAw] ExErTs Um TwEnTy ThReE ] NeW^-ToNs ~ x FiVe ClAwS- um, WhAt/ Is ThE ToTaL FoR cE?",
+  "115.00"
+)
 
 check(
   // 'two' is noise between 'twenty' and 'three'; extractNumbersPrecedingUnits accumulates 20+2+3=25
