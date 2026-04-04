@@ -321,6 +321,12 @@ check(
 )
 
 check(
+  "torque = force * distance with two unit-anchored numbers on left: 40 newtons, 2 meters, torque = forty * two = 80",
+  "A] lO-bS tEr'S ClAw^ FoRcE Is FoR tY? (sh at TeR) FoR tY nEwToNs ]aNd- DiS tAnCe Is T wO/ mEtErS, ToRqUe = FoR tY * TwO, HoW/ mUcH ToRqUe? umm lxobqstwer ~ loooobsssster ph yysxics",
+  "80.00"
+)
+
+check(
   "anagram false positive: 'neeo' (from nEeO oT oNs) must not match 'one' — 22+5=27 not 23+5=28",
   "A] lO b.StErS cL aW fO rCe Is tW eN tYy tW o] nEeO oT oNs~ aNd- AfTeR m O lT iN g iT iN crEaSeS bY- fI vEe, hOw/ mUcH tOt Al- fO rCe^ nOw?",
   "27.00"

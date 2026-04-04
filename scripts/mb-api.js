@@ -265,7 +265,11 @@ export function solveChallenge(text) {
     const unitB = unitRightNums.length > 0 ? unitRightNums[0] : NaN
     // use unit-anchored number for left side only: avoids structural "one claw" accumulation in parseA
     // right side keeps existing logic — right operand may be a decimal (e.g. "4.5 m/s") where unitB is inaccurate
-    const a = !isNaN(unitA) ? unitA : ((!isNaN(extractA) && (isNaN(parseA) || extractA > parseA)) ? extractA : parseA)
+    // exception: for explicit * and ×, prefer the number nearest the operator (extractA from nearLeft)
+    // e.g. "forty newtons and distance is two meters, torque = forty * two" → unitA=2 (two meters, last
+    // unit-anchored in full left) but extractA=40 (the adjacent operand) — extractA is correct here
+    const useNearestForMul = (sym === " * " || sym === " × ") && !isNaN(extractA)
+    const a = useNearestForMul ? extractA : (!isNaN(unitA) ? unitA : ((!isNaN(extractA) && (isNaN(parseA) || extractA > parseA)) ? extractA : parseA))
     const b = (!isNaN(extractB) && (isNaN(parseB) || extractB > parseB)) ? extractB : parseB
     if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
       // for *, only trust parsed numbers if the original text had a "real" *:
