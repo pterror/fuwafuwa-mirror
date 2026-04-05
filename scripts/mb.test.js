@@ -634,5 +634,11 @@ check(
   "75.00"
 )
 
+check(
+  "other claw without unit, spurious 'thirty lobster' prefix: 32+14=46 (was 90 from 30+32+28)",
+  "ThIrTy] LoOoObSsT- ErrR's ClAw^ FoRcE Is ThIrTy TwO NeW-TooNs ~ Um AnD ThE OtHeR ClAw Is FoU rTeeN FoUrTeEn? HaHa | HoW MaNy NeW-TooNs ToTaL",
+  "46.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

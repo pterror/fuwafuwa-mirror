@@ -395,6 +395,16 @@ export function solveChallenge(text) {
       const count = nums.find(n => Math.abs(n - unitNums[0]) > 0.001)
       if (count !== undefined) return (unitNums[0] * count).toFixed(2)
     }
+    // "the other claw is [N]" pattern where N lacks an explicit unit: sum the unit-anchored value with the first number after "other"
+    // e.g. "claw force is thirty two newtons ~ and the other claw is fourteen fourteen? ... how many newtons total" → 32+14=46
+    // prevents spurious numbers (like descriptive "thirty lobster") from inflating the sum
+    if (unitNums.length === 1 && soupHas("other")) {
+      const otherIdx = cleaned.indexOf('other')
+      if (otherIdx >= 0) {
+        const otherNums = extractAllNumbers(cleaned.slice(otherIdx))
+        if (otherNums.length >= 1) return (unitNums[0] + otherNums[0]).toFixed(2)
+      }
+    }
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
     // single number: no count or second force given — just return the one value
     if (nums.length === 1) return nums[0].toFixed(2)
@@ -707,6 +717,9 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
               if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
               else if (val === 100) { current = (current || 1) * 100 }
               else {
+                // once units digit is set, stop — can't add more units without hundred/thousand
+                // prevents "fourteen"+"fourteen"=28 in multi-token soup windows
+                if (found && current % 10 !== 0) break
                 // prevent stacking two round tens within a window (e.g. "twenettyy"+"twenty" = 40)
                 // "twenty twenty" is not valid English for 40 — the first "twenty" is obfuscation noise
                 // hundreds are excluded (current < 100) so "one hundred twenty" still works
