@@ -640,5 +640,11 @@ check(
   "46.00"
 )
 
+check(
+  "share: three lobsters share force of twenty Newtons → total = 3×20 = 60",
+  "A] LoOoBb.-StErR SqUiRrMs^ In~ wAaTtEr, ClAw^-FoRcE Is^ TwEeNnTtYy NeEuToOnS, AnD ThRrEe~ Lo.oObBsStTeRrS ShAaRrEe| ThIs FoRcE, WhAt Is ToTaL FoRcE?",
+  "60.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

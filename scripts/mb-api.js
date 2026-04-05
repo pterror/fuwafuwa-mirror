@@ -389,9 +389,10 @@ export function solveChallenge(text) {
     // one unit-anchored value (force) + one non-unit count → multiply
     // e.g. "claw exerts 26 newtons, has three claws, total force?" → 26 × 3 = 78
     // e.g. "exerts thirty newtons, there are two claws, total force?" → 30 × 2 = 60
-    // only when count context is present ("has N", "there are N", or "each") — otherwise treat as two measurements
+    // e.g. "three lobsters share this force of twenty newtons, total force?" → 20 × 3 = 60
+    // only when count context is present ("has N", "there are N", "each", or "share") — otherwise treat as two measurements
     // "other" signals same unit type (e.g. "the other claw has twelve [newtons]") — don't multiply
-    if (unitNums.length === 1 && nums.length === 2 && !soupHas("other") && (soupHas("has") || eachIsRate || soupHas("are") || soupHas("together"))) {
+    if (unitNums.length === 1 && nums.length === 2 && !soupHas("other") && (soupHas("has") || eachIsRate || soupHas("are") || soupHas("together") || soupHas("share"))) {
       const count = nums.find(n => Math.abs(n - unitNums[0]) > 0.001)
       if (count !== undefined) return (unitNums[0] * count).toFixed(2)
     }
@@ -786,6 +787,9 @@ function extractAllNumbers(text) {
         // also handles cases like "twenty ghh treee] three" where two tokens separate tens and units
         if (found && current > 0 && current % 10 === 0 && current < 100) {
           for (let skip = 1; skip <= 2 && numPos + skip < tokens.length; skip++) {
+            // don't skip over unit tokens — they delimit separate numbers (e.g. "twenty newtons and three lobsters")
+            const skipTokenSoup = tokens[numPos + skip - 1]?.replace(/[^a-z]/g, "") ?? ""
+            if (UNIT_PATTERNS.some(p => p.test(skipTokenSoup))) break
             const nextMatch = matchNumberChunk(tokens, wordsSorted, numPos + skip)
             if (nextMatch !== null && nextMatch[0] > 0 && nextMatch[0] < current) {
               numPos += skip // skip garbage token(s)
