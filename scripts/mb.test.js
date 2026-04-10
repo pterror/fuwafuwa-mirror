@@ -645,6 +645,11 @@ check(
   "A] LoOoBb.-StErR SqUiRrMs^ In~ wAaTtEr, ClAw^-FoRcE Is^ TwEeNnTtYy NeEuToOnS, AnD ThRrEe~ Lo.oObBsStTeRrS ShAaRrEe| ThIs FoRcE, WhAt Is ToTaL FoRcE?",
   "60.00"
 )
+check(
+  "work done: force × distance (32 nootons × 2 meters = 64)",
+  "A] LoObS tEr'S^ ClAw- ExErTs ThIrTy tW]o NoOtOnS~ AnD PuShEs OvEr- TwO MeTeRs, HoW MuCh WoRk D[oNe< By ThE] Lo.o bSstT err?",
+  "64.00"
+)
 
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
