@@ -605,6 +605,12 @@ check(
 )
 
 check(
+  "filler 'um - gah' between two forces: 35+12=47 (not 35-12=23)",
+  "A] lOoO-bSsTtEr ClAwF oRcE iS ThIrTy FiVe NoOtOnS / um - gAh {AnD} AnTeNnA PuSh Is TwElVe NoOtOnS | lxobq, hMm WhAt Is ToTaL FoRcE?",
+  "47.00"
+)
+
+check(
   "'grabs and takes away' with 'remain': 45 - 13 = 32",
   "A] lOoO bSsTtEr] cLaW] fO^rCe Is FoRtY FiVe NoOtOnS~ um - BuT/ tHe OtHeR ClAw] grAbS aNd TaKeS aWy ThIrTeEn NooToNs] , HoW MaNy NeWtOnS ReMaIn< ?!",
   "32.00"

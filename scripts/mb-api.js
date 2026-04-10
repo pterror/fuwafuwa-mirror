@@ -237,9 +237,12 @@ export function solveChallenge(text) {
     // " - unit" pattern: dash between a number and its unit label (e.g. "twenty three - neuttons X Y seven")
     // the unit word comes right after the dash — this is number-to-unit formatting, not subtraction
     if (sym === " - " && isUnitTokenAt(right.trim().split(/\s+/), 0)) continue
-    // " - um/uh/er" pattern: filler/hesitation word follows dash — sentence-pause dash, not subtraction
+    // " - um/uh/er/gah" pattern: filler/hesitation word follows dash — sentence-pause dash, not subtraction
     // e.g. "swims at twenty three cm per second - um - and accelerates by seven"
-    if (sym === " - " && /^(um|uh|er|hmm|ah)\b/.test(right.trimStart())) continue
+    if (sym === " - " && /^(um|uh|er|hmm|ah|gah)\b/.test(right.trimStart())) continue
+    // "filler - filler" pattern: both sides of dash are hesitation words — sentence-pause, not subtraction
+    // e.g. "nootons / um - gah {and} antenna push is twelve" → "um - gah" is a double-hesitation pause
+    if (sym === " - " && /\b(um|uh|er|hmm|ah|gah)\s*$/.test(left.trim()) && /^(um|uh|er|hmm|ah|gah)\b/.test(right.trimStart())) continue
     // " - times" pattern: multiplication keyword follows dash — separator before multiplier, not subtraction
     // e.g. "claw exerts twenty five newtons - times / three, what is total force?" → 25 × 3 = 75
     if (sym === " - " && /^t+i+m+e+s+\b/.test(right.trimStart())) continue
