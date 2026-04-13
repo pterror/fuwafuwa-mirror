@@ -366,7 +366,13 @@ export function solveChallenge(text) {
   const eachIsRate = /\beach\b/.test(cleaned) || soupHas("each")
   if ((perIsRate || eachIsRate) && (/\b(total|combined|sum|altogether)\b/.test(cleaned) || soupHas("total") || soupHas("combined"))) {
     const nums = extractAllNumbers(cleaned)
-    if (nums.length >= 2) return nums.reduce((a, b) => a * b, 1).toFixed(2)
+    // filter out tens sub-components that are prefix of a compound (e.g. 30 when 32 also extracted)
+    // happens when obfuscation splits "thirty two" as ["th","irrty"] + "thirty two" → [30, 32]
+    const filtered = nums.filter((n, _, arr) =>
+      !(n >= 10 && n < 100 && n % 10 === 0 && arr.some(m => m > n && m - n < 10))
+    )
+    const useNums = filtered.length >= 2 ? filtered : nums
+    if (useNums.length >= 2) return useNums.reduce((a, b) => a * b, 1).toFixed(2)
   }
   // "multiplied/multiplies by" with obfuscation — must check before 'total' keyword
   // also catches "multiplys" soup variant (obfuscated "multiplies" with ie→y substitution)

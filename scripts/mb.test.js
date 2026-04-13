@@ -657,5 +657,11 @@ check(
   "64.00"
 )
 
+check(
+  "each neuron fires 14 pulses, claw exerts 32 newtons, total force signal → 32×14=448 (was 13440 from spurious 30 via inter-token 'th'+'irrty')",
+  "A] lO.oBbSsTtErR s ClAw^ eXxEeRrT s/ tH iRrTy ThIrTy? TwO nEwToNs- aNd[ eACh/ nEuRoNn fIiRrEs^ fOuRrTeEeN pUuLlSs, wH-aTs/ tHe- tOoTaLl/ fOrCe* sIgNaLl?",
+  "448.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
