@@ -221,15 +221,15 @@ async function messages() {
 
     const lines: string[] = []
 
+    if (m.content.trim()) {
+      lines.push(`${ts}  ${idPrefix}${name}: ${resolve(m.content.trim()).split("\n").join("\n" + pad + " ".repeat(name.length + 2))}`)
+    }
+
     if (m.referenced_message) {
       const r = m.referenced_message
       const rname = r.author.global_name ?? r.author.username
       const preview = resolve(r.content.trim()).split("\n")[0].slice(0, 80)
       lines.push(`${" ".repeat(ts.length + 2 + idPrefix.length)}↩ ${rname}: ${preview}${r.content.length > 80 ? "…" : ""}`)
-    }
-
-    if (m.content.trim()) {
-      lines.push(`${ts}  ${idPrefix}${name}: ${resolve(m.content.trim()).split("\n").join("\n" + pad + " ".repeat(name.length + 2))}`)
     }
 
     for (const e of m.embeds) {
