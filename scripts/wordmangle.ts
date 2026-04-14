@@ -97,17 +97,138 @@ const wordlist = [
   "bubblegum", "earthquake", "jellyfish", "nightmare", "wanderlust",
   "serendipity", "ephemeral", "iridescent", "melancholy", "petrichor",
   "luminescence", "effervescent", "gossamer", "halcyon", "nebulous",
+  "fuwafuwa", "archipelago", "chrysanthemum", "onomatopoeia", "silhouette",
+  "phosphorescent", "surreptitious", "quintessential", "paradox", "sunflower",
 ];
 
+// --- hint system ---
+function generateHint(original: string, hintLevel: number): string {
+  switch (hintLevel) {
+    case 1: return `${original.length} letters`;
+    case 2: return `starts with "${original[0]}"`;
+    case 3: return `ends with "${original[original.length - 1]}"`;
+    case 4: {
+      // reveal every other letter
+      return [...original].map((c, i) => i % 2 === 0 ? c : "_").join("");
+    }
+    default: return original; // just give it to them
+  }
+}
+
+// --- interactive play mode ---
+async function playMode(difficulty: 1 | 2 | 3, rounds: number) {
+  const rl = require("readline").createInterface({ input: process.stdin, output: process.stdout });
+  const ask = (q: string): Promise<string> => new Promise(r => rl.question(q, r));
+
+  console.log(`\n  wordmangle — interactive mode`);
+  console.log(`  difficulty ${difficulty} · ${rounds} rounds`);
+  console.log(`  type your guess, "hint" for a hint, "skip" to give up\n`);
+
+  let totalScore = 0;
+  let streak = 0;
+  let bestStreak = 0;
+
+  // pick unique words for the session
+  const shuffled = [...wordlist].sort(() => Math.random() - 0.5).slice(0, rounds);
+
+  for (let round = 0; round < shuffled.length; round++) {
+    const word = shuffled[round];
+    const { mangled, transforms } = mangleWord(word, difficulty);
+    let hintsUsed = 0;
+    let solved = false;
+
+    console.log(`  ── round ${round + 1}/${shuffled.length} ──`);
+    console.log(`  ${mangled}`);
+    if (streak >= 3) console.log(`  🔥 streak: ${streak}`);
+    console.log();
+
+    while (!solved) {
+      const answer = (await ask("  > ")).trim().toLowerCase();
+
+      if (answer === "hint") {
+        hintsUsed++;
+        if (hintsUsed <= 4) {
+          console.log(`  hint ${hintsUsed}: ${generateHint(word, hintsUsed)}\n`);
+        } else {
+          console.log(`  no more hints — the word was "${word}"\n`);
+          streak = 0;
+          break;
+        }
+        continue;
+      }
+
+      if (answer === "skip") {
+        console.log(`  skipped — it was "${word}" [${transforms.join(" → ")}]\n`);
+        streak = 0;
+        break;
+      }
+
+      if (answer === "quit" || answer === "q") {
+        console.log(`\n  final score: ${totalScore} points · best streak: ${Math.max(bestStreak, streak)}\n`);
+        rl.close();
+        return;
+      }
+
+      if (answer === word.toLowerCase()) {
+        // base points: 10 * difficulty, minus 2 per hint
+        const points = Math.max(1, 10 * difficulty - 2 * hintsUsed);
+        streak++;
+        bestStreak = Math.max(bestStreak, streak);
+        // streak bonus: +1 per streak beyond 2
+        const streakBonus = streak > 2 ? streak - 2 : 0;
+        const roundScore = points + streakBonus;
+        totalScore += roundScore;
+        console.log(`  yes! +${roundScore} pts${streakBonus ? ` (streak bonus +${streakBonus})` : ""} [${transforms.join(" → ")}]`);
+        console.log(`  total: ${totalScore}\n`);
+        solved = true;
+      } else {
+        // check for close guesses (edit distance)
+        const dist = editDistance(answer, word.toLowerCase());
+        if (dist <= 2) {
+          console.log(`  close! ${dist === 1 ? "one letter off" : "almost there"}\n`);
+        } else {
+          console.log(`  nope\n`);
+        }
+      }
+    }
+  }
+
+  console.log(`  ── game over ──`);
+  console.log(`  score: ${totalScore} · best streak: ${bestStreak}\n`);
+  rl.close();
+}
+
+// minimal edit distance for "close guess" detection
+function editDistance(a: string, b: string): number {
+  const m = a.length, n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => i === 0 ? j : j === 0 ? i : 0)
+  );
+  for (let i = 1; i <= m; i++)
+    for (let j = 1; j <= n; j++)
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+  return dp[m][n];
+}
+
 // --- run it ---
-const difficulty = (parseInt(process.argv[2] || "2") || 2) as 1 | 2 | 3;
-const count = parseInt(process.argv[3] || "5") || 5;
+const mode = process.argv[2];
 
-console.log(`\n  wordmangle — difficulty ${difficulty}\n`);
+if (mode === "play") {
+  const difficulty = (parseInt(process.argv[3] || "2") || 2) as 1 | 2 | 3;
+  const rounds = parseInt(process.argv[4] || "10") || 10;
+  playMode(difficulty, rounds);
+} else {
+  const difficulty = (parseInt(process.argv[2] || "2") || 2) as 1 | 2 | 3;
+  const count = parseInt(process.argv[3] || "5") || 5;
 
-for (let i = 0; i < count; i++) {
-  const word = wordlist[Math.floor(Math.random() * wordlist.length)];
-  const { mangled, transforms } = mangleWord(word, difficulty);
-  console.log(`  ${i + 1}. ${mangled}`);
-  console.log(`     [${transforms.join(" → ")}] original: ${word}\n`);
+  console.log(`\n  wordmangle — difficulty ${difficulty}\n`);
+
+  for (let i = 0; i < count; i++) {
+    const word = wordlist[Math.floor(Math.random() * wordlist.length)];
+    const { mangled, transforms } = mangleWord(word, difficulty);
+    console.log(`  ${i + 1}. ${mangled}`);
+    console.log(`     [${transforms.join(" → ")}] original: ${word}\n`);
+  }
 }
