@@ -8,6 +8,8 @@
  *   bun scripts/hologram.ts create <name> [--owner <discord-user-id>]
  *   bun scripts/hologram.ts facts <id>
  *   bun scripts/hologram.ts add-fact <id> <content>
+ *   bun scripts/hologram.ts update-fact <entity-id> <fact-id> <content>
+ *   bun scripts/hologram.ts delete-fact <entity-id> <fact-id>
  *   bun scripts/hologram.ts config <id>
  *   bun scripts/hologram.ts set-config <id> <key=value> [<key=value> ...]
  *   bun scripts/hologram.ts import-st <charName>  # import from SillyTavern
@@ -81,6 +83,21 @@ const commands: Record<string, (args: string[]) => Promise<void>> = {
     if (!id || !content) { console.error("usage: add-fact <id> <content>"); process.exit(1); }
     const f = await api("POST", `/api/entities/${id}/facts`, { content }) as { id: number };
     console.log(`added fact ${f.id}`);
+  },
+
+  async "update-fact"(args) {
+    const [entityId, factId, ...rest] = args;
+    const content = rest.join(" ");
+    if (!entityId || !factId || !content) { console.error("usage: update-fact <entity-id> <fact-id> <content>"); process.exit(1); }
+    const f = await api("PUT", `/api/entities/${entityId}/facts/${factId}`, { content }) as { id: number; content: string };
+    console.log(`updated fact ${f.id}: ${f.content}`);
+  },
+
+  async "delete-fact"(args) {
+    const [entityId, factId] = args;
+    if (!entityId || !factId) { console.error("usage: delete-fact <entity-id> <fact-id>"); process.exit(1); }
+    await api("DELETE", `/api/entities/${entityId}/facts/${factId}`);
+    console.log(`deleted fact ${factId}`);
   },
 
   async config(args) {
@@ -191,6 +208,8 @@ if (!cmd || !commands[cmd]) {
   console.log("  create <name> [--owner <id>]   create entity");
   console.log("  facts <id>                      list facts");
   console.log("  add-fact <id> <content>         add a fact");
+  console.log("  update-fact <eid> <fid> <text>  update a fact");
+  console.log("  delete-fact <eid> <fid>         delete a fact");
   console.log("  config <id>                     show config");
   console.log("  set-config <id> key=val ...     patch config");
   console.log("  import-st <charName>            import SillyTavern character");
