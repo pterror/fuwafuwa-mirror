@@ -587,6 +587,12 @@ check(
 )
 
 check(
+  "explicit + in question clause: narrative 'fifteen neutrons' must not become left operand (23+15=38)",
+  "A] lO^oObS t-Err S[wI mS/ liKe] aNooOoTtA^eR tOuChInG- BeHaViiOr, WhERe] iTs VeLaWcItEe Is- tW/eNtY ThReE] cMe^tErS pEr- SeCoNd ~ aNd\\ iTs ClAw-FoRce Is{ fIfTeE/n } nEu-ToNs, WhAt] Is- tHe ToTaL ] oF tW]eNtY ThReE + fIfTeEn?",
+  "38.00"
+)
+
+check(
   "new velocity with 'increases by' and obfuscated 'velowcitee': 23+7=30 (was throw: no velocity/accelerates match)",
   "A] Lo.bS-tEr Um S^wImS| aT/ tW/eN tY ThIrTy? Noo oops um tW]eNtY ThReE cEm^tImEtErS PeR SeCoNd, AnD^ iNcrReEaSeS\\ bY[ SeVeN, WhAt] Is ThE NeW VeLoWcItEe?",
   "30.00"

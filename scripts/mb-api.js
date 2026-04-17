@@ -276,7 +276,13 @@ export function solveChallenge(text) {
     // e.g. "forty newtons and distance is two meters, torque = forty * two" → unitA=2 (two meters, last
     // unit-anchored in full left) but extractA=40 (the adjacent operand) — extractA is correct here
     const useNearestForMul = (sym === " * " || sym === " × ") && !isNaN(extractA)
-    const a = useNearestForMul ? extractA : (!isNaN(unitA) ? unitA : ((!isNaN(extractA) && (isNaN(parseA) || extractA > parseA)) ? extractA : parseA))
+    // prefer extractA (last number in nearLeft, i.e. right before the operator) over unitA (from full left):
+    // unitA scans the narrative for unit-anchored numbers and may pick the wrong one — e.g. "swims at
+    // twenty three cm/s, claw force is fifteen neutrons, what is total of twenty three + fifteen?" where
+    // unitA=15 (from "fifteen neutrons" in narrative) but the actual left operand is 23 (in nearLeft)
+    // exception: when nearLeft has no numbers (extractA=NaN), fall back to unitA for cases where the
+    // operand is far from the operator (e.g. "thirty two newtons ... dominance fight getting + fourteen")
+    const a = useNearestForMul ? extractA : (!isNaN(extractA) ? extractA : (!isNaN(unitA) ? unitA : parseA))
     const b = (!isNaN(extractB) && (isNaN(parseB) || extractB > parseB)) ? extractB : parseB
     if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
       // for *, only trust parsed numbers if the original text had a "real" *:
