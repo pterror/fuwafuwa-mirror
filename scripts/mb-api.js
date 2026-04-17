@@ -412,7 +412,16 @@ export function solveChallenge(text) {
       const otherIdx = cleaned.indexOf('other')
       if (otherIdx >= 0) {
         const otherNums = extractAllNumbers(cleaned.slice(otherIdx))
-        if (otherNums.length >= 1) return (unitNums[0] + otherNums[0]).toFixed(2)
+        if (otherNums.length >= 1) {
+          // if the number after "other" is the same as the unit-anchored one, the unit belongs to the "other" claw —
+          // the first claw's value has an unrecognized unit; look for it before "other"
+          if (Math.abs(otherNums[0] - unitNums[0]) < 0.001) {
+            const beforeNums = extractAllNumbers(cleaned.slice(0, otherIdx))
+            if (beforeNums.length >= 1) return (beforeNums[beforeNums.length - 1] + unitNums[0]).toFixed(2)
+          } else {
+            return (unitNums[0] + otherNums[0]).toFixed(2)
+          }
+        }
       }
     }
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)

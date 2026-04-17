@@ -605,6 +605,12 @@ check(
 )
 
 check(
+  "unit 'nEeTwOoT oOnS' contains 'two' — must not pollute sum: 35+12=47 (was 24 from 2×12)",
+  "LoO]bBsT-eR sSwImS^ aNd ]ClAwS fIgHt~ fOr TeRrItOrY, tHe ReSrEaRcH eRs MeAsUrE a ClAw^ FoRcE oF tHiR-tY fIvE }nEeTwOoT oOnS aNd\\ aN oThEr ClAw GaInS tWeLvE [nOoToNs, uM wHaT iS tHe ToTaL- FoRcE?",
+  "47.00"
+)
+
+check(
   "filler 'um - gah' between two forces: 35+12=47 (not 35-12=23)",
   "A] lOoO-bSsTtEr ClAwF oRcE iS ThIrTy FiVe NoOtOnS / um - gAh {AnD} AnTeNnA PuSh Is TwElVe NoOtOnS | lxobq, hMm WhAt Is ToTaL FoRcE?",
   "47.00"
