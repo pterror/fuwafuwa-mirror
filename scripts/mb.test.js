@@ -675,5 +675,11 @@ check(
   "448.00"
 )
 
+check(
+  "number word fused to unit abbreviation: 'threecm' → three, new velocity 23+7=30",
+  "A] L oB-StErS wImMiNnG VeLaWcItEe IsS[ tWeNtY ThReEcM/pErS, Um~ aFtEr M0lTt IiNg It InCrEaSeS By^ SeVeN, WhAtS< ThE NeW> VeLoOociTy?",
+  "30.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

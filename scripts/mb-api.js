@@ -184,6 +184,8 @@ export function solveChallenge(text) {
   // then normalize spacing around operators so "24*6" becomes "24 * 6"
   const cleaned = text.toLowerCase()
     .replace(/[^\w\s+\-×÷*]/g, " ")
+    // split number words fused to unit abbreviations (e.g. "threecm" → "three cm")
+    .replace(/([a-z]{3,})(cm|km|ms|mm)(?=\s|$)/g, "$1 $2")
     .replace(/([×÷*])/g, " $1 ")
     .replace(/\s+/g, " ")
     .trim()
