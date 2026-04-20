@@ -401,6 +401,13 @@ export function solveChallenge(text) {
       const allNums = extractAllNumbers(cleaned)
       if (allNums.length === 2) return (allNums[0] * allNums[1]).toFixed(2)
     }
+    // when asking for total force but unit-anchored numbers include mixed units (e.g. meters + newtons),
+    // filter to only force-unit-anchored numbers to avoid counting distance as force
+    // e.g. "swims at twenty meters, claw force of twenty three newtons and gains fifteen newtons, total force?" → 23+15=38 (not 58)
+    if (unitNums.length >= 2 && soupHas("force")) {
+      const forceNums = extractAllNumbersBeforeUnitType(cleaned, FORCE_UNIT_PATTERNS)
+      if (forceNums.length >= 2 && forceNums.length < unitNums.length) return forceNums.reduce((a, b) => a + b, 0).toFixed(2)
+    }
     if (unitNums.length >= 2) return unitNums.reduce((a, b) => a + b, 0).toFixed(2)
     const nums = extractAllNumbers(cleaned)
     // one unit-anchored value (force) + one non-unit count → multiply
@@ -896,6 +903,39 @@ function extractNumbersPrecedingUnits(text) {
     }
   }
 
+  return results
+}
+
+// extract ALL numbers preceding a specific unit type (e.g. all force-unit-anchored numbers)
+function extractAllNumbersBeforeUnitType(text, unitPatterns) {
+  const results = []
+  const tokens = text.toLowerCase().split(/\s+/).filter(Boolean)
+  const wordsSorted = Object.keys(NUMBER_WORDS).sort((a, b) => b.length - a.length)
+  const isTargetUnit = (toks, idx) => {
+    for (let size = 1; size <= Math.min(3, toks.length - idx); size++) {
+      const soup = toks.slice(idx, idx + size).join('').replace(/[^a-z]/g, '')
+      if (soup && unitPatterns.some(p => p.test(soup))) return true
+    }
+    return false
+  }
+  let i = 0
+  while (i < tokens.length) {
+    let numPos = i, current = 0, total = 0, found = false
+    while (numPos < tokens.length) {
+      const match = matchNumberChunk(tokens, wordsSorted, numPos)
+      if (match === null) break
+      const [val, size] = match
+      if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
+      else if (val === 100) { current = (current || 1) * 100 }
+      else { current += val }
+      found = true; numPos += size
+    }
+    if (found) {
+      const num = total + current
+      if (num > 0 && isTargetUnit(tokens, numPos) && !results.some(r => Math.abs(r - num) < 0.001)) results.push(num)
+      i = numPos
+    } else { i++ }
+  }
   return results
 }
 

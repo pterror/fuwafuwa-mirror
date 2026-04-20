@@ -82,6 +82,11 @@ check(
   "38.00"
 )
 check(
+  "total force: swims at distance (meters) + two force values — distance should not count (23+15)",
+  "A] lO-bS tEr S^wImS aT tWeN tY mEtErS, cLaW fO^rCe oF tWeNtY tHrEe nEwToNs] aNd gAiNs fIfTeEn nEwToNs~, wHaT s ThE tOtAl fOrCe?",
+  "38.00"
+)
+check(
   "total force: how much total (32+20)",
   "A] LoB-StEr^ ClAw FoR|Ce Is ThIrTy TwO NeWtOnS ~ AnD AnOtHeR] ClAw FoR^Ce Is TwEnTy NeWtOnS, HoW MuCh ToTaL FoRcE?",
   "52.00"
