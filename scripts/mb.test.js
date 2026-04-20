@@ -686,5 +686,11 @@ check(
   "30.00"
 )
 
+check(
+  "bracket-noise before *: ']* three' = multiply (24*3=72), velocity keyword doesn't override explicit *",
+  "A] lOoObSsT-eR CLaW^ FoRcee Is tWeN-tY FoUr ]* tHrEe Um, dUrInG DoMiNaNnC e FiGhT sHe ShEeDs MoLt InNeUrOnS, anTaEnNa T oUcHeS, wAtEr PrEsSuRe LiKe, lxobqstwer, veLaaowci tyyy",
+  "72.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

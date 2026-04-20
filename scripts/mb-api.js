@@ -288,11 +288,11 @@ export function solveChallenge(text) {
     const b = (!isNaN(extractB) && (isNaN(parseB) || extractB > parseB)) ? extractB : parseB
     if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
       // for *, only trust parsed numbers if the original text had a "real" *:
-      // a * preceded by space or digit (e.g. "forty * sixteen", "*6") vs letter noise ("ThReE*", "x*I")
-      if (sym !== " * " || /[\s\d]\*/.test(text)) return fn(a, b).toFixed(2)
+      // a * preceded by non-letter (space, digit, or noise char like ]) vs letter noise ("ThReE*", "x*I")
+      if (sym !== " * " || /[^a-zA-Z]\*/.test(text)) return fn(a, b).toFixed(2)
     }
-    // * only attached to letters (no space/digit before any *) is pure obfuscation noise — skip
-    if (sym === " * " && /[a-zA-Z]\*/.test(text) && !/[\s\d]\*/.test(text)) continue
+    // * only attached to letters (no non-letter before any *) is pure obfuscation noise — skip
+    if (sym === " * " && /[a-zA-Z]\*/.test(text) && !/[^a-zA-Z]\*/.test(text)) continue
   }
 
   // — question-keyword strategy (after operators, to avoid spurious number extraction from narrative) —
