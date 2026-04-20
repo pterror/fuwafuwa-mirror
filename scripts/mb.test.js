@@ -692,5 +692,11 @@ check(
   "72.00"
 )
 
+check(
+  "es+seven should not fuse to eleven: 32-7=25 (was 21 from 'esseven' → 'eleven' single-char sub)",
+  "A] L oO bS tEr S^wImS[ LiKe Um, LxObq] ExErTs] ThIrTy TwO N eU^-ToNs] BuT/ LoS eS] SeVeN, WhAtS ReMaInInG?",
+  "25.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

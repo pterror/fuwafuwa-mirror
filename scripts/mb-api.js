@@ -643,6 +643,15 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
       // passes 2+ (fuzzy/tolerant/anagram/subst): skip common English words that are not numbers
       // e.g. "there" → "three" false-positive in tolerant pass
       if (pass >= 2 && FUZZY_STOP_WORDS.has(soup)) continue
+      // passes 3+ (fuzzy): don't absorb standalone number words into a multi-token window
+      // e.g. "es" + "seven" → "esseven" should not match "eleven" — "seven" is a standalone number
+      if (pass >= 3 && size > 1) {
+        const hasSuffixNumber = tokens.slice(startIdx + 1, startIdx + size).some(t => {
+          const s = t.replace(/[^a-z]/g, "")
+          return s && NUMBER_WORDS[s] !== undefined
+        })
+        if (hasSuffixNumber) continue
+      }
 
       // pass 3: anagram match — handles transposed/substituted chars (e.g. "trhee" = "three")
       // also handles multi-token windows where spaces split a number word
