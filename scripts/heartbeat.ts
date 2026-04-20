@@ -51,22 +51,26 @@ if (existsSync(LOCK_FILE)) {
 }
 
 // — pre-check: is there anything worth spawning a session for? —
-const DISCORD_CHANNELS = [
-  "1411109348071051358",  // #general
-  "1411121189081972848",  // #degeneral
-  "1460135297982660699",  // #stinky-nerd-channel
-  "1465255399287423056",  // #hologram
-  "1446568953106137108",  // #rant
-  "1480053330532368488",  // #luvoid's channel
-]
+const DISCORD_STATE_FILE = DIR + "/brain/discord-state.json"
+const discordStateKeys: string[] = existsSync(DISCORD_STATE_FILE)
+  ? Object.keys(JSON.parse(readFileSync(DISCORD_STATE_FILE, "utf8")))
+  : []
 
 let hasActivity = false
 
-// check discord
-for (const ch of DISCORD_CHANNELS) {
-  const dc = spawnSync("bun", ["scripts/discord.ts", "messages", ch, "--since-last", "--exclude-self", "--peek"], {
-    cwd: DIR, encoding: "utf8",
-  })
+// check discord — all channels and DMs tracked in discord-state.json
+for (const key of discordStateKeys) {
+  let dc
+  if (key.startsWith("dm-")) {
+    const userId = key.slice(3)
+    dc = spawnSync("bun", ["scripts/discord.ts", "dm", userId, "--since-last", "--exclude-self", "--peek"], {
+      cwd: DIR, encoding: "utf8",
+    })
+  } else {
+    dc = spawnSync("bun", ["scripts/discord.ts", "messages", key, "--since-last", "--exclude-self", "--peek"], {
+      cwd: DIR, encoding: "utf8",
+    })
+  }
   if (dc.stdout && !dc.stdout.includes("no new messages")) {
     hasActivity = true
     break

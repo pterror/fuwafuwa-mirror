@@ -336,6 +336,8 @@ async function dm() {
   if (!rest.length) {
     // no content — just show recent messages
     const sinceLast = flags.has("--since-last")
+    const peek = flags.has("--peek")  // check without advancing state
+    const excludeSelf = flags.has("--exclude-self")
     const dmStateKey = `dm-${userId}`
     let qs = `limit=100`
     if (sinceLast) {
@@ -349,9 +351,9 @@ async function dm() {
       embeds: { title?: string; description?: string }[]
       message_snapshots?: { message: { content: string; attachments: { filename: string; url: string }[] } }[]
     }[]
-    const ordered = [...data].reverse()
+    const ordered = [...data].reverse().filter(m => !excludeSelf || m.author.id !== SELF_ID)
     // update state
-    if (sinceLast && data.length > 0) {
+    if (sinceLast && !peek && data.length > 0) {
       const state = readState()
       state[dmStateKey] = data[0].id  // data[0] is newest
       writeState(state)
