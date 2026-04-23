@@ -698,5 +698,13 @@ check(
   "25.00"
 )
 
+check(
+  // 'impulse adds' is velocity-addition, not force×time; 'tW/eNnYtHrEe' = twenty-three (compound decomp)
+  // was 15.00: slash split 'tw'+'ennythree', skip found 'three'=3, impulse handler multiplied 3×5=15
+  "impulse adds five cm/s to twenty-three: new velocity 23+5=28 (was 15 from slash-split + impulse multiply)",
+  "A] lOoObSst- Errr S^wImSs[ aT/ tW/eNnYtHrEe] cEm-MeTeRss^ pEr[ sEc-O^nD] aNd- aN/ OtHeR] iMmPuLsSe^ aDdSs[ fIiVvEe] cEm-MeTeRss, wHaT/ iSs] tHe^ nEw- vElAwCiiTy?",
+  "28.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

@@ -484,7 +484,9 @@ export function solveChallenge(text) {
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }
   // "impulse" / "energy" → force × time or force × distance (multiply)
-  if (soupHas("impulse") || soupHas("energy")) {
+  // exception: "another impulse adds X ... new velocity?" is an addition problem, not physics impulse×time
+  // "adds" signals a delta being added; "new" signals asking for the updated value
+  if ((soupHas("impulse") || soupHas("energy")) && !(soupHas("adds") && soupHas("new"))) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }
@@ -795,6 +797,39 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
     }
     if (bestMatch !== null) return bestMatch
   }
+
+  // final pass: compound tens+units decomposition
+  // handles obfuscation where a "/" inside a word creates two tokens that combine to e.g. "twennythree"
+  // the tens prefix may be an anagram of a valid tens word (e.g. "twenny" ≅ "twenty")
+  // only for multi-token windows (size >= 2) where the full soup failed all other passes
+  if (tokens.length > 1) {
+    for (let sz = 1; sz <= Math.min(4, tokens.length); sz++) {
+      const wsoup = tokens.slice(startIdx, startIdx + sz).join("").replace(/[^a-z]/g, "")
+      if (!wsoup) continue
+      for (const tensWord of wordsSorted) {
+        const tensVal = NUMBER_WORDS[tensWord]
+        if (tensVal < 20 || tensVal > 90 || tensVal % 10 !== 0) continue
+        if (wsoup.length <= tensWord.length) continue
+        const maxP = tensWord.length + 2
+        for (let p = Math.max(tensWord.length - 1, 2); p <= Math.min(maxP, wsoup.length - 1); p++) {
+          const prefix = wsoup.slice(0, p)
+          const suffix = wsoup.slice(p)
+          const prefixSorted = [...new Set(prefix)].sort().join("")
+          const wordSorted = [...new Set(tensWord)].sort().join("")
+          if (prefixSorted !== wordSorted) continue
+          const repeatsInWord = tensWord.length - [...new Set(tensWord)].length
+          if (Math.abs(prefix.length - tensWord.length) > repeatsInWord + 1) continue
+          const unitsMatch = wordsSorted.find(w => {
+            const uv = NUMBER_WORDS[w]
+            if (uv === undefined || uv < 1 || uv > 9) return false
+            return new RegExp("^" + w.split("").map(charPat).join("") + "$").test(suffix)
+          })
+          if (unitsMatch !== undefined) return [tensVal + NUMBER_WORDS[unitsMatch], sz]
+        }
+      }
+    }
+  }
+
   return null
 }
 
