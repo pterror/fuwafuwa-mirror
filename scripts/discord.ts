@@ -49,7 +49,7 @@ async function api(method: string, path: string, body?: unknown) {
   }
   if (body) opts.body = JSON.stringify(body)
 
-  const res = await fetch(`${BASE}${path}`, opts)
+  const res = await fetch(`${BASE}${path}`, { ...opts, signal: AbortSignal.timeout(15_000) })
   if (!res.ok) {
     const err = await res.text()
     throw new Error(`discord api error ${res.status}: ${err}`)
