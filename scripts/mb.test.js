@@ -706,5 +706,11 @@ check(
   "28.00"
 )
 
+check(
+  "two-claw total: claw one is forty nootons, claw two gains twenty four — garbage-skip 'and claw' blocked (40+24=64)",
+  "A] lO.bS tErRr S^wImS/ iN tHe[ aQuA um| aNd hItS^ a TaRrGeT wItH rIpPlE fOrCe, cLaW oNe Is^ FoR tY lY nOoToNs] fOrTy aNd cLaW TwO iN cOnfLiCt gAiNs- tWeNtY fO/Ur, hOw/ mUcH ToTaL fOrCe^?",
+  "64.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

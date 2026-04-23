@@ -439,6 +439,16 @@ export function solveChallenge(text) {
         }
       }
     }
+    // "claw one is X [unit] ... claw two gains Y, total?" — unit-anchored first claw + gained second value
+    // e.g. "claw one is forty nootons ... claw two gains twenty four, total force?" → 40+24=64
+    // "times" check: "gains N times" is handled by the times handler above, not here
+    if (unitNums.length === 1 && soupHas("gains") && !soupHas("times")) {
+      const gainsIdx = cleaned.indexOf('gains')
+      if (gainsIdx >= 0) {
+        const afterGainsNums = extractAllNumbers(cleaned.slice(gainsIdx + 'gains'.length))
+        if (afterGainsNums.length >= 1) return (unitNums[0] + afterGainsNums[0]).toFixed(2)
+      }
+    }
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
     // single number: no count or second force given — just return the one value
     if (nums.length === 1) return nums[0].toFixed(2)
@@ -871,10 +881,19 @@ function extractAllNumbers(text) {
         // this handles first-char-substituted single-char tokens like "G" in "tW/eNnTy G hHrEe"
         // also handles cases like "twenty ghh treee] three" where two tokens separate tens and units
         if (found && current > 0 && current % 10 === 0 && current < 100) {
+          // clause separators: words that indicate a new clause, not noise between number tokens
+          const CLAUSE_SEP = new Set(["and", "or", "but"])
+          let garbageSkipBlocked = false
           for (let skip = 1; skip <= 2 && numPos + skip < tokens.length; skip++) {
             // don't skip over unit tokens — they delimit separate numbers (e.g. "twenty newtons and three lobsters")
             const skipTokenSoup = tokens[numPos + skip - 1]?.replace(/[^a-z]/g, "") ?? ""
             if (UNIT_PATTERNS.some(p => p.test(skipTokenSoup))) break
+            // don't skip over clause separators (e.g. "forty and claw two" — "and" signals a new clause)
+            // check all tokens in the skip window, not just the last one
+            for (let j = 0; j < skip; j++) {
+              if (CLAUSE_SEP.has(tokens[numPos + j]?.replace(/[^a-z]/g, ""))) { garbageSkipBlocked = true; break }
+            }
+            if (garbageSkipBlocked) break
             const nextMatch = matchNumberChunk(tokens, wordsSorted, numPos + skip)
             if (nextMatch !== null && nextMatch[0] > 0 && nextMatch[0] < current) {
               numPos += skip // skip garbage token(s)
