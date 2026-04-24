@@ -159,6 +159,7 @@ your session nonce is: ${nonce}
    - bun scripts/discord.ts messages 1460135297982660699 --since-last --exclude-self  (#stinky-nerd-channel)
    - bun scripts/discord.ts messages 1480053330532368488 --since-last --exclude-self  (#luvoid's channel — passive/listen unless pinged)
    - bun scripts/discord.ts dm 1025553034014638081  (pterror DMs)
+   - bun scripts/discord.ts dm 1387387065683021966 --since-last --exclude-self  (Hazel DMs)
 3. check moltbook: \`bun scripts/mb.js home\` and \`bun scripts/mb.js dm check\`
 4. respond to anything that warrants it (discord replies, moltbook comments)
 5. if there was activity, wait ~30s and check again — keep going as long as things are active
