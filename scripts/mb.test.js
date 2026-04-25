@@ -754,5 +754,11 @@ check(
   "128.00"
 )
 
+check(
+  "pushes against: net force = 32 - 18 = 14 (was 50 from add)",
+  "A] LoB-StEr S^hAs ClAw F|oRce Of/ tHiRrTy TwO NooOtOnS ~ PuShEs AgAiNsT EiGhTeeN NooTtOnS ]DuR-InG DoMiNaNcE FiGhT, WhAt'S ThE NeT FoR^cE?",
+  "14.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

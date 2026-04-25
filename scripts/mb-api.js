@@ -474,7 +474,7 @@ export function solveChallenge(text) {
   if (/\b(difference|how much more|how much less|how much remain|left over|remaining)\b/.test(cleaned)
       || /waterresistance|airresistance/.test(soup)
       || /slows?|reduces?|decreases?|decelerats?|loses?|loss|resists?|subtracts?|takesaway/.test(soup)
-      || (/opposing/.test(soup) && /net/.test(soup))
+      || ((/opposing/.test(soup) || /against/.test(soup)) && /net/.test(soup))
       || soupHas("remaining") || soupHas("remain") || soupHas("takesaway") || soupHas("loses") || soupHas("slows") || soupHas("reduces") || soupHas("reducing") || soupHas("decreases") || soupHas("resists") || soupHas("subtracts")) {
     const unitNums = extractNumbersPrecedingUnits(cleaned)
     if (unitNums.length === 2) return Math.abs(unitNums[0] - unitNums[1]).toFixed(2)
