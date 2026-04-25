@@ -949,7 +949,9 @@ function extractNumbersPrecedingUnits(text) {
       else if (val === 100) { current = (current || 1) * 100 }
       else {
         if (found && current >= 10 && current < 100 && current % 10 === 0 && val >= 10 && val < 100) break
-        current += val
+        // two consecutive single-digit words → two-digit compound (e.g. "three three" = 33, "one four" = 14)
+        if (found && current > 0 && current < 10 && val >= 1 && val <= 9) current = current * 10 + val
+        else current += val
       }
       found = true; numPos += size
     }

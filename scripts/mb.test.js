@@ -712,5 +712,11 @@ check(
   "64.00"
 )
 
+check(
+  "two consecutive single-digit words = two-digit compound: 'three three' → 33 (15+33=48)",
+  "LoBbEsTeR] cL^aW| fOrCe] eXxErT sSooomEe] FiFfTeEeN~ nEeWwToNs, uMh {aNd} AnTeNnA] tOuCh] aDdS+ ThHrReEe] ThReEe< nEeWwToNs, wHaT] iIs} tOtAl/ fOrCe?",
+  "48.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
