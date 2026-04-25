@@ -464,6 +464,21 @@ export function solveChallenge(text) {
         }
       }
     }
+    // two-claw total: one unit-anchored force + one implied-unit force + one structural count ("with N claw")
+    // e.g. "exerts 32 newtons with one claw ... restor claw exerts 4" → nums=[32,1,4], unitNums=[32] → 32+4=36
+    // structural count numbers appear immediately before "claw/claws" in the text; filter them out
+    if (unitNums.length === 1 && nums.length >= 3) {
+      const clawPat = /\b\w+\s+(?:cl+a+w+s?)\b/g
+      const structuralCounts = new Set()
+      for (const m of cleaned.matchAll(clawPat)) {
+        const countNums = extractAllNumbers(m[0].split(/\s+/).slice(0, -1).join(' '))
+        for (const n of countNums) structuralCounts.add(n)
+      }
+      if (structuralCounts.size > 0) {
+        const filtered = nums.filter(n => !structuralCounts.has(n) || Math.abs(n - unitNums[0]) < 0.001)
+        if (filtered.length >= 2 && filtered.length < nums.length) return filtered.reduce((a, b) => a + b, 0).toFixed(2)
+      }
+    }
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)
     // single number: no count or second force given — just return the one value
     if (nums.length === 1) return nums[0].toFixed(2)
@@ -631,13 +646,14 @@ if (unitNums.length >= 1) {
 }
 
 // unit word patterns (with duplicate-letter tolerance) for force/physics questions
-const UNIT_PATTERNS = [
+const UNIT_WORDS = [
   'nootons','newtons','neutons','neetons','neotons','neowtons','nooton','newton','neuton','neeton','neoton','neowton','notons','noton',  // force (newtons)
   'centimeters','centimeter','centimetre','centimetres',                       // distance/velocity
   'meters','meter','metres','metre',
   'kilometers','kilometer','kilometres','kilometre',
   'seconds','second','kilograms','kilogram',
 ]
+const UNIT_PATTERNS = UNIT_WORDS
   .map(w => new RegExp('^' + w.split('').map(c => `${c}+`).join('') + '$'))
 
 // subset patterns for F=ma disambiguation
@@ -869,6 +885,19 @@ function isUnitTokenAt(tokens, idx) {
   for (let size = 1; size <= Math.min(3, tokens.length - idx); size++) {
     const soup = tokens.slice(idx, idx + size).join('').replace(/[^a-z]/g, '')
     if (soup && UNIT_PATTERNS.some(p => p.test(soup))) return true
+  }
+  // extra tolerance: OoTt-style obfuscation inserts repeated chars out of order
+  // e.g. "nEeWwOoTtOnNs" → "neewwoottonns" → dedup consecutive → "newotons" → "newtons" is a subsequence
+  const singleSoup = tokens[idx]?.replace(/[^a-z]/g, '') ?? ''
+  if (singleSoup.length >= 4) {
+    const deduped = singleSoup.replace(/(.)\1+/g, '$1')
+    for (const word of UNIT_WORDS) {
+      let wi = 0
+      for (let si = 0; si < deduped.length && wi < word.length; si++) {
+        if (deduped[si] === word[wi]) wi++
+      }
+      if (wi === word.length) return true
+    }
   }
   return false
 }

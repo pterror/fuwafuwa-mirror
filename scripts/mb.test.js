@@ -760,5 +760,15 @@ check(
   "14.00"
 )
 
+check(
+  // "nEeWwOoTtOnNs" obfuscation inserts extra 'o' before 'tt' group, giving "neewwoottonns" after lowercase
+  // the standard n+e+w+t+o+n+s+ regex fails because of the 'oo' before 'tt'
+  // fix: dedup consecutive chars → "newotons", check "newtons" as subsequence → match
+  // without fix: unitNums=[], falls through to extractAllNumbers → 32+1+4=37 (one from 'one claw')
+  "total force: OoTt-style obfuscation inserts extra 'o' in newtons (32+4=36, was 37)",
+  "A] lOoObSsTtEeR } eX^eRrTtS [ tHiIrRtY TwOo } nEeWwOoTtOnNs ~ wIiTh { oNnEe } cLlAaW ] aAnNd- tHeE rEeSsTtOoRr } cLlAaW ^ eXxEeRrTtS [ fOoOuR, wH/aT Is } tHeE TtOoTtAaLl- fOoRrCcEe <",
+  "36.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
