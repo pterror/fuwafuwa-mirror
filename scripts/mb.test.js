@@ -730,5 +730,11 @@ check(
   "67.00"
 )
 
+check(
+  "triples by three: 'triples' = ×3, 'by three' is redundant noise (14×3=42)",
+  "A] lOoO b-StEr ClA w] FoR cE Is^ fOuRtEeN nootons um- anD/ dUrInG mOlT-inG iT^ trIiPpLeS bY/ tHrEe, WhAt] iS^ tHe ReSuLtInG FoR cE?",
+  "42.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

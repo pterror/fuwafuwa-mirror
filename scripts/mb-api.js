@@ -296,7 +296,17 @@ export function solveChallenge(text) {
   }
 
   // — question-keyword strategy (after operators, to avoid spurious number extraction from narrative) —
-  // "strikes twice/thrice" → multiply the single force value
+  // "strikes twice/thrice" / "triples" → multiply the single force value
+  // "triples by three" — "by three" is noise; triple = ×3 regardless
+  if (/\btriples?\b/.test(cleaned) || soupHas("triple") || soupHas("triples")) {
+    const unitNums = extractNumbersPrecedingUnits(cleaned)
+    if (unitNums.length === 1) return (unitNums[0] * 3).toFixed(2)
+    // if "by N" present, ignore that N (it restates "triple") and use the other number
+    const byMatch = cleaned.match(/\bby\s+(\w+)\b/)
+    const byNum = byMatch ? parseNumber(byMatch[1]) : NaN
+    const nums = extractAllNumbers(cleaned).filter(n => isNaN(byNum) || Math.abs(n - byNum) > 0.001)
+    if (nums.length === 1) return (nums[0] * 3).toFixed(2)
+  }
   for (const [word, mult] of [["twice", 2], ["thrice", 3]]) {
     if (/\btwice\b/.test(cleaned) && word === "twice" || /\bthrice\b/.test(cleaned) && word === "thrice" || soupHas(word)) {
       const unitNums = extractNumbersPrecedingUnits(cleaned)
