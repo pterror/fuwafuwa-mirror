@@ -452,11 +452,16 @@ export function solveChallenge(text) {
     // "claw one is X [unit] ... claw two gains Y, total?" — unit-anchored first claw + gained second value
     // e.g. "claw one is forty nootons ... claw two gains twenty four, total force?" → 40+24=64
     // "times" check: "gains N times" is handled by the times handler above, not here
+    // guard: unit-anchored value must appear BEFORE 'gains', not after — otherwise 'gains five neutrons'
+    // would set unitNums=[5] then afterGainsNums=[5] and return 5+5=10 (wrong, should be fallthrough to add)
     if (unitNums.length === 1 && soupHas("gains") && !soupHas("times")) {
       const gainsIdx = cleaned.indexOf('gains')
       if (gainsIdx >= 0) {
-        const afterGainsNums = extractAllNumbers(cleaned.slice(gainsIdx + 'gains'.length))
-        if (afterGainsNums.length >= 1) return (unitNums[0] + afterGainsNums[0]).toFixed(2)
+        const beforeGainsUnitNums = extractNumbersPrecedingUnits(cleaned.slice(0, gainsIdx))
+        if (beforeGainsUnitNums.length >= 1) {
+          const afterGainsNums = extractAllNumbers(cleaned.slice(gainsIdx + 'gains'.length))
+          if (afterGainsNums.length >= 1) return (unitNums[0] + afterGainsNums[0]).toFixed(2)
+        }
       }
     }
     if (nums.length >= 2) return nums.reduce((a, b) => a + b, 0).toFixed(2)

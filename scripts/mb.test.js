@@ -736,5 +736,14 @@ check(
   "42.00"
 )
 
+check(
+  // 'gains five neut ons' — unit-anchored (neutons) value appears AFTER 'gains', not before it.
+  // old code: gains branch fired, returned unitNums[0]+afterGainsNums[0] = 5+5 = 10 (wrong)
+  // fix: only use gains branch when the unit-anchored value appears before 'gains' in the text
+  "unit-anchored value after 'gains', not before: swim 23cm + gains 5 neutrons = 28 (was 10)",
+  "A] Lo.bSt-Er^ sWImS[ aT tWeN tY tHrEe^ cMe/ tErS~ aNd] looobsssTerS GaInS^ fIvE{ nEuT oNs }fRoM- dOmInAnCe| fIgHt, HoW/ mUcH ToTaL ClAw- FoRcE<?",
+  "28.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
