@@ -989,6 +989,37 @@ function extractNumbersPrecedingUnits(text) {
     }
   }
 
+  // Second pass: numbers that FOLLOW a unit word (e.g. "nootons um thirty two")
+  // handles challenges where unit precedes number with optional filler tokens in between
+  const FILLER_TOK = /^(um+|uh+|er+|hmm+|a+h*|the|a|an)$/
+  for (let i = 0; i < tokens.length; i++) {
+    if (!isUnitTokenAt(tokens, i)) continue
+    // scan forward past up to 2 filler words to find a number
+    for (let j = i + 1; j < Math.min(i + 4, tokens.length); j++) {
+      const tok = tokens[j].replace(/[^a-z]/g, '')
+      if (FILLER_TOK.test(tok)) continue
+      // try to extract a compound number starting at j
+      let numPos = j, cur = 0, tot = 0, fnd = false
+      while (numPos < tokens.length) {
+        const match = matchNumberChunk(tokens, wordsSorted, numPos)
+        if (match === null) break
+        const [val, size] = match
+        if (val === 1000 || val === 1000000) { cur = cur || 1; tot += cur * val; cur = 0 }
+        else if (val === 100) { cur = (cur || 1) * 100 }
+        else {
+          if (fnd && cur >= 10 && cur < 100 && cur % 10 === 0 && val >= 10 && val < 100) break
+          cur += val
+        }
+        fnd = true; numPos += size
+      }
+      if (fnd) {
+        const num = tot + cur
+        if (num > 0 && !results.some(r => Math.abs(r - num) < 0.001)) results.push(num)
+      }
+      break // only try first non-filler token position
+    }
+  }
+
   return results
 }
 

@@ -745,5 +745,14 @@ check(
   "28.00"
 )
 
+check(
+  // unit precedes number: "nootons um thirty two" → unit before number with filler in between
+  // old code: extractNumbersPrecedingUnits only scanned number-then-unit, returned unitNums=[], fell through to 32+4=36
+  // fix: second pass in extractNumbersPrecedingUnits detects unit-then-filler-then-number
+  "unit before number (nootons um thirty two), has four claws: 32×4=128 (was 36)",
+  "A] lOoObS tErr Lo.b-St Errr C|lA w Ex^eR tS NoOtOnS Um ThIr Ty TwO ~ AnD/ iT HaS FoUr { ClA wS - WhA tS < ThE ToTaL / FoRcE?",
+  "128.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
