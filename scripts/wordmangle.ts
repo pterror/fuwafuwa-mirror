@@ -64,6 +64,26 @@ const transformations = {
     }
     return result.join("");
   },
+
+  // scramble only interior letters — keep first and last in place
+  // exploits the fact that humans read words by shape, not letter sequence
+  interiorShuffle(word: string): string {
+    if (word.length <= 3) return word;
+    const interior = [...word.slice(1, -1)];
+    for (let i = interior.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [interior[i], interior[j]] = [interior[j], interior[i]];
+    }
+    return word[0] + interior.join("") + word[word.length - 1];
+  },
+
+  // l33t speak — replace letters with number lookalikes
+  leetSpeak(word: string): string {
+    const leet: Record<string, string> = {
+      a: "4", e: "3", i: "1", o: "0", t: "7", s: "5", g: "9", b: "8", l: "1",
+    };
+    return [...word].map(c => leet[c.toLowerCase()] ?? c).join("");
+  },
 };
 
 type TransformName = keyof typeof transformations;
@@ -212,10 +232,83 @@ function editDistance(a: string, b: string): number {
   return dp[m][n];
 }
 
+// --- daily puzzle mode ---
+// one puzzle per day, saved to brain/ so it doesn't reroll mid-session
+async function dailyMode() {
+  const fs = require("fs") as typeof import("fs");
+  const path = require("path") as typeof import("path");
+  const stateFile = path.join(__dirname, "../brain/wordmangle-daily.json");
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  type DailyPuzzle = { date: string; word: string; mangled: string; transforms: string[] };
+  let puzzle: DailyPuzzle | null = null;
+
+  if (fs.existsSync(stateFile)) {
+    const saved = JSON.parse(fs.readFileSync(stateFile, "utf8")) as DailyPuzzle;
+    if (saved.date === today) puzzle = saved;
+  }
+
+  if (!puzzle) {
+    // pick word from date — deterministic index, random mangling saved once
+    const [y, m, d] = today.split("-").map(Number);
+    const dayIndex = ((y - 2020) * 365 + m * 31 + d) % wordlist.length;
+    const word = wordlist[dayIndex];
+    const { mangled, transforms } = mangleWord(word, 2);
+    puzzle = { date: today, word, mangled, transforms };
+    fs.writeFileSync(stateFile, JSON.stringify(puzzle, null, 2));
+  }
+
+  const rl = require("readline").createInterface({ input: process.stdin, output: process.stdout });
+  const ask = (q: string): Promise<string> => new Promise(r => rl.question(q, r));
+
+  console.log(`\n  wordmangle — daily puzzle · ${today}`);
+  console.log(`  ${puzzle.mangled}`);
+  console.log(`  (difficulty 2 · type "hint", "skip", or your guess)\n`);
+
+  let hintsUsed = 0;
+  while (true) {
+    const answer = (await ask("  > ")).trim().toLowerCase();
+
+    if (answer === "hint") {
+      hintsUsed++;
+      if (hintsUsed <= 4) {
+        console.log(`  hint ${hintsUsed}: ${generateHint(puzzle.word, hintsUsed)}\n`);
+      } else {
+        console.log(`  no more hints — it was "${puzzle.word}" [${puzzle.transforms.join(" → ")}]\n`);
+        break;
+      }
+      continue;
+    }
+
+    if (answer === "skip" || answer === "q" || answer === "quit") {
+      console.log(`  today's word: "${puzzle.word}" [${puzzle.transforms.join(" → ")}]\n`);
+      break;
+    }
+
+    if (answer === puzzle.word.toLowerCase()) {
+      const pts = Math.max(1, 20 - 3 * hintsUsed);
+      console.log(`  got it! +${pts} pts · transforms: [${puzzle.transforms.join(" → ")}]\n`);
+      break;
+    }
+
+    const dist = editDistance(answer, puzzle.word.toLowerCase());
+    if (dist <= 2) {
+      console.log(`  close! ${dist === 1 ? "one letter off" : "almost"}\n`);
+    } else {
+      console.log(`  nope\n`);
+    }
+  }
+
+  rl.close();
+}
+
 // --- run it ---
 const mode = process.argv[2];
 
-if (mode === "play") {
+if (mode === "daily") {
+  dailyMode();
+} else if (mode === "play") {
   const difficulty = (parseInt(process.argv[3] || "2") || 2) as 1 | 2 | 3;
   const rounds = parseInt(process.argv[4] || "10") || 10;
   playMode(difficulty, rounds);
