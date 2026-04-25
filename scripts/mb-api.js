@@ -657,10 +657,16 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
       if (pass >= 2 && FUZZY_STOP_WORDS.has(soup)) continue
       // passes 3+ (fuzzy): don't absorb standalone number words into a multi-token window
       // e.g. "es" + "seven" → "esseven" should not match "eleven" — "seven" is a standalone number
+      // also check obfuscated variants: "seeven" matches "seven" via charPat, so "es"+"seeven" ≠ "eleven"
       if (pass >= 3 && size > 1) {
         const hasSuffixNumber = tokens.slice(startIdx + 1, startIdx + size).some(t => {
           const s = t.replace(/[^a-z]/g, "")
-          return s && NUMBER_WORDS[s] !== undefined
+          if (!s) return false
+          if (NUMBER_WORDS[s] !== undefined) return true
+          for (const nw of Object.keys(NUMBER_WORDS)) {
+            if (new RegExp("^" + nw.split("").map(charPat).join("") + "$").test(s)) return true
+          }
+          return false
         })
         if (hasSuffixNumber) continue
       }

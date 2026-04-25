@@ -718,5 +718,11 @@ check(
   "48.00"
 )
 
+check(
+  "loses: 'lo ss es' + 'seeven' — es+seeven must not fuse as eleven (25-7=18)",
+  "A] lOoOobSssTeR^ sW/iMmS< aT~ tWeNtY fIiV e] mE^tErS| pEr\\ sEcOnD- bUt{ lO.sS eS~ sEeVeN} mE^tErS| pEr\\ sEcOnD, wHaT- iS~ tHe{ nEw} sPeEeD?",
+  "18.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
