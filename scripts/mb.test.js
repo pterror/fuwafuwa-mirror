@@ -770,5 +770,15 @@ check(
   "36.00"
 )
 
+check(
+  // "FiFfEeTeEn" obfuscates "fifteen" by doubling f and e chars with a mid-sequence extra 'e'
+  // unique chars match {e,f,i,n,t} but diff=3 > repeatsInWord=2 — rejected by old tolerance check
+  // fix: allow diff <= repeatsInWord + 1 so one extra repeated-char-class duplication is tolerated
+  // without fix: extractNumbersPrecedingUnits finds only [20], returns 20.00 instead of 35.00
+  "total force: FiFfEeTeEn obfuscates fifteen (20+15=35, was 20)",
+  "A] LoOoBbSsStTeEeR'S^ ClAw F[oR-cE] Is T/wEnn-Ty NeUwTtOoNs, Um| AnD] It'S OtHeR ClAw PuShEs FiFfEeTeEn NeUwTtOoNs, WhAt Is ToTaL FoRcE?",
+  "35.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
