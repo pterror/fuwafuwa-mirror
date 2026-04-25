@@ -617,7 +617,7 @@ if (unitNums.length >= 1) {
 
 // unit word patterns (with duplicate-letter tolerance) for force/physics questions
 const UNIT_PATTERNS = [
-  'nootons','newtons','neutons','neetons','neotons','nooton','newton','neuton','neeton','neoton','notons','noton',  // force (newtons)
+  'nootons','newtons','neutons','neetons','neotons','neowtons','nooton','newton','neuton','neeton','neoton','neowton','notons','noton',  // force (newtons)
   'centimeters','centimeter','centimetre','centimetres',                       // distance/velocity
   'meters','meter','metres','metre',
   'kilometers','kilometer','kilometres','kilometre',
@@ -627,7 +627,7 @@ const UNIT_PATTERNS = [
 
 // subset patterns for F=ma disambiguation
 const FORCE_UNIT_PATTERNS = [
-  'nootons','newtons','neutons','neetons','neotons','nooton','newton','neuton','neeton','neoton','notons','noton',
+  'nootons','newtons','neutons','neetons','neotons','neowtons','nooton','newton','neuton','neeton','neoton','neowton','notons','noton',
 ].map(w => new RegExp('^' + w.split('').map(c => `${c}+`).join('') + '$'))
 
 const MASS_UNIT_PATTERNS = [
@@ -637,7 +637,7 @@ const MASS_UNIT_PATTERNS = [
 // try to match tokens[startIdx..startIdx+size) as a single number value
 // returns [value, tokensConsumed] or null
 // common English non-number words that fuzzy passes might mis-match (e.g. "there" → "three")
-const FUZZY_STOP_WORDS = new Set(["there", "their", "these", "those", "where", "here", "were", "ther", "other", "another", "then"])
+const FUZZY_STOP_WORDS = new Set(["there", "their", "these", "those", "where", "here", "were", "ther", "other", "another", "then", "tween"])
 
 function matchNumberChunk(tokens, wordsSorted, startIdx) {
   // four-pass approach to prefer exact multi-token matches over fuzzy single-token matches:
@@ -707,7 +707,7 @@ function matchNumberChunk(tokens, wordsSorted, startIdx) {
       // requires same vowel/consonant class for the substituted char to avoid false positives
       // like "fight" → "eight" (f=consonant, e=vowel)
       if (pass === 4) {
-        if (size > 2) continue
+        if (size > 1) continue
         const VOWELS = "aeiou"
         const soupDedup = soup.replace(/(.)\1+/g, "$1")
         for (const word of wordsSorted) {

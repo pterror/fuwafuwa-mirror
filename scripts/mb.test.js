@@ -724,5 +724,11 @@ check(
   "18.00"
 )
 
+check(
+  "total force: 'tween' is noise before 'tw en ty two nootons', 'neowtons' unit variant (45+22=67)",
+  "A] LooObBsT-eR^ ClAwS PusH gLaRr NeOwToNs LiKe fOrTy FiVe ] aNd- ThE/ OtHeR ClAw Is PuShInG TwEeN tW/eN tY TwO ~ nOoToNs, WhAtS ] ToTaL- FoR^cE?",
+  "67.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
