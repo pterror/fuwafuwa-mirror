@@ -544,7 +544,10 @@ export function solveChallenge(text) {
   }
   // "power" → force × velocity (multiply)
   // e.g. "claw force of 23 newtons, swims at 7 meters per second, how much power?" → 23×7=161
-  if (soupHas("power")) {
+  // only fire when "power" is in the question clause (after "how") — not narrative "burst of power"
+  const _howIdx = cleaned.indexOf('how')
+  const _questionSoup = _howIdx >= 0 ? cleaned.slice(_howIdx).replace(/[^a-z]/g, '') : soup
+  if (soupHas("power") && /p+o+w+e+r+/.test(_questionSoup)) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
   }

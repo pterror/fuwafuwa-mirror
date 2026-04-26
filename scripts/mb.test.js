@@ -789,5 +789,11 @@ check(
   "45.00"
 )
 
+check(
+  "narrative 'burst of power' must not trigger power×velocity multiply; 'how quick' = new speed (23+7=30)",
+  "A] lOoOobSsTtErR sW^iMmS/ iN/ cOoLd] wAtEr~ wItH/ aN iNtEnSe] tAiL- fLiCk, hEr Vel awc i.tYy iS/ tWeN tY] tHrEe+ cEm^ mEeTrS/ pEr/ sEcOnD, aNd- iT/ gAiNs/ sEvEn~ cEm (frOm) aN oThEr] bUrSt- oF- pOwEr, hOw/ qUiCk Is/ iT/ nOw?",
+  "30.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
