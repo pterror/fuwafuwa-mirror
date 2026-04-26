@@ -174,7 +174,11 @@ function parseNumberFromSoup(text) {
     }
     if (val === 1000 || val === 1000000) { current = current || 1; total += current * val; current = 0 }
     else if (val === 100) { current = (current || 1) * 100 }
-    else { current += val }
+    else {
+      // stop if units digit already set — "twotwo" soup shouldn't accumulate 2+2=4
+      if (current > 0 && current % 10 !== 0) break
+      current += val
+    }
   }
   return found.some(v => v !== POINT_SENTINEL) ? total + current : NaN
 }
@@ -375,6 +379,23 @@ export function solveChallenge(text) {
   if (soupHas("fold") || soupHas("foldly")) {
     const nums = extractAllNumbers(cleaned)
     if (nums.length >= 2) return (nums[0] * nums[1]).toFixed(2)
+  }
+  // "N as hard/strong/fast/powerful" → multiply base by N (e.g. "it pinches two as hard" = base × 2)
+  // uses parseNumber (soup fallback) to handle obfuscated short words like "tw otwo" = "two"
+  {
+    const asHardMatch = cleaned.match(/\bas\s+(hard|strong|fast|powerful|forceful|much)\b/)
+    if (asHardMatch) {
+      const beforeAsHard = cleaned.slice(0, asHardMatch.index).trim()
+      const beforeTokens = beforeAsHard.split(/\s+/).slice(-4).join(" ")
+      const multiplier = parseNumber(beforeTokens)
+      if (!isNaN(multiplier) && multiplier >= 2 && multiplier <= 100) {
+        const unitNums = extractNumbersPrecedingUnits(cleaned)
+        const baseNums = unitNums.filter(n => Math.abs(n - multiplier) > 0.001)
+        if (baseNums.length === 1) return (baseNums[0] * multiplier).toFixed(2)
+        const allNums = extractAllNumbers(cleaned).filter(n => Math.abs(n - multiplier) > 0.001)
+        if (allNums.length === 1) return (allNums[0] * multiplier).toFixed(2)
+      }
+    }
   }
   // "X per [action], N [action]s, total" → rate × count (e.g. "twenty neotons per strike, three strikes")
   // must check before total keyword (which would otherwise add)

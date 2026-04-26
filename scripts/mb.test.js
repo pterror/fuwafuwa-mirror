@@ -487,6 +487,12 @@ check(
 )
 
 check(
+  "'N as hard' multiplier: pinches two as hard, combined force (28 × 2 = 56, with 'tw otwo' obfuscation for 'two')",
+  "A] lO-bS tEr'S^ doMiNaNt LOoobsssStEr ClAw ExErTs^ tWeN tY eIgHt NooToNs~ WhEn/ piNcHiNg, Um] dUrInG DoMiNaNcE DiSpLaY iT PiNcHeS^ tW oTwO aS HaRd< WhAt/ Is ThE CoMbInEd} FoRcE?",
+  "56.00"
+)
+
+check(
   "accelerates by seven: 'tW eN nY tH rEe' = twenty-three, 'eN eW' noise in question (23+7=30)",
   "A] lO- bS tEr ] lOoOo bSsT eRrR sW/ iMmS aT tW eN nY tH rEe ^ cE m/ eNt I mEe rS ] pE rS eC oN d aNd- aC cE lE rA tEs ] bY sE vE n~, uM wH/ aT iS ] tH eN eW- vE lO cI tY?",
   "30.00"
