@@ -780,5 +780,14 @@ check(
   "35.00"
 )
 
+check(
+  // "fifty- nootons" is a compound unit name (fifty-newtons), not a force value
+  // the actual force is "thir ty" (thirty = 30); other claw has "fif teen" (fifteen = 15)
+  // without fix: fifty (50) is extracted as unit-anchored, giving 50+15=65 (wrong)
+  "compound unit prefix: fifty- nootons is the unit, thirty + fifteen = 45 (was 65)",
+  "A] lOoO bS tEr^ cLa W eXe Rts [tHiR tY] fIfTy- NoOtOnS / aNd ] oThEr^ cLa W hAs [fIf TeEn] nEu-ToNs~ , ToTaL- FoR cE?",
+  "45.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)

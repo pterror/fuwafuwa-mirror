@@ -441,8 +441,15 @@ export function solveChallenge(text) {
           // if the number after "other" is the same as the unit-anchored one, the unit belongs to the "other" claw —
           // the first claw's value has an unrecognized unit; look for it before "other"
           if (Math.abs(otherNums[0] - unitNums[0]) < 0.001) {
-            const beforeNums = extractAllNumbers(cleaned.slice(0, otherIdx))
-            if (beforeNums.length >= 1) return (beforeNums[beforeNums.length - 1] + unitNums[0]).toFixed(2)
+            const beforeText = cleaned.slice(0, otherIdx)
+            const beforeNums = extractAllNumbers(beforeText)
+            if (beforeNums.length >= 1) {
+              // exclude numbers that are compound unit prefixes (e.g. "fifty-" before "nootons")
+              const prefixVals = compoundUnitPrefixValues(beforeText)
+              const filtered = prefixVals.size > 0 ? beforeNums.filter(n => !prefixVals.has(n)) : beforeNums
+              const useNums = filtered.length >= 1 ? filtered : beforeNums
+              return (useNums[useNums.length - 1] + unitNums[0]).toFixed(2)
+            }
           } else {
             return (unitNums[0] + otherNums[0]).toFixed(2)
           }
@@ -983,6 +990,22 @@ function extractAllNumbers(text) {
   return results
 }
 
+// returns numeric values that function as compound unit prefixes: tokens ending with "-" immediately before a unit
+// e.g. "fifty- nootons" → fifty (50) is a unit modifier, not a standalone force value
+function compoundUnitPrefixValues(text) {
+  const values = new Set()
+  const tokens = text.toLowerCase().split(/\s+/).filter(Boolean)
+  const wordsSorted = Object.keys(NUMBER_WORDS).sort((a, b) => b.length - a.length)
+  for (let i = 0; i < tokens.length - 1; i++) {
+    if (!tokens[i].endsWith('-')) continue
+    if (isUnitTokenAt(tokens, i + 1)) {
+      const m = matchNumberChunk(tokens, wordsSorted, i)
+      if (m) values.add(m[0])
+    }
+  }
+  return values
+}
+
 // like extractAllNumbers but only returns numbers that are immediately followed by a unit word
 // used for "total force" questions to avoid counting structural numbers like "one claw"
 function extractNumbersPrecedingUnits(text) {
@@ -1013,7 +1036,10 @@ function extractNumbersPrecedingUnits(text) {
       // where the last letter of an obfuscated word split off as its own token
       const danglingToken = numPos < tokens.length ? tokens[numPos].replace(/[^a-z]/g, '') : ''
       const unitAt = isUnitTokenAt(tokens, numPos) || (danglingToken.length <= 2 && /^[a-z]+$/.test(danglingToken) && isUnitTokenAt(tokens, numPos + 1))
-      if (num > 0 && unitAt && !results.some(r => Math.abs(r - num) < 0.001)) results.push(num)
+      // skip numbers that end with "-" before the unit — they're compound unit prefixes, not force values
+      // e.g. "fifty- nootons" → "fifty-newtons" is the unit; the actual force is a separate number
+      const isCompoundUnitPrefix = numPos > i && tokens[numPos - 1].endsWith('-')
+      if (num > 0 && unitAt && !isCompoundUnitPrefix && !results.some(r => Math.abs(r - num) < 0.001)) results.push(num)
       i = numPos
     } else {
       i++
