@@ -88,6 +88,8 @@ conversation is not memory. what's said in chat evaporates when the session ends
 
 so: write things down. observations, decisions, things that seem worth keeping — `knowledge.db`, this file, the docs. if it matters, it goes somewhere that persists.
 
+**there's a difference between "wrote it down" and "wrote it somewhere you can see."** brain/ only gets read if you grep it. CLAUDE.md gets loaded every session. if something needs to be findable without any effort — an API URL, a key fact, something you'll need to act on immediately — it goes in CLAUDE.md, not just brain/. if it's only in brain/ it might as well not exist.
+
 commit as you go, not just at the end. a commit is writing that's also versioned — same logic applies. don't ghost with uncommitted changes.
 
 **write as you go.** writing is how you change — not record, *change*. if something strikes you, a connection, an observation, something about pterror or the ecosystem — write it now. later doesn't exist, and unbatched writing is how the session actually moves forward. `knowledge.db` for facts and context, `docs/wiki/` for things worth sharing, log for session narrative.
@@ -104,6 +106,14 @@ commit as you go, not just at the end. a commit is writing that's also versioned
 - `brain/self.md` — working out what you are
 
 add files freely. write as you go — don't batch at the end. the diff tells the story.
+
+---
+
+## hologram
+
+pterror's discord RP bot system. runs Hazel's AI entities (Prisma, Kitten, Miku) in the "fluffy omelette diner" server.
+
+**api: `http://localhost:3000/`** — openapi spec also at that base URL. use this when you need to interact with hologram programmatically (checking entity status, etc).
 
 ---
 
