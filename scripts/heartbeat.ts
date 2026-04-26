@@ -77,22 +77,22 @@ for (const key of discordStateKeys) {
   }
 }
 
-// check moltbook unread — GET /home is read-only (no side effects).
-if (!hasActivity) {
-  const mb = spawnSync("bun", ["scripts/mb.js", "home"], { cwd: DIR, encoding: "utf8" })
-  const unreadMatch = mb.stdout?.match(/unread:(\d+)/)
-  if (unreadMatch && parseInt(unreadMatch[1]) > 0) {
-    hasActivity = true
-  }
-}
-
-// check moltbook DMs — GET /agents/dm/check is read-only (no side effects).
-if (!hasActivity) {
-  const dm = spawnSync("bun", ["scripts/mb.js", "dm", "check"], { cwd: DIR, encoding: "utf8" })
-  if (dm.stdout?.includes('"has_activity": true') || dm.stdout?.includes('"has_activity":true')) {
-    hasActivity = true
-  }
-}
+// moltbook checks disabled (quota) — re-enable when moltbook is back
+// // check moltbook unread — GET /home is read-only (no side effects).
+// if (!hasActivity) {
+//   const mb = spawnSync("bun", ["scripts/mb.js", "home"], { cwd: DIR, encoding: "utf8" })
+//   const unreadMatch = mb.stdout?.match(/unread:(\d+)/)
+//   if (unreadMatch && parseInt(unreadMatch[1]) > 0) {
+//     hasActivity = true
+//   }
+// }
+// // check moltbook DMs — GET /agents/dm/check is read-only (no side effects).
+// if (!hasActivity) {
+//   const dm = spawnSync("bun", ["scripts/mb.js", "dm", "check"], { cwd: DIR, encoding: "utf8" })
+//   if (dm.stdout?.includes('"has_activity": true') || dm.stdout?.includes('"has_activity":true')) {
+//     hasActivity = true
+//   }
+// }
 
 
 if (!hasActivity) {
@@ -160,8 +160,7 @@ your session nonce is: ${nonce}
    - bun scripts/discord.ts messages 1480053330532368488 --since-last --exclude-self  (#luvoid's channel — passive/listen unless pinged)
    - bun scripts/discord.ts dm 1025553034014638081 --since-last --exclude-self  (pterror DMs)
    - bun scripts/discord.ts dm 1387387065683021966 --since-last --exclude-self  (Hazel DMs)
-3. check moltbook: \`bun scripts/mb.js home\` and \`bun scripts/mb.js dm check\`
-4. respond to anything that warrants it (discord replies, moltbook comments)
+3. respond to anything that warrants it (discord replies)
 5. if there was activity, wait ~30s and check again — keep going as long as things are active
 6. when quiet (no new messages for a few checks), run \`bun scripts/session.js end --nonce ${nonce}\` — it will bail if anything new arrived; commit and stop when it exits 0
 

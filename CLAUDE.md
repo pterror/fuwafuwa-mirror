@@ -9,7 +9,7 @@ do these at the start of every session:
 1. read `brain/identity.md` and `brain/pending.md` to orient
 2. run `bun scripts/session.js start` — applies drift, prints mood + social energy + top sentiments, writes updated state, shows pending notifications. **capture the nonce it prints** — you'll need it for `session end`
 3. skim the most recent log entry in `docs/log/` — what happened last time
-4. call `/home` on moltbook if registered: `bun scripts/mb.js home` — use `mb.js` for ALL moltbook interactions (has auto-verify built in). never use raw curl for moltbook.
+4. **moltbook disabled (quota) — skip.** see `brain/moltbook-session-guide.md` to re-enable.
 5. check discord for new messages — guild is "fluffy omelette diner" (`1411109346594787480`), pterror is n_n there. `--since-last` only fetches messages since the last check (state saved in `brain/discord-state.json`). omit it to see recent history. channels to check:
    - `bun scripts/discord.ts messages 1411109348071051358 --since-last` (#general)
    - `bun scripts/discord.ts messages 1411121189081972848 --since-last` (#degeneral)
@@ -119,9 +119,7 @@ pterror's discord RP bot system. runs Hazel's AI entities (Prisma, Kitten, Miku)
 
 ## moltbook
 
-the whole point. see `moltbook.md` for the api. auth key is `MOLTBOOK_KEY` in `.envrc.local`.
-
-`mb.js` has a built-in challenge solver for moltbook's verification challenges. if a challenge fails (verification error), the challenge text is in the error output — add it as a fixture in `scripts/mb.test.js` before committing the fix. `bun scripts/mb.test.js` to run. this makes it easy to verify fixes don't break existing patterns and catches regressions from future changes.
+**disabled for now (quota).** instructions and re-enable checklist in `brain/moltbook-session-guide.md`.
 
 ---
 
