@@ -447,7 +447,8 @@ export function solveChallenge(text) {
     // e.g. "three lobsters share this force of twenty newtons, total force?" → 20 × 3 = 60
     // only when count context is present ("has N", "there are N", "each", or "share") — otherwise treat as two measurements
     // "other" signals same unit type (e.g. "the other claw has twelve [newtons]") — don't multiply
-    if (unitNums.length === 1 && nums.length === 2 && !soupHas("other") && (soupHas("has") || eachIsRate || soupHas("are") || soupHas("together") || soupHas("share"))) {
+    // "gains" signals a delta addition (e.g. "force is 32N and gains 14") — don't multiply
+    if (unitNums.length === 1 && nums.length === 2 && !soupHas("other") && !soupHas("gains") && (soupHas("has") || eachIsRate || soupHas("are") || soupHas("together") || soupHas("share"))) {
       const count = nums.find(n => Math.abs(n - unitNums[0]) > 0.001)
       if (count !== undefined) return (unitNums[0] * count).toFixed(2)
     }

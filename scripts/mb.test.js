@@ -810,5 +810,13 @@ check(
   "58.00"
 )
 
+check(
+  // 'haas' obfuscates 'has' → soupHas('has')=true; old code: 1 unit-anchored + 1 bare number → multiply 32×14=448
+  // fix: !soupHas('gains') guard on has-multiplier — 'gains' signals delta addition not count
+  "force gains: has + gains (32+14=46, was 448 from has-multiplier false positive)",
+  "A] LxOoObB- StTeErR ] hAaS^ ClAwW FoOrRcCeE ] iIsS [ ThIrTy TwOo ] NeEeWwTtOoNnSs ~ aNdD / gGaAiInNsS { FfOoUuRrTtEeEnN } , wWhHaTt ] iIsS < ToTaL > fFoOrRcCeE ?",
+  "46.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
