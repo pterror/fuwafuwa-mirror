@@ -502,6 +502,13 @@ export function solveChallenge(text) {
         const countNums = extractAllNumbers(m[0].split(/\s+/).slice(0, -1).join(' '))
         for (const n of countNums) structuralCounts.add(n)
       }
+      // "N quantities/values/measurements" in question clause → N is a count descriptor, not a value
+      // e.g. "swims at 23 cm/s, claw exerts 35 newtons, how much total is these two quantities?" → two=2 is structural
+      const descriptorPat = /\b\w+\s+(?:quantities?|values?|measurements?|items?|factors?)\b/g
+      for (const m of cleaned.matchAll(descriptorPat)) {
+        const countNums = extractAllNumbers(m[0].split(/\s+/).slice(0, -1).join(' '))
+        for (const n of countNums) structuralCounts.add(n)
+      }
       if (structuralCounts.size > 0) {
         const filtered = nums.filter(n => !structuralCounts.has(n) || Math.abs(n - unitNums[0]) < 0.001)
         if (filtered.length >= 2 && filtered.length < nums.length) return filtered.reduce((a, b) => a + b, 0).toFixed(2)

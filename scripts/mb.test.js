@@ -801,5 +801,14 @@ check(
   "30.00"
 )
 
+check(
+  // "two quantities" in the question clause: "two" is a count descriptor, not a summable value
+  // without fix: extractAllNumbers returns [23, 35, 2], summing to 60
+  // fix: 'two quantities' detected as structural count → filtered to [23, 35] → 58.00
+  "mixed units 'how much total is these two quantities': 23 cm/s + 35 newtons = 58 (was 60)",
+  "A] lOoBbStTeR S^wImS aT tWeNtY tHrEe} cMe^tErS\\ pEr| sEcOnD, Um- iTs ClAw~ eX^eRtS tHiRtY fIfE] nEu-TonS, HoW/ mUcH ToTaL- iS tHeSe/ tWo~ qUaNtItIeS?",
+  "58.00"
+)
+
 console.log(`\n${passed} passed, ${failed} failed`)
 if (failed > 0) process.exit(1)
