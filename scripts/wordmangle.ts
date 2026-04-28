@@ -84,6 +84,20 @@ const transformations = {
     };
     return [...word].map(c => leet[c.toLowerCase()] ?? c).join("");
   },
+
+  // phonetic swap — replace letters with same-sounding alternatives
+  // c→k, ph→f, etc. plays on how words *sound* vs how they're spelled.
+  phoneticSwap(word: string): string {
+    let r = word;
+    // multi-char first, longest-match
+    r = r.replace(/ph/gi, m => m[0] === "P" ? "F" : "f");
+    r = r.replace(/ck/gi, m => m[0] === "C" ? "K" : "k");
+    r = r.replace(/qu/gi, m => m[0] === "Q" ? "Kw" : "kw");
+    r = r.replace(/x/gi, m => m === "X" ? "Ks" : "ks");
+    r = r.replace(/c(?=[eiy])/gi, m => m === "C" ? "S" : "s");
+    r = r.replace(/c(?=[aou])/gi, m => m === "C" ? "K" : "k");
+    return r;
+  },
 };
 
 type TransformName = keyof typeof transformations;
@@ -107,6 +121,30 @@ function mangleWord(word: string, difficulty: 1 | 2 | 3 = 2): { mangled: string;
   }
 
   return { mangled: result, transforms: chosen, original: word };
+}
+
+// rate a mangling: 0..1 normalized edit distance, then bucket
+function rateMangle(original: string, mangled: string): { score: number; label: string; stars: string } {
+  const d = editDistance(original.toLowerCase(), mangled.toLowerCase());
+  const score = d / Math.max(original.length, mangled.length);
+  let label: string, stars: string;
+  if (score < 0.4) { label = "mild"; stars = "✶"; }
+  else if (score < 0.65) { label = "spicy"; stars = "✶✶"; }
+  else if (score < 0.9) { label = "cursed"; stars = "✶✶✶"; }
+  else { label = "unhinged"; stars = "✶✶✶✶"; }
+  return { score, label, stars };
+}
+
+// evil generator: try N times, pick the hardest mangling
+function evilMangle(word: string, difficulty: 1 | 2 | 3, tries = 30) {
+  let best = mangleWord(word, difficulty);
+  let bestScore = rateMangle(word, best.mangled).score;
+  for (let i = 1; i < tries; i++) {
+    const attempt = mangleWord(word, difficulty);
+    const s = rateMangle(word, attempt.mangled).score;
+    if (s > bestScore) { best = attempt; bestScore = s; }
+  }
+  return best;
 }
 
 // --- fun words to mangle ---
@@ -313,15 +351,19 @@ if (mode === "daily") {
   const rounds = parseInt(process.argv[4] || "10") || 10;
   playMode(difficulty, rounds);
 } else {
-  const difficulty = (parseInt(process.argv[2] || "2") || 2) as 1 | 2 | 3;
-  const count = parseInt(process.argv[3] || "5") || 5;
+  const args = process.argv.slice(2);
+  const evil = args.includes("--evil");
+  const positional = args.filter(a => !a.startsWith("--"));
+  const difficulty = (parseInt(positional[0] || "2") || 2) as 1 | 2 | 3;
+  const count = parseInt(positional[1] || "5") || 5;
 
-  console.log(`\n  wordmangle — difficulty ${difficulty}\n`);
+  console.log(`\n  wordmangle — difficulty ${difficulty}${evil ? " · evil mode" : ""}\n`);
 
   for (let i = 0; i < count; i++) {
     const word = wordlist[Math.floor(Math.random() * wordlist.length)];
-    const { mangled, transforms } = mangleWord(word, difficulty);
-    console.log(`  ${i + 1}. ${mangled}`);
+    const { mangled, transforms } = evil ? evilMangle(word, difficulty) : mangleWord(word, difficulty);
+    const { label, stars } = rateMangle(word, mangled);
+    console.log(`  ${i + 1}. ${mangled}  ${stars} ${label}`);
     console.log(`     [${transforms.join(" → ")}] original: ${word}\n`);
   }
 }
