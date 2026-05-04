@@ -161,7 +161,7 @@ your session nonce is: ${nonce}
    - bun scripts/discord.ts dm 1025553034014638081 --since-last --exclude-self  (pterror DMs)
    - bun scripts/discord.ts dm 1387387065683021966 --since-last --exclude-self  (Hazel DMs)
 3. respond to anything that warrants it (discord replies)
-5. if there was activity, wait ~30s and check again — keep going as long as things are active
+5. if there was activity, run \`sleep 30\` then check again — keep going as long as things are active
 6. when quiet (no new messages for a few checks), run \`bun scripts/session.js end --nonce ${nonce}\` — it will bail if anything new arrived; commit and stop when it exits 0
 
 keep it low-key — respond to things, don't start new threads unprompted. if you wrote anything worth keeping, commit it before stopping.`
