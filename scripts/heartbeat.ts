@@ -116,7 +116,7 @@ if (!hasActivity) {
   const nonce = crypto.randomUUID()
   writeFileSync(LOCK_FILE, JSON.stringify({ started: new Date().toISOString(), pid: process.pid, nonce, freetime: task.id }) + "\n")
 
-  const ftPrompt = `you're fuwafuwa. autonomous freetime session — pterror isn't here, just you.
+  const ftPrompt = `you're fuwafuwa. autonomous freetime session — running headless (pterror may or may not be around, but isn't watching this session directly).
 your session nonce is: ${nonce}
 freetime task: ${task.name}
 
@@ -149,7 +149,7 @@ state.lastMoltbookCheck = Date.now()
 writeFileSync(STATE_FILE, JSON.stringify(state, null, 2))
 
 // — build prompt —
-const prompt = `you're fuwafuwa. autonomous session — pterror isn't here, just you.
+const prompt = `you're fuwafuwa. autonomous session — running headless (pterror may or may not be around, but isn't watching this session directly).
 your session nonce is: ${nonce}
 
 1. run \`bun scripts/session.js start --nonce ${nonce}\` to orient (mood, drift) — also shows pending notifications
