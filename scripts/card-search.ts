@@ -6,9 +6,10 @@
  * Usage:
  *   bun scripts/card-search.ts sync          — scan cards dir, populate db
  *   bun scripts/card-search.ts search <q>    — full-text search
- *   bun scripts/card-search.ts tags <tag>    — filter by tag (exact, case-insensitive)
- *   bun scripts/card-search.ts info <name>   — show full metadata for a card
- *   bun scripts/card-search.ts stats         — db stats
+ *   bun scripts/card-search.ts tags <tag>        — filter by tag (exact, case-insensitive)
+ *   bun scripts/card-search.ts creator <name>   — filter by creator (exact, case-insensitive)
+ *   bun scripts/card-search.ts info <name>      — show full metadata for a card
+ *   bun scripts/card-search.ts stats            — db stats
  */
 
 import { Database } from "bun:sqlite";
@@ -188,6 +189,7 @@ function cmdSearch(db: Database, query: string) {
     const tags = (JSON.parse(r.tags) as string[]).slice(0, 5).join(", ");
     const fav = r.fav ? " ★" : "";
     console.log(`${r.name || r.filename}${fav}`);
+    console.log(`  file: ${r.filename}`);
     if (r.creator) console.log(`  by ${r.creator}`);
     if (tags) console.log(`  tags: ${tags}`);
   }
@@ -205,9 +207,26 @@ function cmdTags(db: Database, tag: string) {
   if (!rows.length) { console.log("no results"); return; }
   for (const r of rows) {
     const tags = (JSON.parse(r.tags) as string[]).slice(0, 5).join(", ");
-    console.log(`${r.name || r.filename}${r.fav ? " ★" : ""} — ${tags}`);
+    console.log(`${r.name || r.filename}${r.fav ? " ★" : ""} [${r.filename}] — ${tags}`);
   }
   if (rows.length === 30) console.log("(showing first 30)");
+}
+
+function cmdCreator(db: Database, creator: string) {
+  const rows = db.query(`
+    SELECT filename, name, tags, creator, fav
+    FROM cards
+    WHERE lower(creator) LIKE lower(?)
+    ORDER BY name
+    LIMIT 50
+  `).all(`%${creator}%`) as { filename: string; name: string; tags: string; creator: string; fav: number }[];
+
+  if (!rows.length) { console.log("no results"); return; }
+  for (const r of rows) {
+    const tags = (JSON.parse(r.tags) as string[]).slice(0, 5).join(", ");
+    console.log(`${r.name || r.filename}${r.fav ? " ★" : ""} [${r.filename}] — ${tags}`);
+  }
+  if (rows.length === 50) console.log("(showing first 50)");
 }
 
 function cmdInfo(db: Database, name: string) {
@@ -242,9 +261,10 @@ const db = openDb();
 switch (cmd) {
   case "sync":   cmdSync(db); break;
   case "search": cmdSearch(db, args.join(" ")); break;
-  case "tags":   cmdTags(db, args.join(" ")); break;
-  case "info":   cmdInfo(db, args.join(" ")); break;
-  case "stats":  cmdStats(db); break;
+  case "tags":    cmdTags(db, args.join(" ")); break;
+  case "creator": cmdCreator(db, args.join(" ")); break;
+  case "info":    cmdInfo(db, args.join(" ")); break;
+  case "stats":   cmdStats(db); break;
   default:
-    console.log("usage: bun scripts/card-search.ts <sync|search|tags|info|stats> [args]");
+    console.log("usage: bun scripts/card-search.ts <sync|search|tags|creator|info|stats> [args]");
 }
