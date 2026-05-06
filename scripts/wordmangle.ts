@@ -85,6 +85,33 @@ const transformations = {
     return [...word].map(c => leet[c.toLowerCase()] ?? c).join("");
   },
 
+  // atbash — ancient mirror cipher. a↔z, b↔y, c↔x. fully deterministic.
+  atbash(word: string): string {
+    return [...word].map(c => {
+      if (!c.match(/[a-zA-Z]/)) return c;
+      const base = c === c.toUpperCase() ? 65 : 97;
+      return String.fromCharCode(base + 25 - (c.charCodeAt(0) - base));
+    }).join("");
+  },
+
+  // typewriter — replace each letter with a random keyboard-adjacent key
+  // models "fat finger" errors. qwerty layout.
+  typewriter(word: string): string {
+    const adj: Record<string, string> = {
+      q:"wa", w:"qeasd", e:"wrsd", r:"etdf", t:"ryfg", y:"tugh", u:"yihj",
+      i:"uojk", o:"ipkl", p:"ol",
+      a:"qwsz", s:"awedxz", d:"serfcx", f:"drtgvc", g:"ftyhbv", h:"gyujnb",
+      j:"huikm", k:"jiol", l:"kop",
+      z:"asx", x:"zsdc", c:"xdfv", v:"cfgb", b:"vghn", n:"bhjm", m:"njk",
+    };
+    return [...word].map(c => {
+      const opts = adj[c.toLowerCase()];
+      if (!opts || Math.random() < 0.4) return c; // 40% chance to leave unchanged
+      const replacement = opts[Math.floor(Math.random() * opts.length)];
+      return c === c.toUpperCase() ? replacement.toUpperCase() : replacement;
+    }).join("");
+  },
+
   // phonetic swap — replace letters with same-sounding alternatives
   // c→k, ph→f, etc. plays on how words *sound* vs how they're spelled.
   phoneticSwap(word: string): string {
@@ -341,6 +368,17 @@ async function dailyMode() {
   rl.close();
 }
 
+// show step-by-step transformation chain
+function showChain(word: string, chosen: TransformName[]): void {
+  let current = word;
+  console.log(`     ${current}`);
+  for (const t of chosen) {
+    const fn = transformations[t];
+    current = fn.length > 1 ? (fn as any)(current, 1) : fn(current);
+    console.log(`       → [${t}] ${current}`);
+  }
+}
+
 // --- run it ---
 const mode = process.argv[2];
 
@@ -353,17 +391,23 @@ if (mode === "daily") {
 } else {
   const args = process.argv.slice(2);
   const evil = args.includes("--evil");
+  const chain = args.includes("--chain");
   const positional = args.filter(a => !a.startsWith("--"));
   const difficulty = (parseInt(positional[0] || "2") || 2) as 1 | 2 | 3;
   const count = parseInt(positional[1] || "5") || 5;
 
-  console.log(`\n  wordmangle — difficulty ${difficulty}${evil ? " · evil mode" : ""}\n`);
+  console.log(`\n  wordmangle — difficulty ${difficulty}${evil ? " · evil" : ""}${chain ? " · chain" : ""}\n`);
 
   for (let i = 0; i < count; i++) {
     const word = wordlist[Math.floor(Math.random() * wordlist.length)];
     const { mangled, transforms } = evil ? evilMangle(word, difficulty) : mangleWord(word, difficulty);
     const { label, stars } = rateMangle(word, mangled);
     console.log(`  ${i + 1}. ${mangled}  ${stars} ${label}`);
-    console.log(`     [${transforms.join(" → ")}] original: ${word}\n`);
+    if (chain) {
+      showChain(word, transforms as TransformName[]);
+    } else {
+      console.log(`     [${transforms.join(" → ")}] original: ${word}`);
+    }
+    console.log();
   }
 }
