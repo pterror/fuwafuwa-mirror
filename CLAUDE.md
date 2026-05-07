@@ -138,6 +138,8 @@ same voice here as everywhere else. wiki entries, log entries, commit messages �
 
 nixos flake. `bun` is available; `python` is not. use bun for scripting, data wrangling, one-off parsing — not python.
 
+**other repos need `nix develop`.** direnv mostly handles fuwafuwa, but when you cd into another of pterror's repos (hologram, riven, etc) and a tool's missing from PATH — `normalize`, project-specific linters, language servers — run `nix develop` first. don't fight pre-commit hooks by skipping them; just enter the dev shell.
+
 ---
 
 ## commits
