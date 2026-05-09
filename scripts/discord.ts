@@ -5,6 +5,7 @@
 //   discord guilds                          — list guilds the bot is in
 //   discord channels [guild-id]             — list channels in a guild
 //   discord messages <channel-id>           — get recent messages (last 20)
+//   discord reactions <channel-id> <msg-id> — list who reacted to a message
 //   discord send <channel-id> <content>     — send a message
 
 import { readFileSync, writeFileSync, existsSync } from "fs"
@@ -443,6 +444,25 @@ async function emojis() {
   }
 }
 
+async function reactions() {
+  const [channelId, messageId] = posArgs
+  if (!channelId || !messageId) {
+    console.error("usage: discord reactions <channel-id> <message-id>")
+    process.exit(1)
+  }
+  const msg = await api("GET", `/channels/${channelId}/messages/${messageId}`) as { reactions?: { emoji: { id: string | null; name: string; animated?: boolean }; count: number }[] }
+  if (!msg.reactions?.length) { console.log("no reactions"); return }
+  for (const r of msg.reactions) {
+    const emojiStr = r.emoji.id
+      ? `<${r.emoji.animated ? "a" : ""}:${r.emoji.name}:${r.emoji.id}>`
+      : r.emoji.name
+    const encoded = r.emoji.id ? `${r.emoji.name}:${r.emoji.id}` : encodeURIComponent(r.emoji.name!)
+    const users = await api("GET", `/channels/${channelId}/messages/${messageId}/reactions/${encoded}`) as { id: string; username: string; global_name?: string }[]
+    const names = users.map(u => u.global_name ?? u.username).join(", ")
+    console.log(`${emojiStr} ×${r.count}  —  ${names}`)
+  }
+}
+
 async function react() {
   const [channelId, messageId, emoji] = posArgs
   if (!channelId || !messageId || !emoji) {
@@ -457,7 +477,7 @@ async function react() {
 }
 
 // — dispatch —
-const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, attach, reply, react, emojis, stickers, sticker, view, dm }
+const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, attach, reply, reactions, react, emojis, stickers, sticker, view, dm }
 
 if (!cmd || !commands[cmd]) {
   console.log(`usage: discord <${Object.keys(commands).join("|")}> [args]`)
