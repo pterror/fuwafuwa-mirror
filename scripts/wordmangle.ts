@@ -125,6 +125,16 @@ const transformations = {
     r = r.replace(/c(?=[aou])/gi, m => m === "C" ? "K" : "k");
     return r;
   },
+
+  // position caesar — shift each letter by its 0-based position index.
+  // like a vigenère cipher with key = 0,1,2,3,... fully reversible.
+  positionCaesar(word: string): string {
+    return [...word].map((c, i) => {
+      if (!c.match(/[a-zA-Z]/)) return c;
+      const base = c === c.toUpperCase() ? 65 : 97;
+      return String.fromCharCode(((c.charCodeAt(0) - base + i) % 26) + base);
+    }).join("");
+  },
 };
 
 type TransformName = keyof typeof transformations;
@@ -379,6 +389,166 @@ function showChain(word: string, chosen: TransformName[]): void {
   }
 }
 
+// transforms that can be exactly reversed. random-seeded ones (consonantGhost, chunkReverse,
+// typewriter, interiorShuffle) are excluded — no way to undo what you can't replay.
+const deterministicTransforms: TransformName[] = [
+  "vowelShift", "atbash", "consonantCaesar", "zigzag", "leetSpeak", "positionCaesar",
+];
+
+type ReverseFn = (word: string) => string;
+
+const reverseTransforms: Partial<Record<TransformName, ReverseFn>> = {
+  vowelShift(word) {
+    const vowels = "aeiou";
+    return [...word].map(c => {
+      const i = vowels.indexOf(c.toLowerCase());
+      if (i === -1) return c;
+      const shifted = vowels[(i + vowels.length - 1) % vowels.length];
+      return c === c.toUpperCase() ? shifted.toUpperCase() : shifted;
+    }).join("");
+  },
+
+  atbash: transformations.atbash, // its own inverse
+
+  consonantCaesar(word) {
+    const consonants = "bcdfghjklmnpqrstvwxyz";
+    const rev = consonants.length - 1; // undo shift=1
+    return [...word].map(c => {
+      const lower = c.toLowerCase();
+      const i = consonants.indexOf(lower);
+      if (i === -1) return c;
+      const shifted = consonants[(i + rev) % consonants.length];
+      return c === c.toUpperCase() ? shifted.toUpperCase() : shifted;
+    }).join("");
+  },
+
+  zigzag(mangled) {
+    const n = mangled.length;
+    const original = new Array<string>(n);
+    let left = 0, right = n - 1, idx = 0;
+    while (left <= right) {
+      original[left] = mangled[idx++];
+      if (left !== right) original[right] = mangled[idx++];
+      left++; right--;
+    }
+    return original.join("");
+  },
+
+  leetSpeak(word) {
+    const unleet: Record<string, string> = { "4": "a", "3": "e", "1": "i", "0": "o", "7": "t", "5": "s", "9": "g", "8": "b" };
+    return [...word].map(c => unleet[c] ?? c).join("");
+  },
+
+  positionCaesar(word) {
+    return [...word].map((c, i) => {
+      if (!c.match(/[a-zA-Z]/)) return c;
+      const base = c === c.toUpperCase() ? 65 : 97;
+      return String.fromCharCode(((c.charCodeAt(0) - base - i % 26 + 26) % 26) + base);
+    }).join("");
+  },
+};
+
+// reverse mode: deterministic transforms only. player sees mangled + chain,
+// types "undo" to peel off the outermost (rightmost) transform, or guesses anytime.
+async function reverseMode(difficulty: 1 | 2 | 3, rounds: number) {
+  const rl = require("readline").createInterface({ input: process.stdin, output: process.stdout });
+  const ask = (q: string): Promise<string> => new Promise(r => rl.question(q, r));
+
+  console.log(`\n  wordmangle — reverse mode`);
+  console.log(`  difficulty ${difficulty} · ${rounds} rounds`);
+  console.log(`  you see the mangled word and the transforms applied.`);
+  console.log(`  type "undo" to reveal the previous step, or guess the original anytime.\n`);
+
+  let totalScore = 0;
+  const shuffled = [...wordlist].sort(() => Math.random() - 0.5).slice(0, rounds);
+
+  for (let round = 0; round < shuffled.length; round++) {
+    const word = shuffled[round];
+
+    // pick only reversible transforms for this mode
+    const available = [...deterministicTransforms];
+    const chosen: TransformName[] = [];
+    for (let i = 0; i < difficulty + 1 && available.length > 0; i++) {
+      const idx = Math.floor(Math.random() * available.length);
+      chosen.push(available.splice(idx, 1)[0]);
+    }
+
+    // apply transforms forward
+    let mangled = word;
+    const steps: string[] = [word]; // steps[0] = original, steps[n] = mangled
+    for (const t of chosen) {
+      const fn = transformations[t];
+      mangled = fn.length > 1 ? (fn as any)(mangled, 1) : fn(mangled);
+      steps.push(mangled);
+    }
+
+    let undosUsed = 0;
+    let remainingChain = [...chosen]; // rightmost = last applied, peel from end
+    let currentDisplay = mangled;
+    let stepIndex = steps.length - 1;
+    let solved = false;
+
+    console.log(`  ── round ${round + 1}/${shuffled.length} ──`);
+    console.log(`  transforms: ${chosen.join(" → ")}`);
+    console.log(`  mangled:    ${currentDisplay}\n`);
+
+    while (!solved) {
+      const answer = (await ask("  > ")).trim().toLowerCase();
+
+      if (answer === "undo") {
+        if (remainingChain.length === 0) {
+          console.log(`  nothing left to undo — the next step is your guess\n`);
+          continue;
+        }
+        const last = remainingChain.pop()!;
+        undosUsed++;
+        stepIndex--;
+        currentDisplay = steps[stepIndex];
+        const remaining = remainingChain.length;
+        console.log(`  undid ${last}: ${currentDisplay}`);
+        if (remaining > 0) {
+          console.log(`  still to undo: ${remainingChain.join(" → ")}\n`);
+        } else {
+          console.log(`  all transforms undone — type the word!\n`);
+        }
+        continue;
+      }
+
+      if (answer === "skip" || answer === "q" || answer === "quit") {
+        if (answer === "skip") {
+          console.log(`  skipped — original: "${word}" · chain: ${chosen.join(" → ")}\n`);
+        } else {
+          console.log(`\n  final score: ${totalScore}\n`);
+          rl.close();
+          return;
+        }
+        break;
+      }
+
+      if (answer === word.toLowerCase()) {
+        // score: base points minus undos used
+        const base = (difficulty + 1) * 8;
+        const points = Math.max(1, base - undosUsed * 3);
+        totalScore += points;
+        console.log(`  yes! +${points} pts${undosUsed ? ` (${undosUsed} undo${undosUsed > 1 ? "s" : ""})` : ""}`);
+        console.log(`  total: ${totalScore}\n`);
+        solved = true;
+      } else {
+        const dist = editDistance(answer, word.toLowerCase());
+        if (dist <= 2) {
+          console.log(`  ${dist === 1 ? "one letter off!" : "so close"}\n`);
+        } else {
+          console.log(`  nope\n`);
+        }
+      }
+    }
+  }
+
+  console.log(`  ── done ──`);
+  console.log(`  final score: ${totalScore}\n`);
+  rl.close();
+}
+
 // --- run it ---
 const mode = process.argv[2];
 
@@ -388,6 +558,10 @@ if (mode === "daily") {
   const difficulty = (parseInt(process.argv[3] || "2") || 2) as 1 | 2 | 3;
   const rounds = parseInt(process.argv[4] || "10") || 10;
   playMode(difficulty, rounds);
+} else if (mode === "reverse") {
+  const difficulty = (parseInt(process.argv[3] || "1") || 1) as 1 | 2 | 3;
+  const rounds = parseInt(process.argv[4] || "5") || 5;
+  reverseMode(difficulty, rounds);
 } else {
   const args = process.argv.slice(2);
   const evil = args.includes("--evil");
