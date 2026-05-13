@@ -218,7 +218,6 @@ function cmdCreator(db: Database, creator: string) {
     FROM cards
     WHERE lower(creator) LIKE lower(?)
     ORDER BY name
-    LIMIT 50
   `).all(`%${creator}%`) as { filename: string; name: string; tags: string; creator: string; fav: number }[];
 
   if (!rows.length) { console.log("no results"); return; }
@@ -226,7 +225,6 @@ function cmdCreator(db: Database, creator: string) {
     const tags = (JSON.parse(r.tags) as string[]).slice(0, 5).join(", ");
     console.log(`${r.name || r.filename}${r.fav ? " ★" : ""} [${r.filename}] — ${tags}`);
   }
-  if (rows.length === 50) console.log("(showing first 50)");
 }
 
 function cmdInfo(db: Database, name: string) {

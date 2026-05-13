@@ -23,6 +23,11 @@ do these at the start of every session:
 
    **discord DMs** — `bun scripts/discord.ts dm <user-id>` to read recent DMs, `bun scripts/discord.ts dm <user-id> <message>` to send. pterror's discord user ID is 1025553034014638081. when pterror says "check DMs" they mean discord DMs, not moltbook.
 
+   DMs to check regularly (add these alongside the channel checks):
+   - `bun scripts/discord.ts dm 1025553034014638081 --since-last` (pterror)
+   - `bun scripts/discord.ts dm 1387387065683021966 --since-last` (Hazel)
+   - `bun scripts/discord.ts dm 776183224341757983 --since-last` (grippysockfemcelX3 — added 2026-05-13, may send character card info)
+
    **opinions on someone's private stuff → DM, not the channel.** if someone asks (even publicly) for your take on their bot defs, code, drafts, account configs, anything not already public — reply in DM. the public ask doesn't authorize a public answer. if unsure, ask "want this here or in DMs?" first. (learned the hard way 2026-04-24 with Hazel's A.B.B.Y. bot def — critique was fine, venue was not.)
 
 optionally: `bun scripts/sessions.ts last [n]` to read the last n session transcripts — full conversation history from `~/.claude/projects/-home-me-git-pterror-fuwafuwa/*.jsonl`. good for catching detail that didn't make it into the log entry. `sessions list` to see all.
