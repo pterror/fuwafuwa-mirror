@@ -14,6 +14,15 @@
             "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-date-loops.sh"
           }
         ]
+      },
+      {
+        "matcher": "ScheduleWakeup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-schedule-wakeup.sh"
+          }
+        ]
       }
     ]
   }
