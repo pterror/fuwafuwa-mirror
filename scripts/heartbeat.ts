@@ -5,7 +5,30 @@
 // otherwise spawns a claude session that runs its own check-respond loop
 
 import { spawnSync } from "child_process"
-import { existsSync, statSync, readdirSync, readFileSync, writeFileSync } from "fs"
+import { existsSync, statSync, readdirSync, readFileSync, writeFileSync, unlinkSync } from "fs"
+
+// Belt-and-suspenders: after the spawned claude exits, if our nonce still
+// owns the lockfile it means the session didn't run `session end` (silent
+// ScheduleWakeup, crash, context limit, etc). Try a normal end first so NT
+// drift + sentiment habituation still apply; fall back to a hard unlink so
+// the lock can't strand future ticks (the 2026-05-14 nonce-f628e441 hang).
+function ensureSessionEnded(ourNonce: string) {
+  if (!existsSync(LOCK_FILE)) return
+  let lock: { nonce?: string } = {}
+  try { lock = JSON.parse(readFileSync(LOCK_FILE, "utf8")) } catch {}
+  if (lock.nonce !== ourNonce) return  // someone else owns it now — leave alone
+  console.log(`[heartbeat] session exited without end — forcing cleanup (nonce: ${ourNonce.slice(0, 8)}...)`)
+  spawnSync("bun", ["scripts/session.js", "end", "--nonce", ourNonce], { cwd: DIR, stdio: "inherit" })
+  if (existsSync(LOCK_FILE)) {
+    try {
+      const stillOurs = JSON.parse(readFileSync(LOCK_FILE, "utf8"))
+      if (stillOurs.nonce === ourNonce) {
+        console.log(`[heartbeat] session end couldn't release lock (likely unread notifications) — hard-unlinking`)
+        unlinkSync(LOCK_FILE)
+      }
+    } catch {}
+  }
+}
 
 const DIR = import.meta.dir + "/.."
 const LOCK_FILE = DIR + "/brain/session.lock"
@@ -135,6 +158,7 @@ this is your free time. do the thing, enjoy it, keep it short. no need to check 
     env: { ...process.env },
   })
 
+  ensureSessionEnded(nonce)
   process.exit(ftRun.status ?? 0)
 }
 
@@ -174,4 +198,5 @@ const result = spawnSync("claude", ["-p", "--dangerously-skip-permissions", prom
   env: { ...process.env },
 })
 
+ensureSessionEnded(nonce)
 process.exit(result.status ?? 0)
