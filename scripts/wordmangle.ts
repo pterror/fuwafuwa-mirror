@@ -135,6 +135,36 @@ const transformations = {
       return String.fromCharCode(((c.charCodeAt(0) - base + i) % 26) + base);
     }).join("");
   },
+
+  // stretchy — repeat vowels 2-4× randomly, like a shouted word
+  stretchy(word: string): string {
+    const vowels = "aeiou";
+    return [...word].map(c => {
+      if (!vowels.includes(c.toLowerCase())) return c;
+      const reps = 2 + Math.floor(Math.random() * 3);
+      return c.repeat(reps);
+    }).join("");
+  },
+
+  // vowelDrop — strip most vowels (keep first vowel of word so it's not unreadable)
+  vowelDrop(word: string): string {
+    const vowels = "aeiou";
+    let kept = false;
+    return [...word].map(c => {
+      if (!vowels.includes(c.toLowerCase())) return c;
+      if (!kept) { kept = true; return c; }
+      return "";
+    }).join("");
+  },
+
+  // doubleTrouble — randomly double consonants (~40% chance each)
+  doubleTrouble(word: string): string {
+    const vowels = "aeiou";
+    return [...word].map(c => {
+      if (vowels.includes(c.toLowerCase()) || !c.match(/[a-z]/i)) return c;
+      return Math.random() < 0.4 ? c + c : c;
+    }).join("");
+  },
 };
 
 type TransformName = keyof typeof transformations;
@@ -552,7 +582,18 @@ async function reverseMode(difficulty: 1 | 2 | 3, rounds: number) {
 // --- run it ---
 const mode = process.argv[2];
 
-if (mode === "daily") {
+if (mode === "compare") {
+  const word = process.argv[3] || wordlist[Math.floor(Math.random() * wordlist.length)];
+  console.log(`\n  wordmangle — comparing all transforms on "${word}"\n`);
+  const widest = Math.max(...allTransforms.map(t => t.length));
+  for (const t of allTransforms) {
+    const fn = transformations[t];
+    const out = fn.length > 1 ? (fn as any)(word, 1) : fn(word);
+    const { label, stars } = rateMangle(word, out);
+    console.log(`  ${t.padEnd(widest)}  ${out.padEnd(28)} ${stars} ${label}`);
+  }
+  console.log();
+} else if (mode === "daily") {
   dailyMode();
 } else if (mode === "play") {
   const difficulty = (parseInt(process.argv[3] || "2") || 2) as 1 | 2 | 3;
