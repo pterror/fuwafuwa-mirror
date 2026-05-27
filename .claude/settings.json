@@ -28,6 +28,17 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/me/git/pterror/fuwafuwa/tooling/claude-hooks/post-history.sh"
+          }
+        ]
+      }
     ]
   }
 }
