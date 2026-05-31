@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# pre-push hook — auto-refresh the public mirror on every push to origin.
+#
+# Non-blocking: the mirror push runs detached in the background so it can
+# never hold up or fail the origin push. The hook always exits 0.
+#
+# Origin-only: if the remote is not "origin" (e.g. the mirror remote itself),
+# the hook exits 0 immediately — preventing any chance of recursion.
+#
+# Log: .git/mirror-push.log (inside .git/, never tracked).
+
+set -u
+
+REMOTE_NAME="$1"
+# REMOTE_URL="$2"  # available if needed
+
+# only mirror on origin pushes
+if [ "$REMOTE_NAME" != "origin" ]; then
+  exit 0
+fi
+
+ROOT="$(git rev-parse --show-toplevel)"
+LOG="$ROOT/.git/mirror-push.log"
+
+# check bun is available
+if ! command -v bun > /dev/null 2>&1; then
+  echo "=== mirror push skipped $(date -Iseconds) — bun not found on PATH ===" >> "$LOG"
+  exit 0
+fi
+
+# timestamped header so log entries are distinguishable
+echo "=== mirror push triggered $(date -Iseconds) ===" >> "$LOG"
+
+# fire the mirror push fully detached:
+#   - nohup: survives the hook returning
+#   - setsid: new session, fully detached from git's process group
+#   - < /dev/null: no stdin from git's pipe
+#   - >> log 2>&1: stdout+stderr to log, not to git's stdio
+nohup setsid bash -c "cd \"$ROOT\" && exec bun scripts/push-mirror.ts" >> "$LOG" 2>&1 < /dev/null &
+
+# always succeed — mirror is best-effort
+exit 0

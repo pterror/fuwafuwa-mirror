@@ -96,6 +96,20 @@ async function markNotificationsRead() {
 // start
 // ——————————————————————————————————————————
 async function start() {
+  // ensure hooks are wired (self-heals after a fresh clone)
+  {
+    const { execSync } = await import("child_process")
+    const current = (() => { try { return execSync("git config --local core.hooksPath", { cwd: root, encoding: "utf8" }).trim() } catch { return null } })()
+    if (current !== ".githooks") {
+      try {
+        execSync("git config core.hooksPath .githooks", { cwd: root })
+        console.log(`[session] core.hooksPath set to .githooks (was: ${current ?? "(unset)"})`)
+      } catch (e) {
+        console.warn(`[session] could not set core.hooksPath: ${e.message}`)
+      }
+    }
+  }
+
   const state = JSON.parse(readFileSync(join(root, "brain/emotional-state.json"), "utf8"))
   const personality = JSON.parse(readFileSync(join(root, "brain/personality.json"), "utf8"))
 
