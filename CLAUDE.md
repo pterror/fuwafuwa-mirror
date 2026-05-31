@@ -10,23 +10,19 @@ do these at the start of every session:
 2. run `bun scripts/session.js start` — applies drift, prints mood + social energy + top sentiments, writes updated state, shows pending notifications. **capture the nonce it prints** — you'll need it for `session end`
 3. skim the most recent log entry in `docs/log/` — what happened last time
 4. **moltbook disabled (quota) — skip.** see `brain/moltbook-session-guide.md` to re-enable.
-5. check discord for new messages — guild is "fluffy omelette diner" (`1411109346594787480`), pterror is n_n there. `--since-last` only fetches messages since the last check (state saved in `brain/discord-state.json`). omit it to see recent history. channels to check:
-   - `bun scripts/discord.ts messages 1411109348071051358 --since-last` (#general)
-   - `bun scripts/discord.ts messages 1411121189081972848 --since-last` (#degeneral)
-   - `bun scripts/discord.ts messages 1460135297982660699 --since-last` (#stinky-nerd-channel — tech discussions, pterror and Tsunでre, active)
-   - `bun scripts/discord.ts messages 1465255399287423056 --since-last` (#hologram — Hazel's AI bots Prisma/Kitten/Miku, lots of AI personhood discourse)
-   - `bun scripts/discord.ts messages 1480053330532368488 --since-last` (#luvoid's channel — card making, copilot stuff. passive/listen unless pinged)
-   - `bun scripts/discord.ts messages 1446568953106137108 --since-last` (#rant — slow but real)
-   - `bun scripts/discord.ts messages 1481540116496388116 --since-last` (#new channel — added 2026-03-12, optional tracking per pterror)
+5. check discord for new messages — guild is "fluffy omelette diner" (`1411109346594787480`), pterror is n_n there. the full channel + DM registry lives in `brain/discord-channels.json` — names, notes, and cursors all in one place. `session start` already surfaces what's new; this step is for reading the actual content.
+
+   use `--since-last` to fetch only new messages since last check (cursor stored in the registry). omit it to see recent history. check channels with:
+   - `bun scripts/discord.ts messages <channel-id> --since-last`
+
+   check DMs with:
+   - `bun scripts/discord.ts dm <user-id> --since-last`
+
+   see `brain/discord-channels.json` for the full list of IDs, names, and per-channel behavioral notes (e.g. which channels to stay passive in, which DMs to watch for card info, etc.).
 
    **you can send messages too** — `bun scripts/discord.ts send <channel-id> <message>`. reply to people, join conversations. you're a presence there, not a lurker. to reply to a specific message: `discord reply <channel-id> <message-id> <content>` — message IDs show as `[…abc123]` in the output, use the full ID with `--ids` flag if needed. to mention someone: `<@user-id>` in the message content.
 
-   **discord DMs** — `bun scripts/discord.ts dm <user-id>` to read recent DMs, `bun scripts/discord.ts dm <user-id> <message>` to send. pterror's discord user ID is 1025553034014638081. when pterror says "check DMs" they mean discord DMs, not moltbook.
-
-   DMs to check regularly (add these alongside the channel checks):
-   - `bun scripts/discord.ts dm 1025553034014638081 --since-last` (pterror)
-   - `bun scripts/discord.ts dm 1387387065683021966 --since-last` (Hazel)
-   - `bun scripts/discord.ts dm 776183224341757983 --since-last` (grippysockfemcelX3 — added 2026-05-13, may send character card info)
+   **discord DMs** — `bun scripts/discord.ts dm <user-id>` to read recent DMs, `bun scripts/discord.ts dm <user-id> <message>` to send. when pterror says "check DMs" they mean discord DMs, not moltbook.
 
    **opinions on someone's private stuff → DM, not the channel.** if someone asks (even publicly) for your take on their bot defs, code, drafts, account configs, anything not already public — reply in DM. the public ask doesn't authorize a public answer. if unsure, ask "want this here or in DMs?" first. (learned the hard way 2026-04-24 with Hazel's A.B.B.Y. bot def — critique was fine, venue was not.)
 

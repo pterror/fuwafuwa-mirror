@@ -28,15 +28,75 @@ function getEnv(key: string): string {
 const TOKEN = getEnv("DISCORD_TOKEN")
 const BASE = "https://discord.com/api/v10"
 
-// — channel state (last-seen message ids) —
-const STATE_PATH = join(root, "brain/discord-state.json")
+// — channel registry (brain/discord-channels.json) —
+const REGISTRY_PATH = join(root, "brain/discord-channels.json")
 
-function readState(): Record<string, string> {
-  try { return JSON.parse(readFileSync(STATE_PATH, "utf8")) } catch { return {} }
+interface ChannelEntry { id: string; name: string; note?: string; lastSeen?: string }
+interface DmEntry { userId: string; name: string; note?: string; lastSeen?: string }
+interface OtherGuild { guild: string; name: string; note?: string; channels: ChannelEntry[] }
+interface Registry {
+  guild: string
+  channels: ChannelEntry[]
+  otherGuilds?: OtherGuild[]
+  dms: DmEntry[]
 }
 
-function writeState(state: Record<string, string>) {
-  writeFileSync(STATE_PATH, JSON.stringify(state, null, 2) + "\n")
+function readRegistry(): Registry {
+  try { return JSON.parse(readFileSync(REGISTRY_PATH, "utf8")) }
+  catch { return { guild: "", channels: [], dms: [] } }
+}
+
+function writeRegistry(reg: Registry) {
+  writeFileSync(REGISTRY_PATH, JSON.stringify(reg, null, 2) + "\n")
+}
+
+function getLastSeen(channelId: string): string | undefined {
+  const reg = readRegistry()
+  const ch = reg.channels.find(c => c.id === channelId)
+  if (ch) return ch.lastSeen
+  for (const og of reg.otherGuilds ?? []) {
+    const ch2 = og.channels.find(c => c.id === channelId)
+    if (ch2) return ch2.lastSeen
+  }
+  return undefined
+}
+
+function setLastSeen(channelId: string, messageId: string) {
+  const reg = readRegistry()
+  let found = false
+  for (const ch of reg.channels) {
+    if (ch.id === channelId) { ch.lastSeen = messageId; found = true; break }
+  }
+  if (!found) {
+    for (const og of reg.otherGuilds ?? []) {
+      for (const ch of og.channels) {
+        if (ch.id === channelId) { ch.lastSeen = messageId; found = true; break }
+      }
+      if (found) break
+    }
+  }
+  if (!found) {
+    // not in registry yet — append a minimal entry to main guild channels
+    reg.channels.push({ id: channelId, name: channelId })
+    reg.channels[reg.channels.length - 1].lastSeen = messageId
+  }
+  writeRegistry(reg)
+}
+
+function getDmLastSeen(userId: string): string | undefined {
+  const reg = readRegistry()
+  return reg.dms.find(d => d.userId === userId)?.lastSeen
+}
+
+function setDmLastSeen(userId: string, messageId: string) {
+  const reg = readRegistry()
+  const dm = reg.dms.find(d => d.userId === userId)
+  if (dm) {
+    dm.lastSeen = messageId
+  } else {
+    reg.dms.push({ userId, name: userId, lastSeen: messageId })
+  }
+  writeRegistry(reg)
 }
 
 // — api wrapper —
@@ -170,8 +230,8 @@ async function messages() {
   const before = posArgs[2]
 
   if (sinceLast) {
-    const state = readState()
-    if (state[channelId]) after = state[channelId]
+    const lastSeen = getLastSeen(channelId)
+    if (lastSeen) after = lastSeen
   }
 
   let qs = `limit=100`
@@ -197,11 +257,9 @@ async function messages() {
   // newest-first from api, display chronologically
   const ordered = [...data].reverse().filter(m => !excludeSelf || m.author.id !== SELF_ID)
 
-  // update last-seen state (always advance past self-messages too)
+  // update last-seen (always advance past self-messages too)
   if (sinceLast && !peek && data.length > 0) {
-    const state = readState()
-    state[channelId] = data[0].id  // data[0] is newest (api returns newest-first)
-    writeState(state)
+    setLastSeen(channelId, data[0].id)  // data[0] is newest (api returns newest-first)
   }
 
   if (sinceLast && ordered.length === 0) {
@@ -339,11 +397,10 @@ async function dm() {
     const sinceLast = flags.has("--since-last")
     const peek = flags.has("--peek")  // check without advancing state
     const excludeSelf = flags.has("--exclude-self")
-    const dmStateKey = `dm-${userId}`
     let qs = `limit=100`
     if (sinceLast) {
-      const state = readState()
-      if (state[dmStateKey]) qs = `limit=100&after=${state[dmStateKey]}`
+      const lastSeen = getDmLastSeen(userId)
+      if (lastSeen) qs = `limit=100&after=${lastSeen}`
     }
     const data = await api("GET", `/channels/${ch.id}/messages?${qs}`) as {
       id: string; content: string; timestamp: string
@@ -353,11 +410,9 @@ async function dm() {
       message_snapshots?: { message: { content: string; attachments: { filename: string; url: string }[] } }[]
     }[]
     const ordered = [...data].reverse().filter(m => !excludeSelf || m.author.id !== SELF_ID)
-    // update state
+    // update last-seen
     if (sinceLast && !peek && data.length > 0) {
-      const state = readState()
-      state[dmStateKey] = data[0].id  // data[0] is newest
-      writeState(state)
+      setDmLastSeen(userId, data[0].id)  // data[0] is newest
     }
     if (sinceLast && ordered.length === 0) {
       console.log(`no new messages`)

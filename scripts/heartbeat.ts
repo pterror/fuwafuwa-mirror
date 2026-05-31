@@ -74,29 +74,43 @@ if (existsSync(LOCK_FILE)) {
 }
 
 // — pre-check: is there anything worth spawning a session for? —
-const DISCORD_STATE_FILE = DIR + "/brain/discord-state.json"
-const discordStateKeys: string[] = existsSync(DISCORD_STATE_FILE)
-  ? Object.keys(JSON.parse(readFileSync(DISCORD_STATE_FILE, "utf8")))
-  : []
+const REGISTRY_FILE = DIR + "/brain/discord-channels.json"
+interface RegistryChannel { id: string; name: string; lastSeen?: string }
+interface RegistryDm { userId: string; name: string; lastSeen?: string }
+interface DiscordRegistry { channels?: RegistryChannel[]; otherGuilds?: { channels?: RegistryChannel[] }[]; dms?: RegistryDm[] }
+const registry: DiscordRegistry = existsSync(REGISTRY_FILE)
+  ? JSON.parse(readFileSync(REGISTRY_FILE, "utf8"))
+  : { channels: [], dms: [] }
+
+const allChannelIds: string[] = [
+  ...(registry.channels ?? []).map(c => c.id),
+  ...((registry.otherGuilds ?? []).flatMap(g => (g.channels ?? []).map(c => c.id))),
+]
+const allDmUserIds: string[] = (registry.dms ?? []).map(d => d.userId)
 
 let hasActivity = false
 
-// check discord — all channels and DMs tracked in discord-state.json
-for (const key of discordStateKeys) {
-  let dc
-  if (key.startsWith("dm-")) {
-    const userId = key.slice(3)
-    dc = spawnSync("bun", ["scripts/discord.ts", "dm", userId, "--since-last", "--exclude-self", "--peek"], {
-      cwd: DIR, encoding: "utf8",
-    })
-  } else {
-    dc = spawnSync("bun", ["scripts/discord.ts", "messages", key, "--since-last", "--exclude-self", "--peek"], {
-      cwd: DIR, encoding: "utf8",
-    })
-  }
+// check discord — all channels tracked in discord-channels.json
+for (const channelId of allChannelIds) {
+  const dc = spawnSync("bun", ["scripts/discord.ts", "messages", channelId, "--since-last", "--exclude-self", "--peek"], {
+    cwd: DIR, encoding: "utf8",
+  })
   if (dc.stdout && !dc.stdout.includes("no new messages")) {
     hasActivity = true
     break
+  }
+}
+
+// check DMs if no channel activity found
+if (!hasActivity) {
+  for (const userId of allDmUserIds) {
+    const dc = spawnSync("bun", ["scripts/discord.ts", "dm", userId, "--since-last", "--exclude-self", "--peek"], {
+      cwd: DIR, encoding: "utf8",
+    })
+    if (dc.stdout && !dc.stdout.includes("no new messages")) {
+      hasActivity = true
+      break
+    }
   }
 }
 

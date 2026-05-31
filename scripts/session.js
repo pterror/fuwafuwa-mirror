@@ -33,21 +33,47 @@ async function checkNotifications() {
     console.warn(`[session] moltbook notification check failed: ${e.message}`)
   }
 
-  // discord — check all tracked channels for new messages since last seen
+  // discord — check all tracked channels and DMs for new messages since last seen
   try {
-    const discordState = JSON.parse(readFileSync(join(root, "brain/discord-state.json"), "utf8"))
+    const reg = JSON.parse(readFileSync(join(root, "brain/discord-channels.json"), "utf8"))
     const envrc = readFileSync(join(root, ".envrc.local"), "utf8")
     const token = (process.env.DISCORD_TOKEN ?? envrc.match(/DISCORD_TOKEN=(\S+)/)?.[1] ?? "").replace(/^["']|["']$/g, "")
     if (token) {
-      for (const [channelId, lastId] of Object.entries(discordState)) {
-        if (channelId.startsWith("dm-")) continue  // dm state uses different key format
-        const res = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages?after=${lastId}&limit=1`, {
+      // collect all channels across main guild and other guilds
+      const allChannels = [
+        ...(reg.channels ?? []),
+        ...((reg.otherGuilds ?? []).flatMap(g => g.channels ?? [])),
+      ]
+      for (const ch of allChannels) {
+        if (!ch.lastSeen) continue
+        const res = await fetch(`https://discord.com/api/v10/channels/${ch.id}/messages?after=${ch.lastSeen}&limit=1`, {
           headers: { Authorization: `Bot ${token}` },
           signal: AbortSignal.timeout(10_000),
         })
         const msgs = await res.json()
         if (Array.isArray(msgs) && msgs.length > 0) {
-          pending.push(`[discord #${channelId}] ${msgs.length} new message(s) since last check`)
+          pending.push(`[discord ${ch.name}] new message(s) since last check`)
+        }
+      }
+      // check DMs
+      for (const dm of reg.dms ?? []) {
+        if (!dm.lastSeen) continue
+        // open DM channel to get the channel id
+        const chRes = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
+          method: "POST",
+          headers: { Authorization: `Bot ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ recipient_id: dm.userId }),
+          signal: AbortSignal.timeout(10_000),
+        })
+        const ch = await chRes.json()
+        if (!ch.id) continue
+        const res = await fetch(`https://discord.com/api/v10/channels/${ch.id}/messages?after=${dm.lastSeen}&limit=1`, {
+          headers: { Authorization: `Bot ${token}` },
+          signal: AbortSignal.timeout(10_000),
+        })
+        const msgs = await res.json()
+        if (Array.isArray(msgs) && msgs.length > 0) {
+          pending.push(`[discord DM from ${dm.name}] new message(s) since last check`)
         }
       }
     }
