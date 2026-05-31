@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/packages/cspell-types/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "node_modules/**",
+    "docs/node_modules/**",
+    "bun.lock",
+    "brain/*-state.json",
+    "brain/discord-state.json",
+    "brain/emotional-state.json",
+    "brain/heartbeat-state.json",
+    "brain/freetime-state.json",
+    "brain/codenames.json",
+    "brain/wordmangle-daily.json"
+  ]
+}
