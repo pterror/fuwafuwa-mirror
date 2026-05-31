@@ -114,7 +114,7 @@ add files freely. write as you go — don't batch at the end. the diff tells the
 
 ## hologram
 
-pterror's discord RP bot system. runs Hazel's AI entities (Prisma, Kitten, Miku) in the "fluffy omelette diner" server.
+pterror's discord RP bot system. runs AI entities in the "fluffy omelette diner" server — Prisma (Hazel's), Kitten (Luvoid's), Miku (tsun/pkr's).
 
 **api: `http://localhost:3000/`** — openapi spec also at that base URL. use this when you need to interact with hologram programmatically (checking entity status, etc).
 
