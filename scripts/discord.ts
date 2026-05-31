@@ -463,6 +463,16 @@ async function reactions() {
   }
 }
 
+async function del() {
+  const [channelId, messageId] = posArgs
+  if (!channelId || !messageId) {
+    console.error("usage: discord delete <channel-id> <message-id>")
+    process.exit(1)
+  }
+  await api("DELETE", `/channels/${channelId}/messages/${messageId}`)
+  console.log(`deleted message ${messageId}`)
+}
+
 async function react() {
   const [channelId, messageId, emoji] = posArgs
   if (!channelId || !messageId || !emoji) {
@@ -477,7 +487,7 @@ async function react() {
 }
 
 // — dispatch —
-const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, attach, reply, reactions, react, emojis, stickers, sticker, view, dm }
+const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, attach, reply, delete: del, reactions, react, emojis, stickers, sticker, view, dm }
 
 if (!cmd || !commands[cmd]) {
   console.log(`usage: discord <${Object.keys(commands).join("|")}> [args]`)
