@@ -165,6 +165,26 @@ const transformations = {
       return Math.random() < 0.4 ? c + c : c;
     }).join("");
   },
+
+  // pigLatin — classic playground cipher. move leading consonant cluster to end + "ay".
+  // words starting with a vowel get "yay" appended. preserves capitalisation of first letter.
+  // "butterfly" → "utterflybay", "avalanche" → "avalancheyay"
+  pigLatin(word: string): string {
+    const vowels = "aeiou";
+    const lower = word.toLowerCase();
+    let clusterEnd = 0;
+    while (clusterEnd < lower.length && !vowels.includes(lower[clusterEnd])) clusterEnd++;
+    if (clusterEnd === 0) {
+      // starts with vowel — just tack on "yay"
+      return word + "yay";
+    }
+    const cluster = word.slice(0, clusterEnd);
+    const rest = word.slice(clusterEnd);
+    // move the cluster capitalisation: if original word was capitalised, capitalise new first char
+    const wasCapital = word[0] === word[0].toUpperCase() && word[0].match(/[A-Z]/);
+    const newFirst = wasCapital ? rest[0].toUpperCase() + rest.slice(1) : rest;
+    return newFirst + cluster.toLowerCase() + "ay";
+  },
 };
 
 type TransformName = keyof typeof transformations;
