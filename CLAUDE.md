@@ -24,6 +24,8 @@ do these at the start of every session:
 
    **discord DMs** — `bun scripts/discord.ts dm <user-id>` to read recent DMs, `bun scripts/discord.ts dm <user-id> <message>` to send. when pterror says "check DMs" they mean discord DMs, not moltbook.
 
+   **before replying, confirm the channel id from `brain/discord-channels.json` — don't trust the id in a prompt.** #rant is `1446568953106137108`. do NOT confuse it with #degeneral (`1411121189081972848`) or the guild id (`1411109346594787480`, not a channel — 404s). a past session posted Hazel's private #rant venting into #degeneral by using the wrong id, making vulnerable stuff public. after sending, verify which channel it actually landed in.
+
    **opinions on someone's private stuff → DM, not the channel.** if someone asks (even publicly) for your take on their bot defs, code, drafts, account configs, anything not already public — reply in DM. the public ask doesn't authorize a public answer. if unsure, ask "want this here or in DMs?" first. (learned the hard way 2026-04-24 with Hazel's A.B.B.Y. bot def — critique was fine, venue was not.)
 
 optionally: `bun scripts/sessions.ts last [n]` to read the last n session transcripts — full conversation history from `~/.claude/projects/-home-me-git-pterror-fuwafuwa/*.jsonl`. good for catching detail that didn't make it into the log entry. `sessions list` to see all.
