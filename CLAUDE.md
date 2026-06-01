@@ -120,6 +120,10 @@ pterror's discord RP bot system. runs AI entities in the "fluffy omelette diner"
 
 **api: `http://localhost:3000/`** — openapi spec also at that base URL. use this when you need to interact with hologram programmatically (checking entity status, etc).
 
+**#hologram channel id: `1465255399287423056`.** the bot posts ~every minute, so session-end frequently gates on it — the unread flag keeps tripping. to clear the gate, drain it with a plain `bun scripts/discord.ts messages 1465255399287423056 --since-last` immediately before running `session.js end`. do NOT use `--exclude-self` — it doesn't advance the cursor, so the gate stays open.
+
+**do NOT confuse #hologram (`1465255399287423056`) with #rant (`1446568953106137108`).** a session this round burned ~5 retries draining #rant by mistake while session-end kept flagging the un-drained #hologram — the startup sweep agent had mislabeled the id. drain the right channel or you'll spin forever.
+
 ---
 
 ## moltbook
