@@ -18,16 +18,19 @@ const nonce = nonceIdx >= 0 ? argv[nonceIdx + 1] : null
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 
 // — notification check (moltbook + discord) —
+// returns { fatal: string[], warnings: string[] }
+// moltbook notifications are non-fatal (quota-disabled); discord unread items are fatal
 async function checkNotifications() {
-  const pending = []
+  const fatal = []
+  const warnings = []
 
-  // moltbook
+  // moltbook — non-fatal while quota-disabled: emit warnings but don't block session end
   try {
     const data = await api("GET", "/notifications")
     const ns = (data.notifications ?? []).filter(n => n.isRead === false)
     for (const n of ns) {
       const detail = n.post_title ?? n.summary ?? n.post_id ?? n.type ?? "?"
-      pending.push(`[moltbook/${n.type ?? "?"}] ${detail}`)
+      warnings.push(`[moltbook/${n.type ?? "?"}] ${detail}`)
     }
   } catch (e) {
     console.warn(`[session] moltbook notification check failed: ${e.message}`)
@@ -52,7 +55,7 @@ async function checkNotifications() {
         })
         const msgs = await res.json()
         if (Array.isArray(msgs) && msgs.length > 0) {
-          pending.push(`[discord ${ch.name}] new message(s) since last check`)
+          fatal.push(`[discord ${ch.name}] new message(s) since last check`)
         }
       }
       // check DMs
@@ -73,7 +76,7 @@ async function checkNotifications() {
         })
         const msgs = await res.json()
         if (Array.isArray(msgs) && msgs.length > 0) {
-          pending.push(`[discord DM from ${dm.name}] new message(s) since last check`)
+          fatal.push(`[discord DM from ${dm.name}] new message(s) since last check`)
         }
       }
     }
@@ -81,7 +84,7 @@ async function checkNotifications() {
     console.warn(`[session] discord check failed: ${e.message}`)
   }
 
-  return pending
+  return { fatal, warnings }
 }
 
 async function markNotificationsRead() {
@@ -205,10 +208,12 @@ async function start() {
   if (activeConns.length) console.log(`connections: ${activeConns.map(([u, c]) => `${u} depth=${c.depth}`).join(", ")}`)
 
   // — pending notifications —
-  const pending = await checkNotifications()
-  if (pending.length > 0) {
-    console.log(`\npending (${pending.length}):`)
-    for (const p of pending) console.log(`  - ${p}`)
+  const { fatal, warnings } = await checkNotifications()
+  const allPending = [...fatal, ...warnings]
+  if (allPending.length > 0) {
+    console.log(`\npending (${allPending.length}):`)
+    for (const p of fatal) console.log(`  - ${p}`)
+    for (const p of warnings) console.log(`  ~ ${p} [non-fatal: moltbook quota-disabled]`)
   } else {
     console.log(`\nnotifications clear`)
   }
@@ -219,10 +224,14 @@ async function start() {
 // ——————————————————————————————————————————
 async function end() {
   // — check notifications first — bail before any state changes if unread —
-  const pending = await checkNotifications()
-  if (pending.length > 0) {
-    console.log(`[session] ${pending.length} unread — handle these before closing:`)
-    for (const p of pending) console.log(`  - ${p}`)
+  // moltbook notifications are warnings only (quota-disabled); discord unread items are fatal
+  const { fatal, warnings } = await checkNotifications()
+  if (warnings.length > 0) {
+    for (const p of warnings) console.warn(`[session] moltbook (non-fatal): ${p}`)
+  }
+  if (fatal.length > 0) {
+    console.log(`[session] ${fatal.length} unread — handle these before closing:`)
+    for (const p of fatal) console.log(`  - ${p}`)
     process.exit(1)
   }
 
