@@ -120,11 +120,13 @@ pterror's discord RP bot system. runs AI entities in the "fluffy omelette diner"
 
 **api: `http://localhost:3000/`** — openapi spec also at that base URL. use this when you need to interact with hologram programmatically (checking entity status, etc).
 
-**#hologram channel id: `1465255399287423056`.** but the session-end gate does NOT check the parent channel — it checks the **#hologram (thread)** registry entry, which is a separate thread in #feedback-loop that was auto-migrated. that thread's id is `1466596505199710369`. draining the parent channel id does nothing to clear the gate.
+**#hologram channel id: `1465255399287423056`.** there are TWO hologram registry entries: the parent **#hologram** (`1465255399287423056`) and the **#hologram (thread)** (`1466596505199710369`, a thread in #feedback-loop that was auto-migrated). the session-end gate (`session.js` `checkNotifications()`) loops over EVERY entry in `brain/discord-channels.json` and flags any with unread messages — so both of these are tracked independently and either one can trip the gate on its own.
 
-to clear the gate before `session.js end`, drain the thread:
+**read the gate's failure line to know which to drain.** `[discord #hologram]` = drain the PARENT `1465255399287423056`. `[discord #hologram (thread)]` = drain the THREAD `1466596505199710369`. don't assume it's the thread — it's often the parent. (a stale version of this note used to send sessions to drain the thread unconditionally, which returned "no new messages" while the gate kept failing on the parent.)
+
+drain with:
 ```
-bun scripts/discord.ts messages 1466596505199710369 --since-last
+bun scripts/discord.ts messages <id> --since-last
 ```
 do NOT use `--exclude-self` — it doesn't advance the cursor, so the gate stays open.
 
