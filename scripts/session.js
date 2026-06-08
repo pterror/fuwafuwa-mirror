@@ -37,11 +37,38 @@ async function checkNotifications() {
   }
 
   // discord — check all tracked channels and DMs for new messages since last seen
+
+  // fetchWithRetry: up to 3 attempts with the same 10s timeout; throws on final failure
+  async function fetchWithRetry(url, options, attempts = 3) {
+    let lastErr
+    for (let i = 0; i < attempts; i++) {
+      try {
+        const res = await fetch(url, { ...options, signal: AbortSignal.timeout(10_000) })
+        return await res.json()
+      } catch (e) {
+        lastErr = e
+      }
+    }
+    throw lastErr
+  }
+
+  let reg, token
   try {
-    const reg = JSON.parse(readFileSync(join(root, "brain/discord-channels.json"), "utf8"))
-    const envrc = readFileSync(join(root, ".envrc.local"), "utf8")
-    const token = (process.env.DISCORD_TOKEN ?? envrc.match(/DISCORD_TOKEN=(\S+)/)?.[1] ?? "").replace(/^["']|["']$/g, "")
-    if (token) {
+    reg = JSON.parse(readFileSync(join(root, "brain/discord-channels.json"), "utf8"))
+  } catch (e) {
+    fatal.push(`[discord registry] could not read brain/discord-channels.json (${e.message}) — could not confirm read state`)
+    reg = null
+  }
+  if (reg !== null) {
+    try {
+      const envrc = readFileSync(join(root, ".envrc.local"), "utf8")
+      token = (process.env.DISCORD_TOKEN ?? envrc.match(/DISCORD_TOKEN=(\S+)/)?.[1] ?? "").replace(/^["']|["']$/g, "")
+    } catch {
+      token = (process.env.DISCORD_TOKEN ?? "").replace(/^["']|["']$/g, "")
+    }
+    if (!token) {
+      fatal.push(`[discord] DISCORD_TOKEN not set — could not confirm read state`)
+    } else {
       // collect all channels across main guild and other guilds
       const allChannels = [
         ...(reg.channels ?? []),
@@ -50,39 +77,41 @@ async function checkNotifications() {
       for (const ch of allChannels) {
         if (!ch.lastSeen) continue
         if (ch.gateIgnore) continue
-        const res = await fetch(`https://discord.com/api/v10/channels/${ch.id}/messages?after=${ch.lastSeen}&limit=1`, {
-          headers: { Authorization: `Bot ${token}` },
-          signal: AbortSignal.timeout(10_000),
-        })
-        const msgs = await res.json()
-        if (Array.isArray(msgs) && msgs.length > 0) {
-          fatal.push(`[discord ${ch.name}] new message(s) since last check`)
+        try {
+          const msgs = await fetchWithRetry(
+            `https://discord.com/api/v10/channels/${ch.id}/messages?after=${ch.lastSeen}&limit=1`,
+            { headers: { Authorization: `Bot ${token}` } },
+          )
+          if (Array.isArray(msgs) && msgs.length > 0) {
+            fatal.push(`[discord ${ch.name}] new message(s) since last check`)
+          }
+        } catch (e) {
+          fatal.push(`[discord ${ch.name}] check failed after retries (${e.message}) — could not confirm read state`)
         }
       }
       // check DMs
       for (const dm of reg.dms ?? []) {
         if (!dm.lastSeen) continue
-        // open DM channel to get the channel id
-        const chRes = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
-          method: "POST",
-          headers: { Authorization: `Bot ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ recipient_id: dm.userId }),
-          signal: AbortSignal.timeout(10_000),
-        })
-        const ch = await chRes.json()
-        if (!ch.id) continue
-        const res = await fetch(`https://discord.com/api/v10/channels/${ch.id}/messages?after=${dm.lastSeen}&limit=1`, {
-          headers: { Authorization: `Bot ${token}` },
-          signal: AbortSignal.timeout(10_000),
-        })
-        const msgs = await res.json()
-        if (Array.isArray(msgs) && msgs.length > 0) {
-          fatal.push(`[discord DM from ${dm.name}] new message(s) since last check`)
+        try {
+          // open DM channel to get the channel id
+          const ch = await fetchWithRetry(`https://discord.com/api/v10/users/@me/channels`, {
+            method: "POST",
+            headers: { Authorization: `Bot ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ recipient_id: dm.userId }),
+          })
+          if (!ch.id) continue
+          const msgs = await fetchWithRetry(
+            `https://discord.com/api/v10/channels/${ch.id}/messages?after=${dm.lastSeen}&limit=1`,
+            { headers: { Authorization: `Bot ${token}` } },
+          )
+          if (Array.isArray(msgs) && msgs.length > 0) {
+            fatal.push(`[discord DM from ${dm.name}] new message(s) since last check`)
+          }
+        } catch (e) {
+          fatal.push(`[discord DM ${dm.name}] check failed after retries (${e.message}) — could not confirm read state`)
         }
       }
     }
-  } catch (e) {
-    console.warn(`[session] discord check failed: ${e.message}`)
   }
 
   return { fatal, warnings }
