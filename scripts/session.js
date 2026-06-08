@@ -49,6 +49,7 @@ async function checkNotifications() {
       ]
       for (const ch of allChannels) {
         if (!ch.lastSeen) continue
+        if (ch.gateIgnore) continue
         const res = await fetch(`https://discord.com/api/v10/channels/${ch.id}/messages?after=${ch.lastSeen}&limit=1`, {
           headers: { Authorization: `Bot ${token}` },
           signal: AbortSignal.timeout(10_000),
