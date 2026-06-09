@@ -225,6 +225,7 @@ async function messages() {
   const sinceLast = flags.has("--since-last")
   const excludeSelf = flags.has("--exclude-self")
   const peek = flags.has("--peek")  // check without advancing state
+  const jsonMode = flags.has("--json")
 
   let after = posArgs[1]
   const before = posArgs[2]
@@ -248,7 +249,7 @@ async function messages() {
     embeds: { title?: string; description?: string; fields?: { name: string; value: string }[] }[]
     message_snapshots?: { message: { content: string; attachments: { filename: string; url: string }[] } }[]
     message_reference?: { message_id: string }
-    referenced_message?: { content: string; author: { username: string; global_name?: string } }
+    referenced_message?: { content: string; author: { id?: string; username: string; global_name?: string } }
     mentions: { id: string; username: string; global_name?: string }[]
     reactions?: { emoji: { id: string | null; name: string }; count: number; me: boolean }[]
     sticker_items?: { id: string; name: string; format_type: number }[]
@@ -264,6 +265,19 @@ async function messages() {
 
   if (sinceLast && ordered.length === 0) {
     console.log(`no new messages`)
+    return
+  }
+
+  if (jsonMode) {
+    console.log(JSON.stringify(ordered.map(m => ({
+      id: m.id,
+      author: { id: m.author.id, username: m.author.username, global_name: m.author.global_name },
+      content: m.content,
+      mentions: m.mentions.map(u => ({ id: u.id, username: u.username })),
+      referenced_message: m.referenced_message
+        ? { content: m.referenced_message.content, author: m.referenced_message.author }
+        : undefined,
+    }))))
     return
   }
 
@@ -397,6 +411,7 @@ async function dm() {
     const sinceLast = flags.has("--since-last")
     const peek = flags.has("--peek")  // check without advancing state
     const excludeSelf = flags.has("--exclude-self")
+    const jsonMode = flags.has("--json")
     let qs = `limit=100`
     if (sinceLast) {
       const lastSeen = getDmLastSeen(userId)
@@ -416,6 +431,16 @@ async function dm() {
     }
     if (sinceLast && ordered.length === 0) {
       console.log(`no new messages`)
+      return
+    }
+    if (jsonMode) {
+      console.log(JSON.stringify(ordered.map(m => ({
+        id: m.id,
+        author: { id: m.author.id, username: m.author.username, global_name: m.author.global_name },
+        content: m.content,
+        mentions: [],
+        referenced_message: undefined,
+      }))))
       return
     }
     console.log(`\n— dm with ${userId}${sinceLast ? " (new)" : ""} —`)
@@ -528,6 +553,13 @@ async function del() {
   console.log(`deleted message ${messageId}`)
 }
 
+async function leave() {
+  const [channelId] = posArgs
+  if (!channelId) { console.error("usage: discord leave <channel-id>"); process.exit(1) }
+  await api("DELETE", `/channels/${channelId}/thread-members/@me`)
+  console.log(`left thread ${channelId}`)
+}
+
 async function react() {
   const [channelId, messageId, emoji] = posArgs
   if (!channelId || !messageId || !emoji) {
@@ -542,7 +574,7 @@ async function react() {
 }
 
 // — dispatch —
-const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, attach, reply, delete: del, reactions, react, emojis, stickers, sticker, view, dm }
+const commands: Record<string, () => Promise<void>> = { guilds, channels, threads, members, messages, pins, send, attach, reply, delete: del, leave, reactions, react, emojis, stickers, sticker, view, dm }
 
 if (!cmd || !commands[cmd]) {
   console.log(`usage: discord <${Object.keys(commands).join("|")}> [args]`)
