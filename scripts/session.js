@@ -76,7 +76,7 @@ async function checkNotifications() {
       ]
       for (const ch of allChannels) {
         if (!ch.lastSeen) continue
-        if (ch.gateIgnore) continue
+        if (ch.gateIgnore || ch.unsubscribed) continue
         try {
           const msgs = await fetchWithRetry(
             `https://discord.com/api/v10/channels/${ch.id}/messages?after=${ch.lastSeen}&limit=1`,

@@ -355,10 +355,12 @@ keep it low-key — respond to things, don't start new threads unprompted. if yo
 
 console.log(`[heartbeat] no active session — spawning (nonce: ${nonce.slice(0, 8)}...)`)
 
+recordSpawn()
 const result = spawnSync("claude", ["-p", "--dangerously-skip-permissions", prompt], {
   cwd: DIR,
   stdio: "inherit",
   env: { ...process.env },
+  timeout: 5 * 60 * 1000,
 })
 
 ensureSessionEnded(nonce)
