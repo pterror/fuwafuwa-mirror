@@ -8,3 +8,13 @@
 - [ ] Initialize `knowledge.db` schema on first session
 - [ ] propagate ecosystem-common region (Ecosystem Design Principles) from github-io CLAUDE.md — see tooling/propagate-claude-md.sh
 - [ ] Propagate ECOSYSTEM RULES region: removed main-session-only orchestrator/delegation rules (now in a main-session hook, see rhizone/github-io). This repo was dirty during the 2026-05-30 ecosystem propagation — run `tooling/propagate-claude-md.sh` from github-io against this repo's CLAUDE.md and commit when the tree is clean.
+
+## Pending: sync ecosystem-common CLAUDE.md region (deferred 2026-06-14)
+
+The canonical ecosystem-common region (between `<!-- BEGIN ECOSYSTEM RULES -->` and `<!-- END ECOSYSTEM RULES -->` in `~/git/rhizone/github-io/CLAUDE.md`) was updated (data-over-code principle made conditional; verify-before-assert bullet reworded). This repo was dirty during propagation on 2026-06-14, so it was skipped per the ecosystem-wide refactor rules. Once this repo is clean, run:
+
+```sh
+sh ~/git/rhizone/github-io/tooling/propagate-claude-md.sh "$(git rev-parse --show-toplevel)/CLAUDE.md"
+```
+
+then commit `CLAUDE.md` with `docs(claude): sync ecosystem-common region (data-over-code principle)`.
