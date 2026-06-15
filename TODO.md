@@ -18,3 +18,13 @@ sh ~/git/rhizone/github-io/tooling/propagate-claude-md.sh "$(git rev-parse --sho
 ```
 
 then commit `CLAUDE.md` with `docs(claude): sync ecosystem-common region (data-over-code principle)`.
+
+## CLAUDE.md ecosystem sync pending (2026-06-15)
+
+Ecosystem-common region updated again (commit 050410c in github-io: refined "At a decision point…" decision-rule Meta bullet, plus the "Prefer data over code" refinement). This repo was dirty at propagation time, so the region was not synced. Re-run when clean:
+
+```sh
+sh ~/git/rhizone/github-io/tooling/propagate-claude-md.sh "$(git rev-parse --show-toplevel)/CLAUDE.md"
+```
+
+The propagator replaces the whole region from canonical, so this single re-run reconciles every missed edit at once. Commit with `docs(claude): sync ecosystem CLAUDE.md decision-rule region`. (Supersedes the earlier data-over-code sync note above.)
