@@ -28,3 +28,17 @@ sh ~/git/rhizone/github-io/tooling/propagate-claude-md.sh "$(git rev-parse --sho
 ```
 
 The propagator replaces the whole region from canonical, so this single re-run reconciles every missed edit at once. Commit with `docs(claude): sync ecosystem CLAUDE.md decision-rule region`. (Supersedes the earlier data-over-code sync note above.)
+
+
+## Pending: ecosystem-rules region sync (deferred — repo was dirty 2026-06-15)
+
+The canonical ecosystem-rules region (github-io commit e678388) dropped two harness-management bullets
+("No ecosystem changes without checking all affected repos." and "Control surface stays self-contained and versioned.").
+This region sync was deferred because this repo had uncommitted work. Re-run when clean:
+
+```sh
+sh ~/git/rhizone/github-io/tooling/propagate-claude-md.sh "$(git rev-parse --show-toplevel)/CLAUDE.md"
+git add CLAUDE.md
+git commit -m "docs(claude): sync ecosystem rules — drop harness-management bullets"
+git push
+```
