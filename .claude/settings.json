@@ -27,6 +27,24 @@
             "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/block-schedule-wakeup.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/tooling/claude-hooks/block-blocking-bash.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/tooling/claude-hooks/block-mainsession-exploration.sh"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -35,7 +53,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/me/git/pterror/fuwafuwa/tooling/claude-hooks/post-history.sh"
+            "command": "${CLAUDE_PROJECT_DIR}/tooling/claude-hooks/inject-orchestrator-rules.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/tooling/claude-hooks/post-history.sh"
           }
         ]
       }
