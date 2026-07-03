@@ -36,27 +36,9 @@
             "command": "${CLAUDE_PROJECT_DIR}/tooling/claude-hooks/block-blocking-bash.sh"
           }
         ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PROJECT_DIR}/tooling/claude-hooks/block-mainsession-exploration.sh"
-          }
-        ]
       }
     ],
     "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PROJECT_DIR}/tooling/claude-hooks/inject-orchestrator-rules.sh"
-          }
-        ]
-      },
       {
         "matcher": "",
         "hooks": [
