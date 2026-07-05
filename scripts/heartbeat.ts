@@ -280,6 +280,39 @@ this is your free time. do the thing, enjoy it, keep it short. no need to check 
   process.exit(ftRun.status ?? 0)
 }
 
+// — triage health: consecutive errors tracked in brain/heartbeat-health.json.
+//   after ~1h of consecutive failures, DM pterror once (discord token works even
+//   when claude auth is dead — that's the alert channel the june outage lacked). —
+const HEALTH_FILE = `${DIR}/brain/heartbeat-health.json`
+const PTERROR_ID = "1025553034014638081"
+const ALERT_AFTER = 6 // consecutive failures ≈ 1 hour at 10-min ticks
+function recordTriageHealth(ok: boolean, detail?: string) {
+  let h: { consecutiveFailures: number; alertedAt: number | null; lastError?: string } = {
+    consecutiveFailures: 0,
+    alertedAt: null,
+  }
+  try {
+    h = JSON.parse(require("fs").readFileSync(HEALTH_FILE, "utf8"))
+  } catch {}
+  if (ok) {
+    if (h.alertedAt) {
+      spawnSync("bun", ["scripts/discord.ts", "dm", PTERROR_ID,
+        "heartbeat triage recovered — proactive mode is back."], { cwd: DIR, timeout: 30_000 })
+    }
+    h = { consecutiveFailures: 0, alertedAt: null }
+  } else {
+    h.consecutiveFailures = (h.consecutiveFailures ?? 0) + 1
+    h.lastError = detail
+    const dayMs = 24 * 60 * 60 * 1000
+    if (h.consecutiveFailures >= ALERT_AFTER && (!h.alertedAt || Date.now() - h.alertedAt > dayMs)) {
+      spawnSync("bun", ["scripts/discord.ts", "dm", PTERROR_ID,
+        `heartbeat triage has failed ${h.consecutiveFailures} ticks in a row — proactive mode is down. last error: ${detail ?? "unknown"}`], { cwd: DIR, timeout: 30_000 })
+      h.alertedAt = Date.now()
+    }
+  }
+  require("fs").writeFileSync(HEALTH_FILE, JSON.stringify(h, null, 2) + "\n")
+}
+
 // — engagement gate: there ARE new messages. spawn directly if addressed,
 //   otherwise run a cheap Haiku triage to decide whether to engage ambient chatter. —
 if (hasAddressedSignal) {
@@ -307,18 +340,31 @@ ${msgLines.join("\n")}
 
 Would fuwafuwa naturally want to chime into this conversation? Answer only "yes" or "no".`
 
-  const triage = spawnSync("claude", ["-p", "--model", "claude-haiku-4-5", "--bare", triagePrompt], {
+  // no --bare: it skips keychain reads, which silently broke triage auth for 25 days
+  // (jun 9 – jul 5 2026; see docs/log/1034.md). the error-vs-no distinction below is
+  // the other half of that outage: an auth error parsed as a "no" verdict alerts nobody.
+  const triage = spawnSync("claude", ["-p", "--model", "claude-haiku-4-5", triagePrompt], {
     cwd: DIR,
     encoding: "utf8",
     env: { ...process.env },
     timeout: 60 * 1000,
   })
-  const answer = (triage.stdout ?? "").trim().toLowerCase()
-  if (!answer.startsWith("yes")) {
-    console.log(`[heartbeat] triage: no — skipping (answer: ${JSON.stringify(answer.slice(0, 40))})`)
+  // exact match only — the prompt demands a bare "yes" or "no", so anything else is
+  // an error. startsWith would re-create the june bug: "not logged in" starts with "no".
+  const answer = (triage.stdout ?? "").trim().toLowerCase().replace(/[."']+$/, "")
+  if (answer === "yes" || answer === "no") {
+    recordTriageHealth(true)
+    if (answer === "no") {
+      console.log(`[heartbeat] triage: no — skipping`)
+      process.exit(0)
+    }
+    console.log(`[heartbeat] triage: yes — spawning`)
+  } else {
+    // anything else is an ERROR, not a verdict ("not logged in", timeouts, crashes).
+    console.error(`[heartbeat] triage ERROR — not a verdict: ${JSON.stringify(answer.slice(0, 80))}`)
+    recordTriageHealth(false, answer.slice(0, 80))
     process.exit(0)
   }
-  console.log(`[heartbeat] triage: yes — spawning`)
 }
 
 // — generate nonce and write lockfile now (before spawning, so next heartbeat tick skips) —
